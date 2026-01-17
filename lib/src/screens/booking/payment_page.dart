@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/kapso_notifier.dart';
 import '../../navigation/app_router.dart';
+import '../../services/localization_service.dart';
 
 class PaymentPage extends StatefulWidget {
   final Map<String, dynamic> args;
@@ -17,21 +19,22 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Payment')),
+      appBar: AppBar(title: Text(loc.t('payment_title', fallback: 'Payment'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _tile('Google pay', 'gpay'),
+          _tile(loc.t('payment_method_gpay', fallback: 'Google Pay'), 'gpay'),
           const Divider(height: 1, color: Colors.white24),
           _tile('Paypal', 'paypal'),
           const Divider(height: 1, color: Colors.white24),
-          _tile('Cash', 'cash'),
+          _tile(loc.t('payment_method_cash', fallback: 'Cash'), 'cash'),
           const SizedBox(height: 16),
-          Row(children: const [
-            Icon(Icons.add, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Add new card', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          Row(children: [
+            const Icon(Icons.add, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(loc.t('payment_add_card', fallback: 'Add new card'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
           ])
         ],
       ),
@@ -39,7 +42,7 @@ class _PaymentPageState extends State<PaymentPage> {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: loading ? null : _confirm,
-          child: Text(loading ? 'Processing...' : 'Continue'),
+          child: Text(loading ? loc.t('payment_processing', fallback: 'Processing...') : loc.t('btn_continue', fallback: 'Continue')),
         ),
       ),
     );
@@ -56,10 +59,12 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> _confirm() async {
+    final loc = context.read<LocalizationService>();
     final auth = context.read<AuthProvider>();
     if (!auth.isLoggedIn) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to complete booking')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(loc.t('payment_login_required', fallback: 'Please log in to complete booking'))));
         Navigator.of(context).pushNamed(AppRoutes.login);
       }
       return;
@@ -70,25 +75,58 @@ class _PaymentPageState extends State<PaymentPage> {
     final slot = widget.args['slot'] as String;
     final duration = widget.args['duration_hours'] as int? ?? 1;
     try {
-      await auth.api.createBookingWithDuration(
+      final created = await auth.api.createBookingWithDuration(
         courtId: court['id'] as int,
         date: iso,
         timeSlot: slot,
         durationHours: duration,
       );
+      // Fire-and-forget admin notification (if Kapso env is configured)
+      try {
+        const admin = String.fromEnvironment('ADMIN_CONTACT');
+        final kapso = KapsoNotifier.fromEnv();
+        if (kapso != null && admin.isNotEmpty) {
+          final user = auth.user ?? const {};
+          kapso
+              .sendReservation(
+            adminRecipient: admin,
+            payload: {
+              'court_id': court['id'],
+              'court_name': court['name'],
+              'date': iso,
+              'time_slot': slot,
+              'duration_hours': duration,
+              'user_id': user['id'],
+              'user_name': user['name'],
+              'user_email': user['email'],
+              'booking': created,
+            },
+          )
+              .catchError((_) {});
+        } else {
+          // ignore: avoid_print
+          assert(() { print('[Kapso] Not configured or missing ADMIN_CONTACT.'); return true; }());
+        }
+      } catch (_) {
+        // ignore notification errors
+      }
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(
         AppRoutes.orderPlaced,
         arguments: {
-          'title': 'Booking Successful',
-          'subtitle': 'Your booking was placed successfully. Note: Cancellations must be made at least 24 hours before the start time.',
-          'buttonText': 'Back to home',
+          'title': loc.t('booking_success_title', fallback: 'Booking Successful'),
+          'subtitle': loc.t(
+            'booking_success_subtitle',
+            fallback: 'Your booking was placed successfully. Note: Cancellations must be made at least 24 hours before the start time.',
+          ),
+          'buttonText': loc.t('btn_back_home', fallback: 'Back to home'),
           'backRoute': AppRoutes.home,
         },
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Booking failed: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('${loc.t('booking_failed', fallback: 'Booking failed')}: $e')));
       }
     } finally {
       if (mounted) setState(() => loading = false);

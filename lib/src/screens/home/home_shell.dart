@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'home_tab.dart';
 import '../profile/profile_tab.dart';
 import '../bookings/bookings_tab.dart';
 import '../events/events_tab.dart';
-// ignore: unused_import
-import '../common/coming_soon_page.dart';
+import '../admin/admin_reservations_page.dart';
+import '../../services/localization_service.dart';
+import '../../providers/auth_provider.dart';
+import '../../navigation/app_router.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -19,29 +22,48 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
+    final auth = context.watch<AuthProvider>();
+    final isLoggedIn = auth.isLoggedIn;
+    final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     final pages = [
       const HomeTab(),
       const BookingsTab(),
       const EventsTab(),
-      const Placeholder(),
+      if (isAdmin) const AdminReservationsPage(),
       const ProfileTab(),
     ];
+    if (index >= pages.length) {
+      index = pages.length - 1;
+    }
+    if (!isLoggedIn && index == pages.length - 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && index == pages.length - 1) {
+          setState(() => index = 0);
+        }
+      });
+    }
+
+    final eventIndex = 2;
+    final reservationsIndex = isAdmin ? 3 : null;
+    final profileIndex = isAdmin ? 4 : 3;
 
     return Scaffold(
       body: SafeArea(child: pages[index]),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (i) {
-          if (i == 2) {
+          if (i == eventIndex) {
             Navigator.of(
               context,
-            ).pushNamed('/coming-soon', arguments: {'title': 'Events'});
+            ).pushNamed('/coming-soon', arguments: {'title': loc.t('nav_event', fallback: 'Event')});
             return;
           }
-          if (i == 3) {
-            Navigator.of(
-              context,
-            ).pushNamed('/coming-soon', arguments: {'title': 'History'});
+          if (reservationsIndex != null && i == reservationsIndex && !isAdmin) {
+            return;
+          }
+          if (i == profileIndex && !isLoggedIn) {
+            Navigator.of(context).pushNamed(AppRoutes.login);
             return;
           }
           setState(() => index = i);
@@ -50,31 +72,32 @@ class _HomeShellState extends State<HomeShell> {
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withOpacity(.6),
         type: BottomNavigationBarType.fixed,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: loc.t('nav_home', fallback: 'Home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            activeIcon: Icon(Icons.calendar_month),
-            label: 'Booking',
+            icon: const Icon(Icons.calendar_month_outlined),
+            activeIcon: const Icon(Icons.calendar_month),
+            label: loc.t('nav_booking', fallback: 'Booking'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.celebration_outlined),
-            activeIcon: Icon(Icons.celebration),
-            label: 'Event',
+            icon: const Icon(Icons.celebration_outlined),
+            activeIcon: const Icon(Icons.celebration),
+            label: loc.t('nav_event', fallback: 'Event'),
           ),
+          if (isAdmin)
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.event_note_outlined),
+              activeIcon: const Icon(Icons.event_note),
+              label: loc.t('nav_reservations', fallback: 'Reservations'),
+            ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: loc.t('nav_profile', fallback: 'Profile'),
           ),
         ],
       ),

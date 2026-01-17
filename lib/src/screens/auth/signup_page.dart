@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
+import '../../services/localization_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -24,6 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
@@ -32,13 +34,13 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Sign up',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+              Text(
+                loc.t('signup_title', fallback: 'Sign up'),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               Text(
-                'Please enter your name, email address and password details to sign up',
+                loc.t('signup_subtitle', fallback: 'Please enter your name, email address and password details to sign up'),
                 style: TextStyle(color: Colors.white.withOpacity(.75)),
               ),
               const SizedBox(height: 24),
@@ -47,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: firstNameCtrl,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  hintText: 'First name',
+                  hintText: loc.t('profile_first_name', fallback: 'First name'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -64,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: lastNameCtrl,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  hintText: 'Last name',
+                  hintText: loc.t('profile_last_name', fallback: 'Last name'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -81,7 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'Email',
+                  hintText: loc.t('login_email', fallback: 'Email'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -98,7 +100,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: passCtrl,
                 obscureText: _obscure,
                 decoration: InputDecoration(
-                  hintText: 'Password',
+                  hintText: loc.t('login_password', fallback: 'Password'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _obscure = !_obscure),
@@ -119,7 +121,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: confirmCtrl,
                 obscureText: _confirmObscure,
                 decoration: InputDecoration(
-                  hintText: 'Confirm password',
+                  hintText: loc.t('signup_confirm_password', fallback: 'Confirm password'),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _confirmObscure = !_confirmObscure),
@@ -145,19 +147,21 @@ class _SignUpPageState extends State<SignUpPage> {
                         final name = '${firstNameCtrl.text.trim()} ${lastNameCtrl.text.trim()}'.trim();
                         if (name.isEmpty || emailCtrl.text.trim().isEmpty || passCtrl.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please complete all fields')),
+                            SnackBar(content: Text(loc.t('signup_complete_fields', fallback: 'Please complete all fields'))),
                           );
                           return;
                         }
                         if (!isValid(passCtrl.text)) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Password must be at least 8 characters, include an uppercase letter and a number')),
+                            SnackBar(
+                                content: Text(loc.t('change_password_requirements',
+                                    fallback: 'Password must be at least 8 characters, include an uppercase letter and a number'))),
                           );
                           return;
                         }
                         if (passCtrl.text != confirmCtrl.text) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Passwords do not match')),
+                            SnackBar(content: Text(loc.t('change_password_mismatch', fallback: 'Passwords do not match'))),
                           );
                           return;
                         }
@@ -171,20 +175,19 @@ class _SignUpPageState extends State<SignUpPage> {
                         if (ok) {
                           Navigator.of(context).pushReplacementNamed(AppRoutes.home);
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Sign up failed')),
-                          );
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text(loc.t('signup_failed', fallback: 'Sign up failed'))));
                         }
                         setState(() => isBusy = false);
                       },
-                child: const Text('Sign up'),
+                child: Text(loc.t('signup_button', fallback: 'Sign up')),
               ),
 
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.login),
-                  child: const Text('Already have an account? Log in'),
+                  child: Text(loc.t('signup_have_account', fallback: 'Already have an account? Log in')),
                 ),
               ),
             ],

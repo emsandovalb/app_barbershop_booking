@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/localization_service.dart';
 
 class SelectDateTimePage extends StatefulWidget {
   final Map<String, dynamic> court;
@@ -46,8 +47,9 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Select date & time')),
+      appBar: AppBar(title: Text(loc.t('select_date_time_title', fallback: 'Select date & time'))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
@@ -64,14 +66,15 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Select time', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(loc.t('select_time', fallback: 'Select time'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
                   Row(children: [
-                    _DurChip(label: '1h', selected: durationHours == 1, onTap: () { durationHours = 1; _rebuildSlots(); }),
+                    _DurChip(label: loc.t('select_duration_1h', fallback: '1h'), selected: durationHours == 1, onTap: () { durationHours = 1; _rebuildSlots(); }),
                     const SizedBox(width: 8),
                     Opacity(
                       opacity: _groundAllows2h(widget.court) ? 1 : .4,
                       child: _DurChip(
-                        label: '2h',
+                        label: loc.t('select_duration_2h', fallback: '2h'),
                         selected: durationHours == 2,
                         onTap: _groundAllows2h(widget.court) ? () { durationHours = 2; _rebuildSlots(); } : null,
                       ),
@@ -93,7 +96,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
                     runSpacing: spacing,
                     children: [
                       if (slots.isEmpty)
-                        const Text('No slots available', style: TextStyle(color: Colors.white70)),
+                        Text(loc.t('select_no_slots', fallback: 'No slots available'), style: const TextStyle(color: Colors.white70)),
                       for (final s in slots)
                         SizedBox(
                           width: chipWidth,
@@ -118,7 +121,8 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
         child: ElevatedButton(
           onPressed: () {
             if (selected == null || _isBooked(selected!)) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please choose an available time slot')));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(loc.t('select_choose_slot', fallback: 'Please choose an available time slot'))));
               return;
             }
             final start = DateTime(date.year, date.month, date.day, selected!.start.hour, selected!.start.minute);
@@ -128,7 +132,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
               'duration_hours': durationHours,
             });
           },
-          child: const Text('Continue'),
+          child: Text(loc.t('btn_continue', fallback: 'Continue')),
         ),
       ),
     );

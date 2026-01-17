@@ -64,7 +64,16 @@ class ApiClient {
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> getCourts({String? q, double? minPrice, double? maxPrice, String? sort, String? category, int? durationHours}) async {
+  Future<Map<String, dynamic>> getCourts({
+    String? q,
+    double? minPrice,
+    double? maxPrice,
+    String? sort,
+    String? category,
+    int? durationHours,
+    int page = 1,
+    int? perPage,
+  }) async {
     final uri = Uri.parse('$baseUrl/courts').replace(queryParameters: {
       if (q != null && q.isNotEmpty) 'q': q,
       if (minPrice != null) 'min_price': '$minPrice',
@@ -72,6 +81,8 @@ class ApiClient {
       if (sort != null) 'sort': sort,
       if (category != null && category.isNotEmpty) 'category': category,
       if (durationHours != null) 'duration': '$durationHours',
+      if (page > 1) 'page': '$page',
+      if (perPage != null) 'per_page': '$perPage',
     });
     final res = await http.get(uri, headers: _headers);
     _ensureOk(res);
@@ -134,6 +145,12 @@ class ApiClient {
 
   Future<Map<String, dynamic>> cancelBooking(int bookingId) async {
     final res = await http.post(Uri.parse('$baseUrl/bookings/$bookingId/cancel'), headers: _headers);
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getReservationsForDay(String day) async {
+    final res = await http.get(Uri.parse('$baseUrl/admin/reservations?day=$day'), headers: _headers);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }

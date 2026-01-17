@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/localization_service.dart';
+import '../../data/number_categories.dart';
 
 class FilterPage extends StatefulWidget {
   const FilterPage({super.key});
@@ -8,75 +12,131 @@ class FilterPage extends StatefulWidget {
 }
 
 class _FilterPageState extends State<FilterPage> {
-  double min = 0;
-  double max = 200;
+  static const double _priceSliderMin = 0;
+  static const double _priceSliderMax = 300;
+
+  double priceMin = _priceSliderMin;
+  double priceMax = _priceSliderMax;
   String sort = 'rating';
   String? category;
   int? duration;
   final nameCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
 
+  void _reset() {
+    setState(() {
+      priceMin = _priceSliderMin;
+      priceMax = _priceSliderMax;
+      sort = 'rating';
+      category = null;
+      duration = null;
+    });
+    nameCtrl.clear();
+    addressCtrl.clear();
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    addressCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Filter')),
+      appBar: AppBar(title: Text(loc.t('filter_title', fallback: 'Filter'))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Ground name'),
+            Text(loc.t('filter_ground_name', fallback: 'Ground name')),
             const SizedBox(height: 6),
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(hintText: 'Search by name'),
+              decoration: InputDecoration(hintText: loc.t('filter_name_hint', fallback: 'Search by name')),
             ),
             const SizedBox(height: 12),
-            const Text('Location / Address'),
+            Text(loc.t('filter_address_label', fallback: 'Location / Address')),
             const SizedBox(height: 6),
             TextField(
               controller: addressCtrl,
-              decoration: const InputDecoration(hintText: 'City, area or address'),
+              decoration: InputDecoration(hintText: loc.t('filter_address_hint', fallback: 'City, area or address')),
             ),
             const SizedBox(height: 16),
-            const Text('Price range'),
+            Text(loc.t('filter_price_range', fallback: 'Price range')),
             RangeSlider(
-              values: RangeValues(min, max),
-              onChanged: (v) => setState(() { min = v.start; max = v.end; }),
-              min: 0, max: 300,
+              values: RangeValues(priceMin, priceMax),
+              onChanged: (v) => setState(() {
+                priceMin = v.start;
+                priceMax = v.end;
+              }),
+              min: _priceSliderMin,
+              max: _priceSliderMax,
             ),
             const SizedBox(height: 12),
-            const Text('Category'),
+            Text(loc.t('filter_category', fallback: 'Category')),
             const SizedBox(height: 8),
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final c in const ['Football','Basketball','Tennis','Volleyball'])
-                ChoiceChip(
-                  label: Text(c),
-                  selected: category == c,
-                  onSelected: (_) => setState(() => category = c),
-                ),
-            ]),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: NumberCategories.list.map((cat) {
+                final selected = category == cat.label;
+                return ChoiceChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(cat.asset, width: 32, height: 32, fit: BoxFit.cover),
+                      const SizedBox(width: 6),
+                      Text(cat.label),
+                    ],
+                  ),
+                  selected: selected,
+                  onSelected: (_) => setState(() => category = cat.label),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 12),
-            const Text('Duration per booking'),
+            Text(loc.t('filter_duration', fallback: 'Duration per booking')),
             const SizedBox(height: 8),
             Wrap(spacing: 8, children: [
-              ChoiceChip(label: const Text('1 hour'), selected: duration == 1, onSelected: (_) => setState(() => duration = 1)),
-              ChoiceChip(label: const Text('2 hours'), selected: duration == 2, onSelected: (_) => setState(() => duration = 2)),
-              ChoiceChip(label: const Text('Any'), selected: duration == null, onSelected: (_) => setState(() => duration = null)),
+              ChoiceChip(
+                  label: Text(loc.t('filter_duration_one', fallback: '1 hour')),
+                  selected: duration == 1,
+                  onSelected: (_) => setState(() => duration = 1)),
+              ChoiceChip(
+                  label: Text(loc.t('filter_duration_two', fallback: '2 hours')),
+                  selected: duration == 2,
+                  onSelected: (_) => setState(() => duration = 2)),
+              ChoiceChip(
+                  label: Text(loc.t('filter_duration_any', fallback: 'Any')),
+                  selected: duration == null,
+                  onSelected: (_) => setState(() => duration = null)),
             ]),
             const SizedBox(height: 12),
-            const Text('Sort by'),
+            Text(loc.t('filter_sort_by', fallback: 'Sort by')),
             Wrap(spacing: 8, children: [
-              ChoiceChip(label: const Text('Rating'), selected: sort=='rating', onSelected: (_) => setState(() => sort='rating')),
-              ChoiceChip(label: const Text('Price ↑'), selected: sort=='price_asc', onSelected: (_) => setState(() => sort='price_asc')),
-              ChoiceChip(label: const Text('Price ↓'), selected: sort=='price_desc', onSelected: (_) => setState(() => sort='price_desc')),
+              ChoiceChip(
+                  label: Text(loc.t('filter_sort_rating', fallback: 'Rating')),
+                  selected: sort == 'rating',
+                  onSelected: (_) => setState(() => sort = 'rating')),
+              ChoiceChip(
+                  label: Text(loc.t('filter_sort_price_asc', fallback: 'Price ↑')),
+                  selected: sort == 'price_asc',
+                  onSelected: (_) => setState(() => sort = 'price_asc')),
+              ChoiceChip(
+                  label: Text(loc.t('filter_sort_price_desc', fallback: 'Price ↓')),
+                  selected: sort == 'price_desc',
+                  onSelected: (_) => setState(() => sort = 'price_desc')),
             ]),
             const Spacer(),
             Row(children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Reset'),
+                  onPressed: _reset,
+                  child: Text(loc.t('btn_reset', fallback: 'Reset')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -84,13 +144,13 @@ class _FilterPageState extends State<FilterPage> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context, {
                     'q': _composeQuery(),
-                    'minPrice': min,
-                    'maxPrice': max,
+                    'minPrice': priceMin,
+                    'maxPrice': priceMax,
                     'sort': sort,
                     'category': category,
                     'duration': duration,
                   }),
-                  child: const Text('Apply'),
+                  child: Text(loc.t('btn_apply', fallback: 'Apply')),
                 ),
               ),
             ])

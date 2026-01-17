@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../navigation/app_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/ground_form_provider.dart';
-import '../../data/categories.dart';
-import '../../widgets/category_icon.dart';
+import '../../services/localization_service.dart';
+import '../../data/number_categories.dart';
 
 class GroundCategoryPage extends StatefulWidget {
   const GroundCategoryPage({super.key});
@@ -13,23 +13,27 @@ class GroundCategoryPage extends StatefulWidget {
 }
 
 class _GroundCategoryPageState extends State<GroundCategoryPage> {
-  String category = 'Football';
+  String category = NumberCategories.list.first.label;
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     final form = context.read<GroundFormProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Ground category')),
+      appBar: AppBar(title: Text(loc.t('grounds_category_title', fallback: 'Ground category'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          for (final cat in AppCategories.list)
+          for (final cat in NumberCategories.list)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: CategoryIcon(asset: cat.asset),
-              title: Text(cat.title, style: const TextStyle(color: Colors.white)),
-              trailing: Radio<String>(value: cat.title, groupValue: category, onChanged: (v) => setState(() => category = v!)),
-              onTap: () => setState(() => category = cat.title),
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(cat.asset, width: 40, height: 40, fit: BoxFit.cover),
+              ),
+              title: Text(cat.label, style: const TextStyle(color: Colors.white)),
+              trailing: Radio<String>(value: cat.label, groupValue: category, onChanged: (v) => setState(() => category = v!)),
+              onTap: () => setState(() => category = cat.label),
             ),
         ],
       ),
@@ -40,7 +44,7 @@ class _GroundCategoryPageState extends State<GroundCategoryPage> {
             form.merge({'category': category});
             Navigator.of(context).pushNamed(AppRoutes.addPhotos);
           },
-          child: const Text('Continue'),
+          child: Text(loc.t('btn_continue', fallback: 'Continue')),
         ),
       ),
     );

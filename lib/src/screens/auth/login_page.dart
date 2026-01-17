@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
+import '../../services/localization_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,20 +20,29 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscure = true;
 
   void _notImplemented(BuildContext context, String what) {
+    final loc = context.read<LocalizationService>();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$what not implemented yet')),
+      SnackBar(
+        content: Text(
+          loc.t('feature_not_implemented', fallback: '{feature} not implemented yet').replaceFirst('{feature}', what),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
       appBar: AppBar(
         actions: [
           TextButton(
             onPressed: () =>
                 Navigator.of(context).pushReplacementNamed(AppRoutes.home),
-            child: const Text('Skip', style: TextStyle(color: Colors.white)),
+            child: Text(
+              loc.t('login_skip', fallback: 'Skip'),
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -43,33 +53,29 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 4),
-              const Text(
-                'Log in',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+              Text(
+                loc.t('login_title', fallback: 'Log in'),
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 16),
 
-              // App logo (shows your PNG without extra background)
+              // Marketing image
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: SizedBox(
-                    width: 170,
-                    height: 170,
+                    width: 180,
+                    height: 180,
                     child: Image.asset(
-                      'assets/images/app_logo.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => Image.asset(
-                        'assets/icons/app_icon.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (c2, e2, s2) => Container(
-                          color: AppColors.black30,
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.calendar_month,
-                            size: 64,
-                            color: Colors.white,
-                          ),
+                      'assets/icons/imageLogin.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => Container(
+                        color: AppColors.black30,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.calendar_month,
+                          size: 64,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -79,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
               Text(
-                'Please enter your email address and password details to login',
+                loc.t('login_subtitle', fallback: 'Please enter your email address and password details to login'),
                 style: TextStyle(color: Colors.white.withOpacity(.75)),
               ),
               const SizedBox(height: 24),
@@ -89,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'Email',
+                  hintText: loc.t('login_email', fallback: 'Email'),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
@@ -111,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: passCtrl,
                 obscureText: _obscure,
                 decoration: InputDecoration(
-                  hintText: 'Password',
+                  hintText: loc.t('login_password', fallback: 'Password'),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
@@ -138,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pushNamed(AppRoutes.forgot),
-                  child: const Text('Forgot password?'),
+                  child: Text(loc.t('login_forgot', fallback: 'Forgot password?')),
                 ),
               ),
 
@@ -160,12 +166,12 @@ class _LoginPageState extends State<LoginPage> {
                           ).pushReplacementNamed(AppRoutes.home);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Incorrect email or password')),
+                            SnackBar(content: Text(loc.t('login_error', fallback: 'Incorrect email or password'))),
                           );
                         }
                         setState(() => isBusy = false);
                       },
-                child: const Text('Log in'),
+                child: Text(loc.t('login_button', fallback: 'Log in')),
               ),
 
               const SizedBox(height: 16),
@@ -176,7 +182,10 @@ class _LoginPageState extends State<LoginPage> {
                   Expanded(child: Container(height: 1, color: AppColors.black30)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('or continue with', style: TextStyle(color: Colors.white.withOpacity(.7))),
+                    child: Text(
+                      loc.t('login_or_continue', fallback: 'or continue with'),
+                      style: TextStyle(color: Colors.white.withOpacity(.7)),
+                    ),
                   ),
                   Expanded(child: Container(height: 1, color: AppColors.black30)),
                 ],
@@ -187,19 +196,19 @@ class _LoginPageState extends State<LoginPage> {
               Column(
                 children: [
                   _SocialButton(
-                    label: 'Continue with Google',
+                    label: loc.t('login_continue_google', fallback: 'Continue with Google'),
                     assetPath: 'assets/icons/google.png',
                     onTap: () => _notImplemented(context, 'Google Sign-In'),
                   ),
                   const SizedBox(height: 8),
                   _SocialButton(
-                    label: 'Continue with Facebook',
+                    label: loc.t('login_continue_facebook', fallback: 'Continue with Facebook'),
                     assetPath: 'assets/icons/facebook.png',
                     onTap: () => _notImplemented(context, 'Facebook Login'),
                   ),
                   const SizedBox(height: 8),
                   _SocialButton(
-                    label: 'Continue with Apple / Face ID',
+                    label: loc.t('login_continue_apple', fallback: 'Continue with Apple / Face ID'),
                     assetPath: 'assets/icons/apple.png',
                     onTap: () => _notImplemented(context, 'Apple / Face ID'),
                   ),
@@ -210,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
               Center(
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.signup),
-                  child: const Text("Don't have an account? Sign up"),
+                  child: Text(loc.t('login_signup_prompt', fallback: "Don't have an account? Sign up")),
                 ),
               ),
             ],

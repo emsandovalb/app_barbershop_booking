@@ -4,8 +4,11 @@ import 'my_profile_page.dart';
 import '../common/simple_page.dart';
 import '../../navigation/app_router.dart';
 import '../common/coming_soon_page.dart';
+import '../bookings/bookings_tab.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/localization_service.dart';
+import '../../theme/colors.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -13,16 +16,22 @@ class ProfileTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final localization = context.watch<LocalizationService>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
     final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
         .toString();
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
+    final currentLang = localization.locale.languageCode;
+    final languageOptions = <Map<String, String>>[
+      {'code': 'es', 'label': localization.t('language_es', fallback: 'Español')},
+      {'code': 'en', 'label': localization.t('language_en', fallback: 'English')},
+    ];
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          'Profile',
-          style: TextStyle(
+        Text(
+          localization.t('profile_title', fallback: 'Profile'),
+          style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: Colors.white,
@@ -56,74 +65,116 @@ class ProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _ProfileTile(
-          title: 'My profile',
+          title: localization.t('profile_my_profile', fallback: 'My profile'),
           icon: Icons.person_outline,
           onTap: () => _go(context, const MyProfilePage()),
         ),
         _ProfileTile(
-          title: 'Change password',
+          title: localization.t('profile_change_password', fallback: 'Change password'),
           icon: Icons.lock_outline,
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.changePassword),
         ),
         _ProfileTile(
-          title: 'Settings',
+          title: localization.t('profile_settings', fallback: 'Settings'),
           icon: Icons.settings_outlined,
-          onTap: () => _coming(context, 'Settings'),
+          onTap: () => _coming(context, localization.t('profile_settings', fallback: 'Settings')),
         ),
         _ProfileTile(
-          title: 'Privacy policy',
+          title: localization.t('profile_privacy', fallback: 'Privacy policy'),
           icon: Icons.privacy_tip_outlined,
-          onTap: () => _coming(context, 'Privacy policy'),
+          onTap: () => _coming(context, localization.t('profile_privacy', fallback: 'Privacy policy')),
         ),
         _ProfileTile(
-          title: 'Help',
+          title: localization.t('profile_help', fallback: 'Help'),
           icon: Icons.help_outline,
-          onTap: () => _coming(context, 'Help'),
+          onTap: () => _coming(context, localization.t('profile_help', fallback: 'Help')),
         ),
         _ProfileTile(
-          title: 'About us',
+          title: localization.t('profile_about', fallback: 'About us'),
           icon: Icons.info_outline,
-          onTap: () => _coming(context, 'About us'),
+          onTap: () => _coming(context, localization.t('profile_about', fallback: 'About us')),
         ),
         _ProfileTile(
-          title: 'Rate us',
+          title: localization.t('profile_rate_us', fallback: 'Rate us'),
           icon: Icons.star_outline,
-          onTap: () => _coming(context, 'Rate us'),
+          onTap: () => _coming(context, localization.t('profile_rate_us', fallback: 'Rate us')),
+        ),
+        _ProfileTile(
+          title: localization.t('nav_history', fallback: 'History'),
+          icon: Icons.history,
+          onTap: () => _go(context, const BookingsTab(initialIndex: 1)),
         ),
         if (isAdmin)
           _ProfileTile(
-            title: 'My grounds',
+            title: localization.t('profile_my_grounds', fallback: 'My grounds'),
             icon: Icons.sports_soccer_outlined,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoutes.myGrounds);
             },
           ),
         const SizedBox(height: 12),
+        Text(
+          localization.t('profile_language_label', fallback: 'Language'),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF282828),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: languageOptions.map((lang) {
+              final code = lang['code']!;
+              return RadioListTile<String>(
+                value: code,
+                groupValue: currentLang,
+                onChanged: localization.isLoading
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          context.read<LocalizationService>().changeLanguage(value);
+                        }
+                      },
+                title: Text(
+                  lang['label']!,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                activeColor: AppColors.primary,
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 12),
         _ProfileTile(
-          title: 'Log out',
+          title: localization.t('profile_logout', fallback: 'Log out'),
           icon: Icons.logout,
           onTap: () async {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
                 backgroundColor: const Color(0xFF1F1F1F),
-                title: const Text(
-                  'Log out',
-                  style: TextStyle(color: Colors.white),
+                title: Text(
+                  localization.t('profile_logout', fallback: 'Log out'),
+                  style: const TextStyle(color: Colors.white),
                 ),
-                content: const Text(
-                  'Are you sure you want to log out?',
-                  style: TextStyle(color: Colors.white70),
+                content: Text(
+                  localization.t('profile_logout_confirm', fallback: 'Are you sure you want to log out?'),
+                  style: const TextStyle(color: Colors.white70),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancel'),
+                    child: Text(localization.t('btn_cancel', fallback: 'Cancel')),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Log out'),
+                    child: Text(localization.t('profile_logout', fallback: 'Log out')),
                   ),
                 ],
               ),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../navigation/app_router.dart';
+import '../services/localization_service.dart';
+import 'package:provider/provider.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -21,7 +24,7 @@ class OnboardingPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Reserva canchas y descubre eventos deportivos cercanos.',
+                loc.t('onboarding_tagline', fallback: 'Reserva canchas y descubre eventos deportivos cercanos.'),
                 style: TextStyle(
                   color: Colors.white.withOpacity(.75),
                 ),
@@ -31,12 +34,12 @@ class OnboardingPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () =>
                     Navigator.of(context).pushReplacementNamed(AppRoutes.login),
-                child: const Text('Get started'),
+                child: Text(loc.t('onboarding_get_started', fallback: 'Get started')),
               ),
               TextButton(
                 onPressed: () =>
                     Navigator.of(context).pushReplacementNamed(AppRoutes.home),
-                child: const Text('Skip'),
+                child: Text(loc.t('onboarding_skip', fallback: 'Skip')),
               )
             ],
           ),
@@ -45,4 +48,3 @@ class OnboardingPage extends StatelessWidget {
     );
   }
 }
-

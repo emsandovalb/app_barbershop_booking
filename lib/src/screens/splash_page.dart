@@ -13,14 +13,17 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 1), () async {
+    // Show GIF ~3s then route
+    Future<void>.delayed(const Duration(seconds: 3)).then((_) async {
       if (!mounted) return;
       final auth = context.read<AuthProvider>();
-      // wait a tick for restore
+      // give a tiny moment for auth restore
       await Future.delayed(const Duration(milliseconds: 200));
+      if (!mounted) return;
       if (auth.isLoggedIn) {
         Navigator.of(context).pushReplacementNamed(AppRoutes.home);
       } else {
@@ -32,14 +35,12 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.sports_soccer, size: 72, color: AppColors.primary),
-            SizedBox(height: 12),
-            Text('Playground Booking', style: TextStyle(fontSize: 18)),
-          ],
+      backgroundColor: Colors.black,
+      body: SizedBox.expand(
+        child: Image.asset(
+          'assets/splash/branding.png',
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
         ),
       ),
     );

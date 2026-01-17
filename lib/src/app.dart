@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'theme/colors.dart';
 import 'navigation/app_router.dart';
@@ -7,6 +8,7 @@ import 'services/api.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'providers/ground_form_provider.dart';
+import 'services/localization_service.dart';
 import 'widgets/inactivity_listener.dart';
 import 'navigation/nav_key.dart';
 
@@ -81,7 +83,8 @@ class PlaygroundBookingApp extends StatelessWidget {
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final base = defaultBase.isNotEmpty
         ? defaultBase
-        : (isAndroid ? 'http://10.0.2.2:8000/api/v1' : 'http://127.0.0.1:8000/api/v1');
+        : (isAndroid ? 'http://10.0.2.2:8001/api/v1' : 'http://127.0.0.1:8001/api/v1');
+    final translationsBase = _translationsBase(base);
     // Simple debug log to verify runtime base URL
     // ignore: avoid_print
     print('API base: ' + base);
@@ -92,19 +95,58 @@ class PlaygroundBookingApp extends StatelessWidget {
           create: (_) => AuthProvider(ApiClient(baseUrl: base)),
         ),
         ChangeNotifierProvider(create: (_) => GroundFormProvider()),
-      ],
-      child: InactivityListener(
-        timeout: const Duration(minutes: 5),
-        child: MaterialApp(
-          title: 'Playground Booking',
-          debugShowCheckedModeBanner: false,
-          theme: theme,
-          navigatorKey: appNavigatorKey,
-          onGenerateRoute: AppRouter.onGenerateRoute,
-          initialRoute: AppRoutes.splash,
+        ChangeNotifierProvider(
+          create: (_) {
+            final service = LocalizationService(translationsBaseUrl: translationsBase);
+            service.init(systemLocale: WidgetsBinding.instance.platformDispatcher.locale);
+            return service;
+          },
         ),
+      ],
+      child: Builder(
+        builder: (context) {
+          final localization = context.watch<LocalizationService>();
+          final app = InactivityListener(
+            timeout: const Duration(minutes: 5),
+            child: MaterialApp(
+              title: 'Playground Booking',
+              debugShowCheckedModeBanner: false,
+              theme: theme,
+              navigatorKey: appNavigatorKey,
+              onGenerateRoute: AppRouter.onGenerateRoute,
+              initialRoute: AppRoutes.splash,
+              locale: localization.locale,
+              supportedLocales: const [Locale('es'), Locale('en')],
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+            ),
+          );
+          if (localization.isLoading) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: theme,
+              home: const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          }
+          return app;
+        },
       ),
     );
   }
-}
 
+  String _translationsBase(String apiBase) {
+    final uri = Uri.tryParse(apiBase);
+    if (uri == null) return apiBase;
+    final segments = List.of(uri.pathSegments);
+    if (segments.isNotEmpty && RegExp(r'^v\d+$').hasMatch(segments.last)) {
+      segments.removeLast();
+    }
+    final newUri = uri.replace(pathSegments: segments);
+    return newUri.toString().replaceAll(RegExp(r'\/+$'), '');
+  }
+}

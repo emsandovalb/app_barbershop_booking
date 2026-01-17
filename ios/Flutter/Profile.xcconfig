@@ -1,0 +1,7 @@
+# This configuration is used for the Profile build.
+# Ensure CocoaPods settings are applied when building via Flutter.
+# The `#include?` directive will include the file if it exists.
+# Keep `Generated.xcconfig` last so user/project settings can override defaults.
+
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"
+#include "Generated.xcconfig"

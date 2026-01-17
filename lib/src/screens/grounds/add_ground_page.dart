@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../navigation/app_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/ground_form_provider.dart';
+import '../../services/localization_service.dart';
 
 class AddGroundPage extends StatefulWidget {
   const AddGroundPage({super.key});
@@ -21,29 +22,31 @@ class _AddGroundPageState extends State<AddGroundPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text('Add ground'),
+        title: Text(loc.t('grounds_add_title', fallback: 'Add ground')),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(controller: nameCtrl, decoration: const InputDecoration(hintText: 'Name')),
+          TextField(controller: nameCtrl, decoration: InputDecoration(hintText: loc.t('form_name', fallback: 'Name'))),
           const SizedBox(height: 12),
-          TextField(controller: emailCtrl, decoration: const InputDecoration(hintText: 'Email address')),
+          TextField(controller: emailCtrl, decoration: InputDecoration(hintText: loc.t('form_email', fallback: 'Email address'))),
           const SizedBox(height: 12),
-          TextField(controller: phoneCtrl, decoration: const InputDecoration(hintText: 'Phone')),
+          TextField(controller: phoneCtrl, decoration: InputDecoration(hintText: loc.t('form_phone', fallback: 'Phone'))),
           const SizedBox(height: 12),
-          TextField(controller: addressCtrl, decoration: const InputDecoration(hintText: 'Address')),
+          TextField(controller: addressCtrl, decoration: InputDecoration(hintText: loc.t('form_address', fallback: 'Address'))),
           const SizedBox(height: 24),
-          const Text('Operating hours', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(loc.t('grounds_operating_hours', fallback: 'Operating hours'),
+              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: _TimeTile(
-                  label: 'Opens',
+                  label: loc.t('grounds_opens', fallback: 'Opens'),
                   value: _fmt(openTime),
                   onTap: () async {
                     final picked = await showTimePicker(context: context, initialTime: openTime);
@@ -54,7 +57,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: _TimeTile(
-                  label: 'Closes',
+                  label: loc.t('grounds_closes', fallback: 'Closes'),
                   value: _fmt(closeTime),
                   onTap: () async {
                     final picked = await showTimePicker(context: context, initialTime: closeTime);
@@ -65,18 +68,19 @@ class _AddGroundPageState extends State<AddGroundPage> {
             ],
           ),
           const SizedBox(height: 16),
-          const Text('Duration per booking', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(loc.t('grounds_duration_label', fallback: 'Duration per booking'),
+              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
           const SizedBox(height: 8),
           Row(
             children: [
               _DurationPill(
-                label: '1 Hour',
+                label: loc.t('grounds_duration_one', fallback: '1 Hour'),
                 selected: durationHours == 1,
                 onTap: () => setState(() => durationHours = 1),
               ),
               const SizedBox(width: 8),
               _DurationPill(
-                label: '2 Hours',
+                label: loc.t('grounds_duration_two', fallback: '2 Hours'),
                 selected: durationHours == 2,
                 onTap: () => setState(() => durationHours = 2),
               ),
@@ -89,7 +93,8 @@ class _AddGroundPageState extends State<AddGroundPage> {
         child: ElevatedButton(
           onPressed: () {
             if (nameCtrl.text.trim().isEmpty || addressCtrl.text.trim().isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name and Address are required')));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(loc.t('grounds_name_required', fallback: 'Name and Address are required'))));
               return;
             }
             context.read<GroundFormProvider>().setAll({
@@ -103,7 +108,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
             });
             Navigator.of(context).pushNamed(AppRoutes.categoryGround);
           },
-          child: const Text('Continue'),
+          child: Text(loc.t('btn_continue', fallback: 'Continue')),
         ),
       ),
     );

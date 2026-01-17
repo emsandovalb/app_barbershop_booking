@@ -2,24 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/localization_service.dart';
+import '../../theme/colors.dart';
 
 class BookingsTab extends StatelessWidget {
-  const BookingsTab({super.key});
+  final int initialIndex;
+  const BookingsTab({super.key, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     final tabs = [
       _BookingList(status: 'active'),
       _BookingList(status: 'completed'),
     ];
     return DefaultTabController(
       length: 2,
+      initialIndex: initialIndex.clamp(0, 1),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('My booking'),
-          bottom: const TabBar(
-            tabs: [Tab(text: 'Upcoming'), Tab(text: 'Completed')],
-            indicatorWeight: 3,
+          title: Text(loc.t('bookings_title', fallback: 'My booking')),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1F1F1F),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: TabBar(
+                  indicator: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorPadding: const EdgeInsets.all(4),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white70,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  tabs: [
+                    Tab(text: loc.t('bookings_tab_upcoming', fallback: 'Upcoming')),
+                    Tab(text: loc.t('bookings_tab_completed', fallback: 'Completed'))
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
         body: TabBarView(children: tabs),
@@ -34,6 +63,7 @@ class _BookingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     final auth = context.watch<AuthProvider>();
     if (!auth.isLoggedIn) {
       return Center(
@@ -42,9 +72,11 @@ class _BookingList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Please log in to view your bookings', style: TextStyle(fontSize: 16)),
+              Text(loc.t('bookings_login_prompt', fallback: 'Please log in to view your bookings'), style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 12),
-              ElevatedButton(onPressed: () => Navigator.of(context).pushNamed('/login'), child: const Text('Log in')),
+              ElevatedButton(
+                  onPressed: () => Navigator.of(context).pushNamed('/login'),
+                  child: Text(loc.t('login_button', fallback: 'Log in'))),
             ],
           ),
         ),
@@ -58,7 +90,12 @@ class _BookingList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (items.isEmpty) {
-          return Center(child: Text(status=='active' ? 'No hay reservas activas.' : 'Sin historial.'));
+          return Center(
+              child: Text(
+                  status == 'active'
+                      ? loc.t('bookings_empty_active', fallback: 'No active bookings yet.')
+                      : loc.t('bookings_empty_completed', fallback: 'No history yet.'),
+                  textAlign: TextAlign.center));
         }
         return ListView.separated(
           padding: const EdgeInsets.all(16),
@@ -86,7 +123,8 @@ class _BookingList extends StatelessWidget {
                 final iso = DateTime(date.year, date.month, date.day, time.hour, time.minute).toIso8601String();
                 await context.read<AuthProvider>().api.rebook(b['id'] as int, date: iso, timeSlot: time.format(context));
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Re-booked')));
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(loc.t('bookings_rebooked_toast', fallback: 'Re-booked'))));
                 }
               },
               onTap: () {
@@ -113,6 +151,7 @@ class _BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.watch<LocalizationService>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -149,7 +188,7 @@ class _BookingCard extends StatelessWidget {
             ),
           ),
           if (showRebook)
-            TextButton(onPressed: onRebook, child: const Text('Re-book')),
+            TextButton(onPressed: onRebook, child: Text(loc.t('booking_rebook_cta', fallback: 'Re-book'))),
         ],
       ),
     ),

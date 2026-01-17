@@ -17,6 +17,7 @@ import '../screens/grounds/ground_category_page.dart';
 import '../screens/grounds/add_photos_page.dart';
 import '../screens/categories/categories_page.dart';
 import '../screens/common/coming_soon_page.dart';
+import '../screens/admin/admin_reservations_page.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -36,34 +37,35 @@ class AppRoutes {
   static const addPhotos = '/grounds/photos';
   static const categories = '/categories';
   static const comingSoon = '/coming-soon';
+  static const adminReservations = '/admin/reservations';
 }
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splash:
-        return _material(const SplashPage());
+        return _material(settings, const SplashPage());
       case AppRoutes.onboarding:
-        return _material(const OnboardingPage());
+        return _material(settings, const OnboardingPage());
       case AppRoutes.login:
-        return _material(const LoginPage());
+        return _material(settings, const LoginPage());
       case AppRoutes.forgot:
-        return _material(const ForgotPasswordPage());
+        return _material(settings, const ForgotPasswordPage());
       case AppRoutes.changePassword:
-        return _material(const ChangePasswordPage());
+        return _material(settings, const ChangePasswordPage());
       case AppRoutes.signup:
-        return _material(const SignUpPage());
+        return _material(settings, const SignUpPage());
       case AppRoutes.home:
-        return _material(const HomeShell());
+        return _material(settings, const HomeShell());
       case AppRoutes.bookingDetail:
         final args = settings.arguments as Map<String, dynamic>;
-        return _material(GroundBookingDetailPage(args: args));
+        return _material(settings, GroundBookingDetailPage(args: args));
       case AppRoutes.payment:
         final args = settings.arguments as Map<String, dynamic>;
-        return _material(PaymentPage(args: args));
+        return _material(settings, PaymentPage(args: args));
       case AppRoutes.orderPlaced:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(OrderPlacedPage(
+        return _material(settings, OrderPlacedPage(
           title: args['title'] as String? ?? 'Booking Successful',
           subtitle: args['subtitle'] as String? ?? 'Congratulations, your booking for service has been successful comfortably at your home',
           buttonText: args['buttonText'] as String? ?? 'Back to home',
@@ -71,26 +73,28 @@ class AppRouter {
         ));
       case AppRoutes.bookingShow:
         final args = settings.arguments as Map<String, dynamic>;
-        return _material(BookingDetailPage(booking: args['booking'] as Map<String, dynamic>));
+        return _material(settings, BookingDetailPage(booking: args['booking'] as Map<String, dynamic>));
       case AppRoutes.myGrounds:
-        return _material(const MyGroundsPage());
+        return _material(settings, const MyGroundsPage());
       case AppRoutes.addGround:
-        return _material(const AddGroundPage());
+        return _material(settings, const AddGroundPage());
       case AppRoutes.categoryGround:
-        return _material(const GroundCategoryPage());
+        return _material(settings, const GroundCategoryPage());
       case AppRoutes.addPhotos:
         final args = settings.arguments as Map<String, dynamic>?;
-        return _material(AddPhotosPage(initialData: args ?? const {}));
+        return _material(settings, AddPhotosPage(initialData: args ?? const {}));
       case AppRoutes.categories:
-        return _material(const CategoriesPage());
+        return _material(settings, const CategoriesPage());
       case AppRoutes.comingSoon:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(ComingSoonPage(title: args['title'] as String?));
+        return _material(settings, ComingSoonPage(title: args['title'] as String?));
+      case AppRoutes.adminReservations:
+        return _material(settings, const AdminReservationsPage());
       default:
-        return _material(const SplashPage());
+        return _material(settings, const SplashPage());
     }
   }
 
-  static MaterialPageRoute _material(Widget child) =>
-      MaterialPageRoute(builder: (_) => child);
+  static MaterialPageRoute _material(RouteSettings settings, Widget child) =>
+      MaterialPageRoute(settings: settings, builder: (_) => child);
 }
