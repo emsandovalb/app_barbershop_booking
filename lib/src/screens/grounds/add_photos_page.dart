@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -121,13 +122,8 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
       List<String> stored = [];
       if (images.isNotEmpty) {
         for (final x in images) {
-          final file = File(x.path);
-          if (await file.exists()) {
-            final bytes = await file.readAsBytes();
-            final mime = _mimeFromPath(x.path);
-            final encoded = base64Encode(bytes);
-            stored.add('data:$mime;base64,$encoded');
-          }
+          final encoded = await _compressAndEncodeImage(x);
+          if (encoded != null) stored.add(encoded);
         }
       }
       final payload = {
@@ -158,10 +154,21 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
   }
 }
 
-String _mimeFromPath(String path) {
-  final lower = path.toLowerCase();
-  if (lower.endsWith('.png')) return 'image/png';
-  if (lower.endsWith('.gif')) return 'image/gif';
-  if (lower.endsWith('.webp')) return 'image/webp';
-  return 'image/jpeg';
+Future<String?> _compressAndEncodeImage(XFile x) async {
+  final file = File(x.path);
+  if (!await file.exists()) return null;
+  final bytes = await file.readAsBytes();
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null) return null;
+  const maxDimension = 1280;
+  img.Image processed = decoded;
+  if (decoded.width > maxDimension || decoded.height > maxDimension) {
+    final scale = (decoded.width > decoded.height ? decoded.width : decoded.height) / maxDimension;
+    final targetWidth = (decoded.width / scale).round();
+    final targetHeight = (decoded.height / scale).round();
+    processed = img.copyResize(decoded, width: targetWidth, height: targetHeight);
+  }
+  final compressedBytes = img.encodeJpg(processed, quality: 80);
+  final encoded = base64Encode(compressedBytes);
+  return 'data:image/jpeg;base64,$encoded';
 }
