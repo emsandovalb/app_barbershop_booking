@@ -18,8 +18,9 @@ class ProfileTab extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final localization = context.watch<LocalizationService>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
-    final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
-        .toString();
+    final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com').toString();
+    final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])?.toString();
+    final avatar = auth.api.resolveAssetUrl(rawAvatar);
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     final currentLang = localization.locale.languageCode;
     final languageOptions = <Map<String, String>>[
@@ -40,10 +41,11 @@ class ProfileTab extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 28,
-              backgroundColor: Color(0xFF2A2A2A),
-              child: Icon(Icons.person, color: Colors.white70),
+              backgroundColor: const Color(0xFF2A2A2A),
+              backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
+              child: avatar.isEmpty ? const Icon(Icons.person, color: Colors.white70) : null,
             ),
             const SizedBox(width: 12),
             Column(

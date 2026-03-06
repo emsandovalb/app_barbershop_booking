@@ -66,16 +66,35 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> updateProfile({String? firstName, String? lastName, String? name, String? avatarPath}) async {
-    final res = await api.updateProfile(firstName: firstName, lastName: lastName, name: name, avatarPath: avatarPath);
+    final res = await api.updateProfile(
+      firstName: firstName,
+      lastName: lastName,
+      name: name,
+      avatarPath: avatarPath,
+    );
     final updated = res['user'] as Map<String, dynamic>?;
-    if (updated != null) {
-      user = updated;
-      final sp = await SharedPreferences.getInstance();
-      await sp.setString('auth_user', json.encode(user));
-      notifyListeners();
-      return true;
+    if (updated == null) {
+      return false;
     }
-    return false;
+
+    Map<String, dynamic> next = updated;
+    // If backend response still lacks avatar_url, fallback to /auth/me
+    if (updated['avatar_url'] == null && updated['avatar'] != null) {
+      try {
+        final refreshed = await api.me();
+        if (refreshed is Map<String, dynamic>) {
+          next = refreshed;
+        }
+      } catch (_) {
+        // ignore refresh errors and fall back to original response
+      }
+    }
+
+    user = next;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('auth_user', json.encode(user));
+    notifyListeners();
+    return true;
   }
   Future<void> logout() async {
     try { await api.logout(); } catch (_) {}

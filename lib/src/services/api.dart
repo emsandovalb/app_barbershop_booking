@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p;
 
 class ApiClient {
   final String baseUrl;
@@ -56,7 +59,10 @@ class ApiClient {
     if (lastName != null) req.fields['last_name'] = lastName;
     if (name != null) req.fields['name'] = name;
     if (avatarPath != null && avatarPath.isNotEmpty) {
-      req.files.add(await http.MultipartFile.fromPath('avatar', avatarPath));
+      final avatarFile = await _optimizeAvatar(avatarPath);
+      if (avatarFile != null) {
+        req.files.add(avatarFile);
+      }
     }
     final streamed = await req.send();
     final res = await http.Response.fromStream(streamed);
@@ -192,6 +198,26 @@ class ApiClient {
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> updateGround(int id, Map<String, dynamic> data) async {
+    final headers = {
+      ..._headers,
+      'Content-Type': 'application/json',
+    };
+    final res = await http.put(
+      Uri.parse('$baseUrl/courts/$id'),
+      headers: headers,
+      body: json.encode(data),
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deactivateGround(int id) async {
+    final res = await http.delete(Uri.parse('$baseUrl/courts/$id'), headers: _headers);
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
   static String _cleanBase(String url) {
     var result = url.trim();
     while (result.endsWith('/')) {
@@ -205,6 +231,42 @@ class ApiClient {
     if (!ok) {
       throw ApiException('HTTP ${res.statusCode}: ${res.body}');
     }
+  }
+
+  Future<http.MultipartFile?> _optimizeAvatar(String path) async {
+    try {
+      final file = File(path);
+      if (!await file.exists()) return null;
+      final data = await file.readAsBytes();
+      final decoded = img.decodeImage(data);
+      if (decoded == null) return null;
+      const maxSide = 600;
+      img.Image result = decoded;
+      if (decoded.width > maxSide || decoded.height > maxSide) {
+        final longest = decoded.width > decoded.height ? decoded.width : decoded.height;
+        final scale = longest / maxSide;
+        final targetWidth = (decoded.width / scale).round();
+        final targetHeight = (decoded.height / scale).round();
+        result = img.copyResize(decoded, width: targetWidth, height: targetHeight);
+      }
+      final encoded = img.encodeJpg(result, quality: 80);
+      final filename = '${p.basenameWithoutExtension(path)}.jpg';
+      return http.MultipartFile.fromBytes('avatar', encoded, filename: filename);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String resolveAssetUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    final trimmed = path.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    final baseUri = Uri.parse(baseUrl);
+    final origin = baseUri.replace(path: '', query: null, fragment: null);
+    final normalized = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+    return origin.resolve(normalized).toString();
   }
 }
 

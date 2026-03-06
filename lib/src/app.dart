@@ -109,7 +109,7 @@ class PlaygroundBookingApp extends StatelessWidget {
           final app = InactivityListener(
             timeout: const Duration(minutes: 5),
             child: MaterialApp(
-              title: 'Playground Booking',
+              title: 'Bamos Al Fut',
               debugShowCheckedModeBanner: false,
               theme: theme,
               navigatorKey: appNavigatorKey,
@@ -129,7 +129,8 @@ class PlaygroundBookingApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: theme,
               home: const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
+                backgroundColor: Colors.black,
+                body: SizedBox.expand(),
               ),
             );
           }

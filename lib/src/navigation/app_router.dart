@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/splash_page.dart';
+import '../screens/splash_screen.dart';
 import '../screens/onboarding_page.dart';
 import '../screens/auth/login_page.dart';
 import '../screens/auth/forgot_password_page.dart';
@@ -44,7 +44,7 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splash:
-        return _material(settings, const SplashPage());
+        return _material(settings, const SplashScreen());
       case AppRoutes.onboarding:
         return _material(settings, const OnboardingPage());
       case AppRoutes.login:
@@ -91,7 +91,7 @@ class AppRouter {
       case AppRoutes.adminReservations:
         return _material(settings, const AdminReservationsPage());
       default:
-        return _material(settings, const SplashPage());
+        return _material(settings, const SplashScreen());
     }
   }
 

@@ -18,7 +18,7 @@ class OnboardingPage extends StatelessWidget {
             children: [
               const Spacer(),
               const Text(
-                'Playground Booking',
+                'Bamos Al Fut',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),

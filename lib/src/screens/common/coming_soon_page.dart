@@ -21,7 +21,7 @@ class ComingSoonPage extends StatelessWidget {
                 child: FractionallySizedBox(
                   heightFactor: 0.9,
                   child: Image.asset(
-                    'assets/images/fondoRed.png',
+                    'assets/images/proximamente.png',
                     fit: BoxFit.fitHeight,
                     errorBuilder: (c, e, s) => const SizedBox.shrink(),
                   ),
