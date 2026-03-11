@@ -17,6 +17,20 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
+enum _TabType { home, booking, event, reservations, profile }
+
+class _TabConfig {
+  const _TabConfig({
+    required this.page,
+    required this.item,
+    required this.type,
+  });
+
+  final Widget page;
+  final BottomNavigationBarItem item;
+  final _TabType type;
+}
+
 class _HomeShellState extends State<HomeShell> {
   int index = 0;
 
@@ -26,43 +40,33 @@ class _HomeShellState extends State<HomeShell> {
     final auth = context.watch<AuthProvider>();
     final isLoggedIn = auth.isLoggedIn;
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
-    final pages = [
-      const HomeTab(),
-      const BookingsTab(),
-      const EventsTab(),
-      if (isAdmin) const AdminReservationsPage(),
-      const ProfileTab(),
-    ];
-    if (index >= pages.length) {
-      index = pages.length - 1;
+    final tabs = _buildTabs(isAdmin: isAdmin, loc: loc);
+    if (index >= tabs.length) {
+      index = tabs.length - 1;
     }
-    if (!isLoggedIn && index == pages.length - 1) {
+    final profileIndex = tabs.indexWhere((t) => t.type == _TabType.profile);
+    if (!isLoggedIn && profileIndex != -1 && index == profileIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && index == pages.length - 1) {
+        if (mounted && index == profileIndex) {
           setState(() => index = 0);
         }
       });
     }
 
-    final eventIndex = 2;
-    final reservationsIndex = isAdmin ? 3 : null;
-    final profileIndex = isAdmin ? 4 : 3;
+    final eventIndex = tabs.indexWhere((t) => t.type == _TabType.event);
 
     return Scaffold(
-      body: SafeArea(child: pages[index]),
+      body: SafeArea(child: tabs[index].page),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (i) {
-          if (i == eventIndex) {
+          if (eventIndex != -1 && i == eventIndex) {
             Navigator.of(
               context,
             ).pushNamed('/coming-soon', arguments: {'title': loc.t('nav_event', fallback: 'Event')});
             return;
           }
-          if (reservationsIndex != null && i == reservationsIndex && !isAdmin) {
-            return;
-          }
-          if (i == profileIndex && !isLoggedIn) {
+          if (!isLoggedIn && profileIndex != -1 && i == profileIndex) {
             Navigator.of(context).pushNamed(AppRoutes.login);
             return;
           }
@@ -72,35 +76,102 @@ class _HomeShellState extends State<HomeShell> {
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withOpacity(.6),
         type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: loc.t('nav_home', fallback: 'Home'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.calendar_month_outlined),
-            activeIcon: const Icon(Icons.calendar_month),
-            label: loc.t('nav_booking', fallback: 'Booking'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.celebration_outlined),
-            activeIcon: const Icon(Icons.celebration),
-            label: loc.t('nav_event', fallback: 'Event'),
-          ),
-          if (isAdmin)
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.event_note_outlined),
-              activeIcon: const Icon(Icons.event_note),
-              label: loc.t('nav_reservations', fallback: 'Reservations'),
-            ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            activeIcon: const Icon(Icons.person),
-            label: loc.t('nav_profile', fallback: 'Profile'),
-          ),
-        ],
+        items: tabs.map((t) => t.item).toList(growable: false),
       ),
     );
   }
+}
+
+List<_TabConfig> _buildTabs({
+  required bool isAdmin,
+  required LocalizationService loc,
+}) {
+  if (isAdmin) {
+    return [
+      _TabConfig(
+        page: const AdminReservationsPage(),
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.event_note_outlined),
+          activeIcon: const Icon(Icons.event_note),
+          label: loc.t('nav_reservations', fallback: 'Reservations'),
+        ),
+        type: _TabType.reservations,
+      ),
+      _TabConfig(
+        page: const BookingsTab(),
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.calendar_month_outlined),
+          activeIcon: const Icon(Icons.calendar_month),
+          label: loc.t('nav_booking', fallback: 'Booking'),
+        ),
+        type: _TabType.booking,
+      ),
+      _TabConfig(
+        page: const HomeTab(),
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.home_outlined),
+          activeIcon: const Icon(Icons.home),
+          label: loc.t('nav_home', fallback: 'Home'),
+        ),
+        type: _TabType.home,
+      ),
+      _TabConfig(
+        page: const EventsTab(),
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.celebration_outlined),
+          activeIcon: const Icon(Icons.celebration),
+          label: loc.t('nav_event', fallback: 'Event'),
+        ),
+        type: _TabType.event,
+      ),
+      _TabConfig(
+        page: const ProfileTab(),
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.person_outline),
+          activeIcon: const Icon(Icons.person),
+          label: loc.t('nav_profile', fallback: 'Profile'),
+        ),
+        type: _TabType.profile,
+      ),
+    ];
+  }
+
+  return [
+    _TabConfig(
+      page: const HomeTab(),
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.home_outlined),
+        activeIcon: const Icon(Icons.home),
+        label: loc.t('nav_home', fallback: 'Home'),
+      ),
+      type: _TabType.home,
+    ),
+    _TabConfig(
+      page: const BookingsTab(),
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.calendar_month_outlined),
+        activeIcon: const Icon(Icons.calendar_month),
+        label: loc.t('nav_booking', fallback: 'Booking'),
+      ),
+      type: _TabType.booking,
+    ),
+    _TabConfig(
+      page: const EventsTab(),
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.celebration_outlined),
+        activeIcon: const Icon(Icons.celebration),
+        label: loc.t('nav_event', fallback: 'Event'),
+      ),
+      type: _TabType.event,
+    ),
+    _TabConfig(
+      page: const ProfileTab(),
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline),
+        activeIcon: const Icon(Icons.person),
+        label: loc.t('nav_profile', fallback: 'Profile'),
+      ),
+      type: _TabType.profile,
+    ),
+  ];
 }
