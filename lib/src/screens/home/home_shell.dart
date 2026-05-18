@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../config/app_config.dart';
 import 'home_tab.dart';
 import '../profile/profile_tab.dart';
 import '../bookings/bookings_tab.dart';
-import '../events/events_tab.dart';
 import '../admin/admin_reservations_page.dart';
 import '../../services/localization_service.dart';
 import '../../providers/auth_provider.dart';
@@ -17,7 +17,7 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
-enum _TabType { home, booking, event, reservations, profile }
+enum _TabType { home, booking, reservations, profile }
 
 class _TabConfig {
   const _TabConfig({
@@ -36,11 +36,12 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<AppConfig>();
     final loc = context.watch<LocalizationService>();
     final auth = context.watch<AuthProvider>();
     final isLoggedIn = auth.isLoggedIn;
-    final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
-    final tabs = _buildTabs(isAdmin: isAdmin, loc: loc);
+    final isAdmin = auth.isAdmin;
+    final tabs = _buildTabs(isAdmin: isAdmin, loc: loc, config: config);
     if (index >= tabs.length) {
       index = tabs.length - 1;
     }
@@ -53,26 +54,18 @@ class _HomeShellState extends State<HomeShell> {
       });
     }
 
-    final eventIndex = tabs.indexWhere((t) => t.type == _TabType.event);
-
     return Scaffold(
       body: SafeArea(child: tabs[index].page),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (i) {
-          if (eventIndex != -1 && i == eventIndex) {
-            Navigator.of(
-              context,
-            ).pushNamed('/coming-soon', arguments: {'title': loc.t('nav_event', fallback: 'Event')});
-            return;
-          }
           if (!isLoggedIn && profileIndex != -1 && i == profileIndex) {
             Navigator.of(context).pushNamed(AppRoutes.login);
             return;
           }
           setState(() => index = i);
         },
-        backgroundColor: const Color(0xFF101010),
+        backgroundColor: const Color(0xFF0E0C0B),
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withOpacity(.6),
         type: BottomNavigationBarType.fixed,
@@ -82,96 +75,55 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
+String _navLabel(LocalizationService loc, String key, String en, String es) {
+  return loc.t(key, fallback: loc.locale.languageCode == 'es' ? es : en);
+}
+
 List<_TabConfig> _buildTabs({
   required bool isAdmin,
   required LocalizationService loc,
+  required AppConfig config,
 }) {
-  if (isAdmin) {
-    return [
+  final tabs = <_TabConfig>[
+    if (config.features.showAdminReservations && isAdmin)
       _TabConfig(
         page: const AdminReservationsPage(),
         item: BottomNavigationBarItem(
           icon: const Icon(Icons.event_note_outlined),
           activeIcon: const Icon(Icons.event_note),
-          label: loc.t('nav_reservations', fallback: 'Reservations'),
+          label: _navLabel(loc, 'nav_reservations', 'Appointments', 'Citas'),
         ),
         type: _TabType.reservations,
       ),
+    if (config.features.showReservations)
       _TabConfig(
         page: const BookingsTab(),
         item: BottomNavigationBarItem(
           icon: const Icon(Icons.calendar_month_outlined),
           activeIcon: const Icon(Icons.calendar_month),
-          label: loc.t('nav_booking', fallback: 'Booking'),
+          label: _navLabel(loc, 'nav_booking', 'Appointments', 'Citas'),
         ),
         type: _TabType.booking,
       ),
-      _TabConfig(
-        page: const HomeTab(),
-        item: BottomNavigationBarItem(
-          icon: const Icon(Icons.home_outlined),
-          activeIcon: const Icon(Icons.home),
-          label: loc.t('nav_home', fallback: 'Home'),
-        ),
-        type: _TabType.home,
-      ),
-      _TabConfig(
-        page: const EventsTab(),
-        item: BottomNavigationBarItem(
-          icon: const Icon(Icons.celebration_outlined),
-          activeIcon: const Icon(Icons.celebration),
-          label: loc.t('nav_event', fallback: 'Event'),
-        ),
-        type: _TabType.event,
-      ),
-      _TabConfig(
-        page: const ProfileTab(),
-        item: BottomNavigationBarItem(
-          icon: const Icon(Icons.person_outline),
-          activeIcon: const Icon(Icons.person),
-          label: loc.t('nav_profile', fallback: 'Profile'),
-        ),
-        type: _TabType.profile,
-      ),
-    ];
-  }
-
-  return [
     _TabConfig(
       page: const HomeTab(),
       item: BottomNavigationBarItem(
         icon: const Icon(Icons.home_outlined),
         activeIcon: const Icon(Icons.home),
-        label: loc.t('nav_home', fallback: 'Home'),
+        label: _navLabel(loc, 'nav_home', 'Home', 'Inicio'),
       ),
       type: _TabType.home,
-    ),
-    _TabConfig(
-      page: const BookingsTab(),
-      item: BottomNavigationBarItem(
-        icon: const Icon(Icons.calendar_month_outlined),
-        activeIcon: const Icon(Icons.calendar_month),
-        label: loc.t('nav_booking', fallback: 'Booking'),
-      ),
-      type: _TabType.booking,
-    ),
-    _TabConfig(
-      page: const EventsTab(),
-      item: BottomNavigationBarItem(
-        icon: const Icon(Icons.celebration_outlined),
-        activeIcon: const Icon(Icons.celebration),
-        label: loc.t('nav_event', fallback: 'Event'),
-      ),
-      type: _TabType.event,
     ),
     _TabConfig(
       page: const ProfileTab(),
       item: BottomNavigationBarItem(
         icon: const Icon(Icons.person_outline),
         activeIcon: const Icon(Icons.person),
-        label: loc.t('nav_profile', fallback: 'Profile'),
+        label: _navLabel(loc, 'nav_profile', 'Profile', 'Perfil'),
       ),
       type: _TabType.profile,
     ),
   ];
+
+  return tabs;
 }

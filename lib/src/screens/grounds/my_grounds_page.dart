@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
+
 import '../../navigation/app_router.dart';
-import '../../widgets/court_image.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import '../../widgets/court_image.dart';
 
 class MyGroundsPage extends StatefulWidget {
   const MyGroundsPage({super.key});
@@ -23,15 +24,15 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(leading: const BackButton(), title: Text(loc.t('grounds_my_title', fallback: 'My grounds'))),
+        appBar: AppBar(leading: const BackButton(), title: Text(loc.t('grounds_my_title', fallback: 'My services'))),
         body: Center(child: Text(loc.t('grounds_admin_only', fallback: 'Only administrators can access this section'))),
       );
     }
-    _future ??= auth.api.getMyGrounds();
+    _future ??= auth.api.getMyResources();
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(loc.t('grounds_my_title', fallback: 'My grounds')),
+        title: Text(loc.t('grounds_my_title', fallback: 'My services')),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _future,
@@ -46,7 +47,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                 ? ListView(
                     padding: const EdgeInsets.all(32),
                     children: [
-                      Center(child: Text(loc.t('grounds_empty', fallback: 'No grounds yet'))),
+                      Center(child: Text(loc.t('grounds_empty', fallback: 'No services yet'))),
                     ],
                   )
                 : ListView.separated(
@@ -54,8 +55,8 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                     itemCount: items.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (_, i) {
-                      final c = items[i] as Map<String, dynamic>;
-                      final status = (c['status'] ?? 'active').toString();
+                      final resource = items[i] as Map<String, dynamic>;
+                      final status = (resource['status'] ?? 'active').toString();
                       final isInactive = status != 'active';
                       return Container(
                         decoration: BoxDecoration(
@@ -71,7 +72,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                                 width: 72,
                                 height: 72,
                                 child: CourtImage(
-                                  images: c['images'],
+                                  images: resource['images'],
                                   height: 72,
                                   width: 72,
                                   radius: BorderRadius.circular(12),
@@ -84,7 +85,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    c['name']?.toString() ?? 'Ground',
+                                    resource['name']?.toString() ?? 'Service',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -94,7 +95,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                                   Row(
                                     children: [
                                       Text(
-                                        '${c['duration_hours'] ?? 1} ${loc.t('grounds_hour', fallback: 'Hour')}',
+                                        '${resource['duration_hours'] ?? 1} ${loc.t('grounds_hour', fallback: 'Hour')}',
                                         style: const TextStyle(color: Colors.white70),
                                       ),
                                       const SizedBox(width: 8),
@@ -115,7 +116,6 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
                                 ],
                               ),
                             ),
@@ -123,10 +123,10 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
                               icon: const Icon(Icons.more_vert, color: Colors.white70),
                               onSelected: (value) {
                                 if (value == 'edit') {
-                                  _openEdit(c);
+                                  _openEdit(resource);
                                 } else if (value == 'toggle' && !_actionInProgress) {
                                   final newStatus = isInactive ? 'active' : 'inactive';
-                                  _changeStatus(c, newStatus);
+                                  _changeStatus(resource, newStatus);
                                 }
                               },
                               itemBuilder: (_) => [
@@ -167,9 +167,9 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
 
   Future<void> _refresh() async {
     final auth = context.read<AuthProvider>();
-    setState(() {
-      _future = auth.api.getMyGrounds();
-    });
+      setState(() {
+        _future = auth.api.getMyResources();
+      });
     await _future;
   }
 
@@ -192,18 +192,20 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
       final id = court['id'] as int?;
       if (id == null) return;
       if (newStatus == 'inactive') {
-        await auth.api.deactivateGround(id);
+        await auth.api.deleteResource(id);
       } else {
-        await auth.api.updateGround(id, {'status': newStatus});
+        await auth.api.updateResource(id, {'status': newStatus});
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(loc.t('grounds_status_updated', fallback: 'Status updated'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.t('grounds_status_updated', fallback: 'Status updated'))),
+      );
       await _refresh();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('${loc.t('grounds_update_failed', fallback: 'Failed to update')}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${loc.t('grounds_update_failed', fallback: 'Failed to update')}: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _actionInProgress = false);
@@ -257,9 +259,7 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
     final loc = context.watch<LocalizationService>();
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: bottom + 16,
-      ),
+      padding: EdgeInsets.only(bottom: bottom + 16),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
@@ -269,7 +269,7 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(loc.t('grounds_edit_details', fallback: 'Edit ground'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(loc.t('grounds_edit_details', fallback: 'Edit resource'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(false),
@@ -313,7 +313,7 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               initialValue: duration,
-              decoration: InputDecoration(labelText: loc.t('grounds_duration_label', fallback: 'Duration per booking')),
+              decoration: InputDecoration(labelText: loc.t('grounds_duration_label', fallback: 'Duration per reservation')),
               items: [
                 DropdownMenuItem(value: 1, child: Text(loc.t('grounds_duration_one', fallback: '1 Hour'))),
                 DropdownMenuItem(value: 2, child: Text(loc.t('grounds_duration_two', fallback: '2 Hours'))),
@@ -372,13 +372,14 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
       'status': status,
     };
     try {
-      await auth.api.updateGround(id, payload);
+      await auth.api.updateResource(id, payload);
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('${context.read<LocalizationService>().t('grounds_update_failed', fallback: 'Failed to update')}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${context.read<LocalizationService>().t('grounds_update_failed', fallback: 'Failed to update')}: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => saving = false);

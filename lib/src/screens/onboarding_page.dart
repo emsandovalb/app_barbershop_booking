@@ -24,7 +24,7 @@ class OnboardingPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                loc.t('onboarding_tagline', fallback: 'Reserva canchas y descubre eventos deportivos cercanos.'),
+                loc.t('onboarding_tagline', fallback: 'Book premium barber services and manage appointments with ease.'),
                 style: TextStyle(
                   color: Colors.white.withOpacity(.75),
                 ),

@@ -6,16 +6,207 @@ import 'package:path/path.dart' as p;
 
 class ApiClient {
   final String baseUrl;
+  final String resourceEndpoint;
+  final String reservationEndpoint;
+  final String myResourcesEndpoint;
   String? _token;
 
-  ApiClient({required String baseUrl}) : baseUrl = _cleanBase(baseUrl);
+  ApiClient({
+    required String baseUrl,
+    String resourceEndpointValue = 'resources',
+    String reservationEndpointValue = 'reservations',
+    String myResourcesEndpointValue = 'my/resources',
+  }) : baseUrl = _cleanBase(baseUrl),
+       resourceEndpoint = resourceEndpointValue,
+       reservationEndpoint = reservationEndpointValue,
+       myResourcesEndpoint = myResourcesEndpointValue;
 
   set token(String? t) => _token = t;
 
   Map<String, String> get _headers => {
-        'Accept': 'application/json',
-        if (_token != null) 'Authorization': 'Bearer $_token',
-      };
+    'Accept': 'application/json',
+    if (_token != null) 'Authorization': 'Bearer $_token',
+  };
+
+  Uri _apiUri(String path, {Map<String, String?>? queryParameters}) {
+    final cleaned = path.startsWith('/') ? path.substring(1) : path;
+    final uri = Uri.parse('$baseUrl/$cleaned');
+    final filtered = <String, String>{};
+    if (queryParameters != null) {
+      for (final entry in queryParameters.entries) {
+        final value = entry.value;
+        if (value != null && value.isNotEmpty) {
+          filtered[entry.key] = value;
+        }
+      }
+    }
+    return filtered.isEmpty ? uri : uri.replace(queryParameters: filtered);
+  }
+
+  Map<String, dynamic> _normalizeResource(Map<String, dynamic> input) {
+    final data = Map<String, dynamic>.from(input);
+    final court = data['court'];
+    final resource = data['resource'];
+    if (resource is Map) {
+      data['resource'] = Map<String, dynamic>.from(resource);
+    } else if (court is Map) {
+      data['resource'] = Map<String, dynamic>.from(court);
+    }
+    if (court is Map) {
+      data['court'] = Map<String, dynamic>.from(court);
+    } else if (resource is Map) {
+      data['court'] = Map<String, dynamic>.from(resource);
+    }
+    if (data['resource_id'] == null && data['court_id'] != null) {
+      data['resource_id'] = data['court_id'];
+    }
+    if (data['court_id'] == null && data['resource_id'] != null) {
+      data['court_id'] = data['resource_id'];
+    }
+    return data;
+  }
+
+  Map<String, dynamic> _normalizeReservation(Map<String, dynamic> input) {
+    final data = Map<String, dynamic>.from(input);
+    final booking = data['booking'];
+    final reservation = data['reservation'];
+    if (reservation is Map) {
+      data['reservation'] = Map<String, dynamic>.from(reservation);
+    } else if (booking is Map) {
+      data['reservation'] = Map<String, dynamic>.from(booking);
+    }
+    if (booking is Map) {
+      data['booking'] = Map<String, dynamic>.from(booking);
+    } else if (reservation is Map) {
+      data['booking'] = Map<String, dynamic>.from(reservation);
+    }
+    if (data['reservation_id'] == null && data['booking_id'] != null) {
+      data['reservation_id'] = data['booking_id'];
+    }
+    if (data['booking_id'] == null && data['reservation_id'] != null) {
+      data['booking_id'] = data['reservation_id'];
+    }
+    if (data['resource_id'] == null && data['court_id'] != null) {
+      data['resource_id'] = data['court_id'];
+    }
+    if (data['court_id'] == null && data['resource_id'] != null) {
+      data['court_id'] = data['resource_id'];
+    }
+    return data;
+  }
+
+  Map<String, dynamic> _normalizeResponse(
+    Map<String, dynamic> json, {
+    bool reservation = false,
+  }) {
+    final data = Map<String, dynamic>.from(json);
+    final items = data['data'];
+    if (items is List) {
+      data['data'] = items
+          .map((item) {
+            if (item is Map<String, dynamic>) {
+              return reservation
+                  ? _normalizeReservation(item)
+                  : _normalizeResource(item);
+            }
+            if (item is Map) {
+              return reservation
+                  ? _normalizeReservation(Map<String, dynamic>.from(item))
+                  : _normalizeResource(Map<String, dynamic>.from(item));
+            }
+            return item;
+          })
+          .toList(growable: false);
+    }
+    return reservation ? _normalizeReservation(data) : _normalizeResource(data);
+  }
+
+  Map<String, dynamic> _resourcePayload(Map<String, dynamic> data) {
+    final payload = Map<String, dynamic>.from(data);
+    if (payload['court_id'] == null && payload['resource_id'] != null) {
+      payload['court_id'] = payload['resource_id'];
+    }
+    if (payload['resource_id'] == null && payload['court_id'] != null) {
+      payload['resource_id'] = payload['court_id'];
+    }
+    if (payload['duration_hours'] == null && payload['duration'] != null) {
+      payload['duration_hours'] = payload['duration'];
+    }
+    if (payload['facilities'] == null && payload['amenities'] != null) {
+      payload['facilities'] = payload['amenities'];
+    }
+    return payload;
+  }
+
+  Map<String, dynamic> _reservationPayload(Map<String, dynamic> data) {
+    final payload = Map<String, dynamic>.from(data);
+    if (payload['court_id'] == null && payload['resource_id'] != null) {
+      payload['court_id'] = payload['resource_id'];
+    }
+    if (payload['resource_id'] == null && payload['court_id'] != null) {
+      payload['resource_id'] = payload['court_id'];
+    }
+    if (payload['duration_hours'] == null && payload['duration'] != null) {
+      payload['duration_hours'] = payload['duration'];
+    }
+    if (payload['time_slot'] == null && payload['slot'] != null) {
+      payload['time_slot'] = payload['slot'];
+    }
+    return payload;
+  }
+
+  Future<Map<String, dynamic>> _getJson(
+    Uri uri, {
+    bool reservation = false,
+  }) async {
+    final res = await http.get(uri, headers: _headers);
+    _ensureOk(res);
+    return _normalizeResponse(
+      json.decode(res.body) as Map<String, dynamic>,
+      reservation: reservation,
+    );
+  }
+
+  Future<Map<String, dynamic>> _postJson(
+    Uri uri,
+    Map<String, dynamic> body, {
+    bool expectCreated = false,
+    bool reservation = false,
+  }) async {
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.post(uri, headers: headers, body: json.encode(body));
+    _ensureOk(res, expectCreated: expectCreated);
+    return _normalizeResponse(
+      json.decode(res.body) as Map<String, dynamic>,
+      reservation: reservation,
+    );
+  }
+
+  Future<Map<String, dynamic>> _putJson(
+    Uri uri,
+    Map<String, dynamic> body, {
+    bool reservation = false,
+  }) async {
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.put(uri, headers: headers, body: json.encode(body));
+    _ensureOk(res);
+    return _normalizeResponse(
+      json.decode(res.body) as Map<String, dynamic>,
+      reservation: reservation,
+    );
+  }
+
+  Future<Map<String, dynamic>> _deleteJson(
+    Uri uri, {
+    bool reservation = false,
+  }) async {
+    final res = await http.delete(uri, headers: _headers);
+    _ensureOk(res);
+    return _normalizeResponse(
+      json.decode(res.body) as Map<String, dynamic>,
+      reservation: reservation,
+    );
+  }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final res = await http.post(
@@ -27,7 +218,11 @@ class ApiClient {
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> register(String name, String email, String password) async {
+  Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
     final res = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: _headers,
@@ -38,20 +233,32 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> me() async {
-    final res = await http.get(Uri.parse('$baseUrl/auth/me'), headers: _headers);
+    final res = await http.get(
+      Uri.parse('$baseUrl/auth/me'),
+      headers: _headers,
+    );
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
   Future<void> logout() async {
-    final res = await http.post(Uri.parse('$baseUrl/auth/logout'), headers: _headers);
+    final res = await http.post(
+      Uri.parse('$baseUrl/auth/logout'),
+      headers: _headers,
+    );
     // Accept 200 OK, ignore others silently when token is already invalid
     if (res.statusCode < 200 || res.statusCode >= 300) {
       // no-op
     }
   }
 
-  Future<Map<String, dynamic>> updateProfile({String? firstName, String? lastName, String? name, String? email, String? avatarPath}) async {
+  Future<Map<String, dynamic>> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? name,
+    String? email,
+    String? avatarPath,
+  }) async {
     final uri = Uri.parse('$baseUrl/auth/profile');
     final req = http.MultipartRequest('POST', uri);
     req.headers.addAll(_headers);
@@ -59,7 +266,10 @@ class ApiClient {
     if (lastName != null) req.fields['last_name'] = lastName;
     if (name != null) req.fields['name'] = name;
     if (avatarPath != null && avatarPath.isNotEmpty) {
-      final avatarFile = await _optimizeAvatar(avatarPath);
+      final avatarFile = await _optimizeImageUpload(
+        avatarPath,
+        fieldName: 'avatar',
+      );
       if (avatarFile != null) {
         req.files.add(avatarFile);
       }
@@ -68,6 +278,144 @@ class ApiClient {
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getResources({
+    String? q,
+    double? minPrice,
+    double? maxPrice,
+    String? sort,
+    String? category,
+    int? durationHours,
+    int page = 1,
+    int? perPage,
+  }) async {
+    final uri = _apiUri(
+      resourceEndpoint,
+      queryParameters: {
+        if (q != null && q.isNotEmpty) 'q': q,
+        if (minPrice != null) 'min_price': '$minPrice',
+        if (maxPrice != null) 'max_price': '$maxPrice',
+        if (sort != null) 'sort': sort,
+        if (category != null && category.isNotEmpty) 'category': category,
+        if (durationHours != null) 'duration': '$durationHours',
+        if (page > 1) 'page': '$page',
+        if (perPage != null) 'per_page': '$perPage',
+      },
+    );
+    return _getJson(uri);
+  }
+
+  Future<Map<String, dynamic>> getResource(int id) async {
+    return _getJson(_apiUri('$resourceEndpoint/$id'));
+  }
+
+  Future<Map<String, dynamic>> getResourceAvailability({
+    required int id,
+    required String date,
+  }) async {
+    return _getJson(
+      _apiUri(
+        '$resourceEndpoint/$id/availability',
+        queryParameters: {'date': date},
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> getStaff({int page = 1, int? perPage}) async {
+    return _getJson(
+      _apiUri(
+        'staff',
+        queryParameters: {
+          if (page > 1) 'page': '$page',
+          if (perPage != null) 'per_page': '$perPage',
+        },
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> getStaffById(int id) async {
+    return _getJson(_apiUri('staff/$id'));
+  }
+
+  Future<Map<String, dynamic>> getResourceStaff(int id) async {
+    return _getJson(_apiUri('resources/$id/staff'));
+  }
+
+  Future<Map<String, dynamic>> getMyResources() async {
+    return _getJson(_apiUri(myResourcesEndpoint));
+  }
+
+  Future<Map<String, dynamic>> createResource(Map<String, dynamic> data) async {
+    return _postJson(
+      _apiUri(resourceEndpoint),
+      _resourcePayload(data),
+      expectCreated: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> updateResource(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    return _putJson(_apiUri('$resourceEndpoint/$id'), _resourcePayload(data));
+  }
+
+  Future<Map<String, dynamic>> deleteResource(int id) async {
+    return _deleteJson(_apiUri('$resourceEndpoint/$id'));
+  }
+
+  Future<Map<String, dynamic>> getReservations({
+    String? status,
+    int? page,
+    int? perPage,
+  }) async {
+    return _getJson(
+      _apiUri(
+        reservationEndpoint,
+        queryParameters: {
+          if (status != null && status.isNotEmpty) 'status': status,
+          if (page != null && page > 1) 'page': '$page',
+          if (perPage != null) 'per_page': '$perPage',
+        },
+      ),
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> createReservation(
+    Map<String, dynamic> data,
+  ) async {
+    return _postJson(
+      _apiUri(reservationEndpoint),
+      _reservationPayload(data),
+      expectCreated: true,
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> getReservation(int id) async {
+    return _getJson(_apiUri('$reservationEndpoint/$id'), reservation: true);
+  }
+
+  Future<Map<String, dynamic>> cancelReservation(int id) async {
+    return _postJson(
+      _apiUri('$reservationEndpoint/$id/cancel'),
+      const {},
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> rebookReservation(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    return _postJson(
+      _apiUri('$reservationEndpoint/$id/rebook'),
+      _reservationPayload(data),
+      expectCreated: true,
+      reservation: true,
+    );
   }
 
   Future<Map<String, dynamic>> getCourts({
@@ -80,19 +428,16 @@ class ApiClient {
     int page = 1,
     int? perPage,
   }) async {
-    final uri = Uri.parse('$baseUrl/courts').replace(queryParameters: {
-      if (q != null && q.isNotEmpty) 'q': q,
-      if (minPrice != null) 'min_price': '$minPrice',
-      if (maxPrice != null) 'max_price': '$maxPrice',
-      if (sort != null) 'sort': sort,
-      if (category != null && category.isNotEmpty) 'category': category,
-      if (durationHours != null) 'duration': '$durationHours',
-      if (page > 1) 'page': '$page',
-      if (perPage != null) 'per_page': '$perPage',
-    });
-    final res = await http.get(uri, headers: _headers);
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+    return getResources(
+      q: q,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      sort: sort,
+      category: category,
+      durationHours: durationHours,
+      page: page,
+      perPage: perPage,
+    );
   }
 
   Future<Map<String, dynamic>> getEvents() async {
@@ -101,20 +446,247 @@ class ApiClient {
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> getBookings(String status) async {
-    final res = await http.get(Uri.parse('$baseUrl/bookings?status=$status'), headers: _headers);
+  Future<Map<String, dynamic>> getTournaments({
+    int page = 1,
+    int? perPage,
+  }) async {
+    final uri = Uri.parse('$baseUrl/tournaments').replace(
+      queryParameters: {
+        if (page > 1) 'page': '$page',
+        if (perPage != null) 'per_page': '$perPage',
+      },
+    );
+    final res = await http.get(uri, headers: _headers);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> createBooking({required int courtId, required String date, required String timeSlot}) async {
-    final res = await http.post(Uri.parse('$baseUrl/bookings'), headers: _headers, body: {
-      'court_id': '$courtId',
-      'date': date,
-      'time_slot': timeSlot,
-    });
+  Future<Map<String, dynamic>> getTournament(int id) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/tournaments/$id'),
+      headers: _headers,
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getTournamentTeams(int tournamentId) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/tournaments/$tournamentId/teams'),
+      headers: _headers,
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getMyTeams() async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/my/teams'),
+      headers: _headers,
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createTournament(
+    Map<String, dynamic> data, {
+    String? coverImagePath,
+  }) async {
+    if (coverImagePath != null && coverImagePath.isNotEmpty) {
+      return _createTournamentMultipart(data, coverImagePath: coverImagePath);
+    }
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.post(
+      Uri.parse('$baseUrl/tournaments'),
+      headers: headers,
+      body: json.encode(data),
+    );
     _ensureOk(res, expectCreated: true);
     return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateTournament(
+    int id,
+    Map<String, dynamic> data, {
+    String? coverImagePath,
+  }) async {
+    if (coverImagePath != null && coverImagePath.isNotEmpty) {
+      return _updateTournamentMultipart(
+        id,
+        data,
+        coverImagePath: coverImagePath,
+      );
+    }
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.put(
+      Uri.parse('$baseUrl/tournaments/$id'),
+      headers: headers,
+      body: json.encode(data),
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> enrollTournamentTeam({
+    required int tournamentId,
+    required int teamId,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/tournaments/$tournamentId/teams'),
+      headers: _headers,
+      body: {'team_id': '$teamId'},
+    );
+    _ensureOk(res, expectCreated: true);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createTeam(
+    Map<String, dynamic> data, {
+    String? logoPath,
+  }) async {
+    if (logoPath != null && logoPath.isNotEmpty) {
+      return _createTeamMultipart(data, logoPath: logoPath);
+    }
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.post(
+      Uri.parse('$baseUrl/my/teams'),
+      headers: headers,
+      body: json.encode(data),
+    );
+    _ensureOk(res, expectCreated: true);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateTeam(
+    int id,
+    Map<String, dynamic> data, {
+    String? logoPath,
+  }) async {
+    if (logoPath != null && logoPath.isNotEmpty) {
+      return _updateTeamMultipart(id, data, logoPath: logoPath);
+    }
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.put(
+      Uri.parse('$baseUrl/my/teams/$id'),
+      headers: headers,
+      body: json.encode(data),
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _createTournamentMultipart(
+    Map<String, dynamic> data, {
+    required String coverImagePath,
+  }) async {
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/tournaments'),
+    );
+    req.headers.addAll(_headers);
+    _appendFields(req.fields, data);
+    final imageFile = await _optimizeImageUpload(
+      coverImagePath,
+      fieldName: 'cover_image',
+    );
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res, expectCreated: true);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _updateTournamentMultipart(
+    int id,
+    Map<String, dynamic> data, {
+    required String coverImagePath,
+  }) async {
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/tournaments/$id'),
+    );
+    req.headers.addAll(_headers);
+    req.fields['_method'] = 'PUT';
+    _appendFields(req.fields, data);
+    final imageFile = await _optimizeImageUpload(
+      coverImagePath,
+      fieldName: 'cover_image',
+    );
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _createTeamMultipart(
+    Map<String, dynamic> data, {
+    required String logoPath,
+  }) async {
+    final req = http.MultipartRequest('POST', Uri.parse('$baseUrl/my/teams'));
+    req.headers.addAll(_headers);
+    _appendFields(req.fields, data);
+    final imageFile = await _optimizeImageUpload(logoPath, fieldName: 'logo');
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res, expectCreated: true);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _updateTeamMultipart(
+    int id,
+    Map<String, dynamic> data, {
+    required String logoPath,
+  }) async {
+    final req = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/my/teams/$id'),
+    );
+    req.headers.addAll(_headers);
+    req.fields['_method'] = 'PUT';
+    _appendFields(req.fields, data);
+    final imageFile = await _optimizeImageUpload(logoPath, fieldName: 'logo');
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> closeTournament(int id) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/tournaments/$id'),
+      headers: _headers,
+    );
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getBookings(String status) async {
+    return getReservations(status: status);
+  }
+
+  Future<Map<String, dynamic>> createBooking({
+    required int courtId,
+    required String date,
+    required String timeSlot,
+    int? staffId,
+  }) async {
+    return createReservation({
+      'court_id': courtId,
+      'date': date,
+      'time_slot': timeSlot,
+      if (staffId != null) 'staff_id': staffId,
+    });
   }
 
   Future<Map<String, dynamic>> createBookingWithDuration({
@@ -122,100 +694,103 @@ class ApiClient {
     required String date,
     required String timeSlot,
     required int durationHours,
+    int? staffId,
   }) async {
-    final res = await http.post(Uri.parse('$baseUrl/bookings'), headers: _headers, body: {
-      'court_id': '$courtId',
+    return createReservation({
+      'court_id': courtId,
       'date': date,
       'time_slot': timeSlot,
-      'duration_hours': '$durationHours',
+      'duration_hours': durationHours,
+      if (staffId != null) 'staff_id': staffId,
     });
-    _ensureOk(res, expectCreated: true);
-    return json.decode(res.body) as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> getCourtAvailability({required int courtId, required String day}) async {
-    final uri = Uri.parse('$baseUrl/courts/$courtId/availability').replace(queryParameters: {'date': day});
-    final res = await http.get(uri, headers: _headers);
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+  Future<Map<String, dynamic>> getCourtAvailability({
+    required int courtId,
+    required String day,
+  }) async {
+    return getResourceAvailability(id: courtId, date: day);
   }
 
-  Future<Map<String, dynamic>> rebook(int bookingId, {required String date, required String timeSlot}) async {
-    final res = await http.post(Uri.parse('$baseUrl/bookings/$bookingId/rebook'), headers: _headers, body: {
-      'date': date,
-      'time_slot': timeSlot,
-    });
-    _ensureOk(res, expectCreated: true);
-    return json.decode(res.body) as Map<String, dynamic>;
+  Future<Map<String, dynamic>> rebook(
+    int bookingId, {
+    required String date,
+    required String timeSlot,
+  }) async {
+    return rebookReservation(bookingId, {'date': date, 'time_slot': timeSlot});
   }
 
   Future<Map<String, dynamic>> cancelBooking(int bookingId) async {
-    final res = await http.post(Uri.parse('$baseUrl/bookings/$bookingId/cancel'), headers: _headers);
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+    return cancelReservation(bookingId);
   }
 
   Future<Map<String, dynamic>> getReservationsForDay(String day) async {
-    final res = await http.get(Uri.parse('$baseUrl/admin/reservations?day=$day'), headers: _headers);
+    final res = await http.get(
+      Uri.parse('$baseUrl/admin/reservations?day=$day'),
+      headers: _headers,
+    );
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
   Future<void> forgotPassword(String email) async {
-    final res = await http.post(Uri.parse('$baseUrl/auth/password/forgot'), headers: _headers, body: {
-      'email': email,
-    });
+    final res = await http.post(
+      Uri.parse('$baseUrl/auth/password/forgot'),
+      headers: _headers,
+      body: {'email': email},
+    );
     _ensureOk(res);
   }
 
-  Future<void> changePassword({required String currentPassword, required String newPassword}) async {
-    final res = await http.post(Uri.parse('$baseUrl/auth/password/change'), headers: _headers, body: {
-      'current_password': currentPassword,
-      'new_password': newPassword,
-    });
+  Future<void> resetPassword({
+    required String email,
+    required String token,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/auth/password/reset'),
+      headers: _headers,
+      body: {
+        'email': email,
+        'token': token,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+    );
+    _ensureOk(res);
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/auth/password/change'),
+      headers: _headers,
+      body: {'current_password': currentPassword, 'new_password': newPassword},
+    );
     _ensureOk(res);
   }
 
   // Grounds (admin)
   Future<Map<String, dynamic>> getMyGrounds() async {
-    final res = await http.get(Uri.parse('$baseUrl/my/grounds'), headers: _headers);
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+    return getMyResources();
   }
 
   Future<Map<String, dynamic>> createGround(Map<String, dynamic> data) async {
-    // Send JSON because payload may contain arrays (e.g., images)
-    final headers = {
-      ..._headers,
-      'Content-Type': 'application/json',
-    };
-    final res = await http.post(
-      Uri.parse('$baseUrl/courts'),
-      headers: headers,
-      body: json.encode(data),
-    );
-    _ensureOk(res, expectCreated: true);
-    return json.decode(res.body) as Map<String, dynamic>;
+    return createResource(data);
   }
 
-  Future<Map<String, dynamic>> updateGround(int id, Map<String, dynamic> data) async {
-    final headers = {
-      ..._headers,
-      'Content-Type': 'application/json',
-    };
-    final res = await http.put(
-      Uri.parse('$baseUrl/courts/$id'),
-      headers: headers,
-      body: json.encode(data),
-    );
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+  Future<Map<String, dynamic>> updateGround(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    return updateResource(id, data);
   }
 
   Future<Map<String, dynamic>> deactivateGround(int id) async {
-    final res = await http.delete(Uri.parse('$baseUrl/courts/$id'), headers: _headers);
-    _ensureOk(res);
-    return json.decode(res.body) as Map<String, dynamic>;
+    return deleteResource(id);
   }
 
   static String _cleanBase(String url) {
@@ -227,13 +802,27 @@ class ApiClient {
   }
 
   void _ensureOk(http.Response res, {bool expectCreated = false}) {
-    final ok = expectCreated ? res.statusCode == 201 : (res.statusCode >= 200 && res.statusCode < 300);
+    final ok = expectCreated
+        ? res.statusCode == 201
+        : (res.statusCode >= 200 && res.statusCode < 300);
     if (!ok) {
       throw ApiException('HTTP ${res.statusCode}: ${res.body}');
     }
   }
 
-  Future<http.MultipartFile?> _optimizeAvatar(String path) async {
+  void _appendFields(Map<String, String> fields, Map<String, dynamic> data) {
+    for (final entry in data.entries) {
+      final value = entry.value;
+      if (value == null) continue;
+      if (value is String && value.trim().isEmpty) continue;
+      fields[entry.key] = value.toString();
+    }
+  }
+
+  Future<http.MultipartFile?> _optimizeImageUpload(
+    String path, {
+    required String fieldName,
+  }) async {
     try {
       final file = File(path);
       if (!await file.exists()) return null;
@@ -243,15 +832,25 @@ class ApiClient {
       const maxSide = 600;
       img.Image result = decoded;
       if (decoded.width > maxSide || decoded.height > maxSide) {
-        final longest = decoded.width > decoded.height ? decoded.width : decoded.height;
+        final longest = decoded.width > decoded.height
+            ? decoded.width
+            : decoded.height;
         final scale = longest / maxSide;
         final targetWidth = (decoded.width / scale).round();
         final targetHeight = (decoded.height / scale).round();
-        result = img.copyResize(decoded, width: targetWidth, height: targetHeight);
+        result = img.copyResize(
+          decoded,
+          width: targetWidth,
+          height: targetHeight,
+        );
       }
       final encoded = img.encodeJpg(result, quality: 80);
       final filename = '${p.basenameWithoutExtension(path)}.jpg';
-      return http.MultipartFile.fromBytes('avatar', encoded, filename: filename);
+      return http.MultipartFile.fromBytes(
+        fieldName,
+        encoded,
+        filename: filename,
+      );
     } catch (_) {
       return null;
     }
@@ -276,8 +875,3 @@ class ApiException implements Exception {
   @override
   String toString() => message;
 }
-
-
-
-
-

@@ -1,5 +1,5 @@
-name: playground_booking
-description: "A new Flutter project."
+name: app_barbershop_booking
+description: "Premium barbershop booking app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -106,8 +106,8 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: assets/icons/ImageIconApp.png
-  adaptive_icon_background: "#0e795d"
+  image_path: assets/icons/barbershop_app_icon.png
+  adaptive_icon_background: "#070707"
   min_sdk_android: 21
 
 # Native splash removed. Using only in-app GIF splash.
@@ -117,12 +117,12 @@ flutter_native_splash:
   ios: true
   web: false
 
-  color: "#000000"
+  color: "#070707"
 
-  image: assets/images/grass.png
+  image: assets/splash/barbershop_splash.png
   android_gravity: fill
   ios_content_mode: scaleAspectFill
 
   android_12:
-    color: "#000000"
-    image: assets/images/grass.png
+    color: "#070707"
+    image: assets/splash/barbershop_splash.png

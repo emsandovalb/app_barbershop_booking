@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 
@@ -14,7 +15,7 @@ class SelectDateTimePage extends StatefulWidget {
 
 class _SelectDateTimePageState extends State<SelectDateTimePage> {
   DateTime date = DateTime.now().add(const Duration(days: 1));
-  late int durationHours; // selected duration
+  late int durationHours;
   late TimeOfDay openTime;
   late TimeOfDay closeTime;
   List<_Slot> slots = [];
@@ -24,16 +25,14 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
   @override
   void initState() {
     super.initState();
-    final groundDuration = _parseInt(widget.court['duration_hours'], 1);
-    // If ground allows 2h, default selection to 1h so user can pick
-    durationHours = groundDuration >= 2 ? 1 : groundDuration;
+    final resourceDuration = _parseInt(widget.court['duration_hours'], 1);
+    durationHours = resourceDuration >= 2 ? 1 : resourceDuration;
     openTime = _parseTime(widget.court['open_hour']) ?? const TimeOfDay(hour: 8, minute: 0);
     closeTime = _parseTime(widget.court['close_hour']) ?? const TimeOfDay(hour: 22, minute: 0);
     _rebuildSlots();
   }
 
   void _rebuildSlots() {
-    // Sanitize inputs
     if (durationHours <= 0) durationHours = 1;
     if (!_validRange(openTime, closeTime)) {
       openTime = const TimeOfDay(hour: 8, minute: 0);
@@ -49,7 +48,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('select_date_time_title', fallback: 'Select date & time'))),
+      appBar: AppBar(title: Text(loc.t('select_date_time_title', fallback: 'Select appointment time'))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
@@ -60,26 +59,37 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
                 initialDate: date,
                 firstDate: DateTime.now(),
                 lastDate: DateTime.now().add(const Duration(days: 365)),
-                onDateChanged: (d) { setState(() => date = d); _loadAvailability(); },
+                onDateChanged: (d) {
+                  setState(() => date = d);
+                  _loadAvailability();
+                },
               ),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(loc.t('select_time', fallback: 'Select time'),
-                      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
-                  Row(children: [
-                    _DurChip(label: loc.t('select_duration_1h', fallback: '1h'), selected: durationHours == 1, onTap: () { durationHours = 1; _rebuildSlots(); }),
-                    const SizedBox(width: 8),
-                    Opacity(
-                      opacity: _groundAllows2h(widget.court) ? 1 : .4,
-                      child: _DurChip(
+                  Text(loc.t('select_time', fallback: 'Select time'), style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                  Row(
+                    children: [
+                      _DurChip(
+                        label: loc.t('select_duration_1h', fallback: '1h'),
+                        selected: durationHours == 1,
+                        onTap: () {
+                          durationHours = 1;
+                          _rebuildSlots();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _DurChip(
                         label: loc.t('select_duration_2h', fallback: '2h'),
                         selected: durationHours == 2,
-                        onTap: _groundAllows2h(widget.court) ? () { durationHours = 2; _rebuildSlots(); } : null,
+                        onTap: () {
+                          durationHours = 2;
+                          _rebuildSlots();
+                        },
                       ),
-                    ),
-                  ])
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -87,16 +97,14 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
                 builder: (context, constraints) {
                   final spacing = 12.0;
                   final columns = 2;
-                  final maxW = constraints.maxWidth.isFinite
-                      ? constraints.maxWidth
-                      : MediaQuery.of(context).size.width - 32; // padding approx
+                  final maxW = constraints.maxWidth.isFinite ? constraints.maxWidth : MediaQuery.of(context).size.width - 32;
                   final chipWidth = (maxW - spacing) / columns;
                   return Wrap(
                     spacing: spacing,
                     runSpacing: spacing,
                     children: [
                       if (slots.isEmpty)
-                        Text(loc.t('select_no_slots', fallback: 'No slots available'), style: const TextStyle(color: Colors.white70)),
+                        Text(loc.t('select_no_slots', fallback: 'No available appointment slots'), style: const TextStyle(color: Colors.white70)),
                       for (final s in slots)
                         SizedBox(
                           width: chipWidth,
@@ -110,19 +118,20 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
                     ],
                   );
                 },
-            ),
-            const SizedBox(height: 16), // extra space so last row isn't under the button
-          ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
-      ),
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () {
             if (selected == null || _isBooked(selected!)) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(loc.t('select_choose_slot', fallback: 'Please choose an available time slot'))));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(loc.t('select_choose_slot', fallback: 'Please choose an available appointment slot'))),
+              );
               return;
             }
             final start = DateTime(date.year, date.month, date.day, selected!.start.hour, selected!.start.minute);
@@ -144,12 +153,11 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
     if (id == null) return;
     final day = DateFormat('yyyy-MM-dd').format(date);
     try {
-      final res = await api.getCourtAvailability(courtId: id, day: day);
+      final res = await api.getResourceAvailability(id: id, date: day);
       final items = (res['booked'] as List?) ?? [];
       booked = items.map((e) => _Range.fromMap(e as Map<String, dynamic>)).toList();
       setState(() {});
     } catch (_) {
-      // ignore network errors for now; no booked ranges
       booked = [];
       setState(() {});
     }
@@ -170,7 +178,13 @@ class _TimeChip extends StatelessWidget {
   final bool selected;
   final bool disabled;
   final VoidCallback? onTap;
-  const _TimeChip({required this.label, required this.selected, required this.onTap, this.disabled = false});
+
+  const _TimeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.disabled = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -183,13 +197,6 @@ class _TimeChip extends StatelessWidget {
           color: const Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: selected ? Colors.white.withOpacity(.85) : Colors.transparent, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.15),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Opacity(
           opacity: opacity,
@@ -234,11 +241,6 @@ class _Slot {
   final TimeOfDay end;
   final String label;
   const _Slot(this.start, this.end, this.label);
-}
-
-bool _groundAllows2h(Map<String, dynamic> court) {
-  final d = _parseInt(court['duration_hours'], 1);
-  return d >= 2;
 }
 
 List<_Slot> _generateSlots(TimeOfDay open, TimeOfDay close, int stepHours) {
@@ -287,13 +289,13 @@ bool _validRange(TimeOfDay a, TimeOfDay b) {
 }
 
 class _Range {
-  final int start; // minutes since midnight
+  final int start;
   final int end;
   _Range(this.start, this.end);
 
   factory _Range.fromMap(Map<String, dynamic> m) {
-    TimeOfDay s = _parseHHmm(m['start'] as String? ?? '00:00');
-    TimeOfDay e = _parseHHmm(m['end'] as String? ?? '00:00');
+    final s = _parseHHmm(m['start'] as String? ?? '00:00');
+    final e = _parseHHmm(m['end'] as String? ?? '00:00');
     return _Range(s.hour * 60 + s.minute, e.hour * 60 + e.minute);
   }
 }

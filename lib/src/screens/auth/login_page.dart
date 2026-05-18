@@ -67,13 +67,13 @@ class _LoginPageState extends State<LoginPage> {
                     width: 180,
                     height: 180,
                     child: Image.asset(
-                      'assets/icons/imageLogin.png',
+                      'assets/icons/barbershop_login.png',
                       fit: BoxFit.cover,
                       errorBuilder: (c, e, s) => Container(
                         color: AppColors.black30,
                         alignment: Alignment.center,
                         child: const Icon(
-                          Icons.calendar_month,
+                          Icons.content_cut,
                           size: 64,
                           color: Colors.white,
                         ),
@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
               Text(
-                loc.t('login_subtitle', fallback: 'Please enter your email address and password details to login'),
+                loc.t('login_subtitle', fallback: 'Please enter your email address and password details to log in'),
                 style: TextStyle(color: Colors.white.withOpacity(.75)),
               ),
               const SizedBox(height: 24),

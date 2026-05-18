@@ -8,11 +8,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:playground_booking/src/app.dart';
+import 'package:app_barbershop_booking/src/app.dart';
+import 'package:app_barbershop_booking/src/config/app_config.dart';
 
 void main() {
   testWidgets('App bootstrap smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const PlaygroundBookingApp());
+    await tester.pumpWidget(const BarbershopBookingApp(config: AppConfig.barbershop));
 
     expect(find.byType(MaterialApp), findsOneWidget);
   });

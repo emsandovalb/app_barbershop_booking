@@ -5,6 +5,7 @@ import '../common/simple_page.dart';
 import '../../navigation/app_router.dart';
 import '../common/coming_soon_page.dart';
 import '../bookings/bookings_tab.dart';
+import '../../config/app_config.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
@@ -17,6 +18,7 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final localization = context.watch<LocalizationService>();
+    final config = context.watch<AppConfig>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
     final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com').toString();
     final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])?.toString();
@@ -107,9 +109,15 @@ class ProfileTab extends StatelessWidget {
           icon: Icons.history,
           onTap: () => _go(context, const BookingsTab(initialIndex: 1)),
         ),
+        if (config.features.showTeams)
+          _ProfileTile(
+            title: localization.t('profile_my_teams', fallback: 'My teams'),
+            icon: Icons.groups_outlined,
+            onTap: () => Navigator.of(context).pushNamed(AppRoutes.myTeams),
+          ),
         if (isAdmin)
           _ProfileTile(
-            title: localization.t('profile_my_grounds', fallback: 'My grounds'),
+            title: localization.t('profile_my_grounds', fallback: 'My services'),
             icon: Icons.sports_soccer_outlined,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoutes.myGrounds);

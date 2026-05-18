@@ -4,18 +4,17 @@ import '../screens/splash_screen.dart';
 import '../screens/onboarding_page.dart';
 import '../screens/auth/login_page.dart';
 import '../screens/auth/forgot_password_page.dart';
+import '../screens/auth/reset_password_page.dart';
 import '../screens/auth/change_password_page.dart';
 import '../screens/auth/signup_page.dart';
 import '../screens/home/home_shell.dart';
-import '../screens/booking/ground_booking_detail_page.dart';
 import '../screens/bookings/booking_detail_page.dart';
+import '../screens/bookings/ground_booking_detail_page.dart';
 import '../screens/booking/payment_page.dart';
 import '../screens/booking/order_placed_page.dart';
 import '../screens/grounds/my_grounds_page.dart';
 import '../screens/grounds/add_ground_page.dart';
-import '../screens/grounds/ground_category_page.dart';
 import '../screens/grounds/add_photos_page.dart';
-import '../screens/categories/categories_page.dart';
 import '../screens/common/coming_soon_page.dart';
 import '../screens/admin/admin_reservations_page.dart';
 
@@ -24,6 +23,7 @@ class AppRoutes {
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const forgot = '/auth/forgot';
+  static const resetPassword = '/auth/reset';
   static const changePassword = '/auth/password-change';
   static const signup = '/signup';
   static const home = '/home';
@@ -36,6 +36,11 @@ class AppRoutes {
   static const categoryGround = '/grounds/category';
   static const addPhotos = '/grounds/photos';
   static const categories = '/categories';
+  static const tournaments = '/tournaments';
+  static const tournamentDetail = '/tournaments/detail';
+  static const tournamentForm = '/tournaments/form';
+  static const myTeams = '/teams';
+  static const teamForm = '/teams/form';
   static const comingSoon = '/coming-soon';
   static const adminReservations = '/admin/reservations';
 }
@@ -51,6 +56,8 @@ class AppRouter {
         return _material(settings, const LoginPage());
       case AppRoutes.forgot:
         return _material(settings, const ForgotPasswordPage());
+      case AppRoutes.resetPassword:
+        return _material(settings, const ResetPasswordPage());
       case AppRoutes.changePassword:
         return _material(settings, const ChangePasswordPage());
       case AppRoutes.signup:
@@ -66,8 +73,8 @@ class AppRouter {
       case AppRoutes.orderPlaced:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(settings, OrderPlacedPage(
-          title: args['title'] as String? ?? 'Booking Successful',
-          subtitle: args['subtitle'] as String? ?? 'Congratulations, your booking for service has been successful comfortably at your home',
+          title: args['title'] as String? ?? 'Appointment confirmed',
+          subtitle: args['subtitle'] as String? ?? 'Your appointment has been confirmed successfully.',
           buttonText: args['buttonText'] as String? ?? 'Back to home',
           backRoute: args['backRoute'] as String? ?? AppRoutes.home,
         ));
@@ -79,12 +86,22 @@ class AppRouter {
       case AppRoutes.addGround:
         return _material(settings, const AddGroundPage());
       case AppRoutes.categoryGround:
-        return _material(settings, const GroundCategoryPage());
+        return _material(settings, const ComingSoonPage(title: 'Service categories unavailable'));
       case AppRoutes.addPhotos:
         final args = settings.arguments as Map<String, dynamic>?;
         return _material(settings, AddPhotosPage(initialData: args ?? const {}));
       case AppRoutes.categories:
-        return _material(settings, const CategoriesPage());
+        return _material(settings, const ComingSoonPage(title: 'Service categories unavailable'));
+      case AppRoutes.tournaments:
+        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+      case AppRoutes.tournamentDetail:
+        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+      case AppRoutes.tournamentForm:
+        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+      case AppRoutes.myTeams:
+        return _material(settings, const ComingSoonPage(title: 'Teams unavailable'));
+      case AppRoutes.teamForm:
+        return _material(settings, const ComingSoonPage(title: 'Teams unavailable'));
       case AppRoutes.comingSoon:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(settings, ComingSoonPage(title: args['title'] as String?));

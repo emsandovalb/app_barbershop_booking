@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../navigation/app_router.dart';
 import 'package:provider/provider.dart';
+
+import '../../navigation/app_router.dart';
 import '../../services/localization_service.dart';
 
 class OrderPlacedPage extends StatelessWidget {
@@ -8,10 +9,11 @@ class OrderPlacedPage extends StatelessWidget {
   final String subtitle;
   final String buttonText;
   final String backRoute;
+
   const OrderPlacedPage({
     super.key,
-    this.title = 'Booking Successful',
-    this.subtitle = 'Congratulations, your booking for service has been successful comfortably at your home',
+    this.title = 'Appointment confirmed',
+    this.subtitle = 'Your appointment has been created successfully.',
     this.buttonText = 'Back to home',
     this.backRoute = AppRoutes.home,
   });
@@ -20,29 +22,28 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('order_placed_title', fallback: 'Order placed'))),
+      appBar: AppBar(title: Text(loc.t('order_placed_title', fallback: 'Success'))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const CircleAvatar(
               radius: 40,
-              backgroundColor: Color(0xFF0e795d),
+              backgroundColor: Color(0xFFC9A56A),
               child: Icon(Icons.check, size: 42, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            Text(title.isNotEmpty ? title : loc.t('booking_success_title', fallback: 'Booking Successful'),
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+            Text(
+              title.isNotEmpty ? title : loc.t('booking_success_title', fallback: 'Appointment confirmed'),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t(
-                        'booking_success_subtitle',
-                        fallback: 'Your booking was placed successfully. Note: Cancellations must be made at least 24 hours before the start time.',
-                      ),
+                    : loc.t('booking_success_subtitle', fallback: 'Your appointment was placed successfully.'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),

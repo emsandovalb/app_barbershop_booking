@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../navigation/app_router.dart';
 import 'package:provider/provider.dart';
+
+import '../../config/app_config.dart';
+import '../../navigation/app_router.dart';
 import '../../providers/ground_form_provider.dart';
 import '../../services/localization_service.dart';
 
@@ -18,15 +20,16 @@ class _AddGroundPageState extends State<AddGroundPage> {
   final addressCtrl = TextEditingController();
   TimeOfDay openTime = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay closeTime = const TimeOfDay(hour: 22, minute: 0);
-  int durationHours = 1; // allowed booking duration per slot
+  int durationHours = 1;
 
   @override
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
+    final config = context.watch<AppConfig>();
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(loc.t('grounds_add_title', fallback: 'Add ground')),
+        title: Text(loc.t('grounds_add_title', fallback: 'Add service')),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -39,8 +42,10 @@ class _AddGroundPageState extends State<AddGroundPage> {
           const SizedBox(height: 12),
           TextField(controller: addressCtrl, decoration: InputDecoration(hintText: loc.t('form_address', fallback: 'Address'))),
           const SizedBox(height: 24),
-          Text(loc.t('grounds_operating_hours', fallback: 'Operating hours'),
-              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(
+            loc.t('grounds_operating_hours', fallback: 'Shop hours'),
+            style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -68,8 +73,10 @@ class _AddGroundPageState extends State<AddGroundPage> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(loc.t('grounds_duration_label', fallback: 'Duration per booking'),
-              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+          Text(
+            loc.t('grounds_duration_label', fallback: 'Duration per appointment'),
+            style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -93,8 +100,9 @@ class _AddGroundPageState extends State<AddGroundPage> {
         child: ElevatedButton(
           onPressed: () {
             if (nameCtrl.text.trim().isEmpty || addressCtrl.text.trim().isEmpty) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(loc.t('grounds_name_required', fallback: 'Name and Address are required'))));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(loc.t('grounds_name_required', fallback: 'Name and Address are required'))),
+              );
               return;
             }
             context.read<GroundFormProvider>().setAll({
@@ -106,12 +114,26 @@ class _AddGroundPageState extends State<AddGroundPage> {
               'close_hour': _fmt24(closeTime),
               'duration_hours': durationHours,
             });
-            Navigator.of(context).pushNamed(AppRoutes.categoryGround);
+            // Legacy sports categories stay available for compatibility with the old backend contract.
+            if (config.features.showResourceCategories) {
+              Navigator.of(context).pushNamed(AppRoutes.categoryGround);
+            } else {
+              Navigator.of(context).pushNamed(AppRoutes.addPhotos);
+            }
           },
           child: Text(loc.t('btn_continue', fallback: 'Continue')),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    emailCtrl.dispose();
+    phoneCtrl.dispose();
+    addressCtrl.dispose();
+    super.dispose();
   }
 }
 

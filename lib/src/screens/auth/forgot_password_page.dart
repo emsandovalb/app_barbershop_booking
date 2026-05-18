@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 
@@ -56,6 +57,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       }
                     },
               child: Text(loading ? loc.t('forgot_sending', fallback: 'Sending...') : loc.t('forgot_button', fallback: 'Send reset link')),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.resetPassword);
+              },
+              child: const Text('I already have a reset token'),
             ),
           ],
         ),

@@ -10,8 +10,8 @@ class OrderPlacedPage extends StatelessWidget {
   final String backRoute;
   const OrderPlacedPage({
     super.key,
-    this.title = 'Creation Successful',
-    this.subtitle = 'Congratulations, your court creation has been successful.',
+    this.title = 'Service created',
+    this.subtitle = 'Your service has been created successfully.',
     this.buttonText = 'Back to home',
     this.backRoute = AppRoutes.home,
   });
@@ -20,7 +20,7 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('grounds_created_appbar', fallback: 'Courts Created'))),
+      appBar: AppBar(title: Text(loc.t('grounds_created_appbar', fallback: 'Services created'))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -31,7 +31,7 @@ class OrderPlacedPage extends StatelessWidget {
               child: Icon(Icons.check, size: 42, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            Text(title.isNotEmpty ? title : loc.t('grounds_created_title', fallback: 'Ground Created'),
+            Text(title.isNotEmpty ? title : loc.t('grounds_created_title', fallback: 'Service created'),
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
             const SizedBox(height: 8),
             Padding(
@@ -39,7 +39,7 @@ class OrderPlacedPage extends StatelessWidget {
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t('grounds_created_subtitle', fallback: 'Your ground has been created successfully and is now listed under My grounds.'),
+                    : loc.t('grounds_created_subtitle', fallback: 'Your service has been created successfully and is now listed under My services.'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),

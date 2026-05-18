@@ -89,7 +89,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
           onPressed: loading || submitted ? null : _confirm,
           child: Text(
             submitted
-                ? loc.t('grounds_created_title', fallback: 'Ground Created')
+                ? loc.t('grounds_created_title', fallback: 'Service Created')
                 : loading
                     ? loc.t('btn_saving', fallback: 'Saving...')
                     : loc.t('btn_confirm', fallback: 'Confirm'),
@@ -108,6 +108,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('grounds_admin_required', fallback: 'Please log in as admin'))));
       return;
     }
+    // The payload still includes legacy sports field names until the backend generic contract is introduced.
     // Validate required fields from previous steps
     final data = widget.initialData.isNotEmpty ? widget.initialData : form.data;
     final name = data['name']?.toString().trim() ?? '';
@@ -131,22 +132,22 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
         'duration_hours': data['duration_hours'] ?? '1',
         if (stored.isNotEmpty) 'images': stored,
       };
-      await auth.api.createGround(payload);
+      await auth.api.createResource(payload);
       if (!mounted) return;
       setState(() => submitted = true);
       Navigator.of(context).pushNamed(AppRoutes.orderPlaced, arguments: {
-        'title': loc.t('grounds_created_title', fallback: 'Ground Created'),
+        'title': loc.t('grounds_created_title', fallback: 'Service created'),
         'subtitle': loc.t(
           'grounds_created_subtitle',
-          fallback: 'Your ground has been created successfully and is now listed under My grounds.',
+          fallback: 'Your service has been created successfully and is now listed under My services.',
         ),
-        'buttonText': loc.t('grounds_back_to_list', fallback: 'Back to My grounds'),
+        'buttonText': loc.t('grounds_back_to_list', fallback: 'Back to My services'),
         'backRoute': AppRoutes.myGrounds,
       });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('${loc.t('grounds_create_failed', fallback: 'Failed to create ground')}: $e')));
+            .showSnackBar(SnackBar(content: Text('${loc.t('grounds_create_failed', fallback: 'Failed to create service')}: $e')));
       }
     } finally {
       if (mounted) setState(() => loading = false);

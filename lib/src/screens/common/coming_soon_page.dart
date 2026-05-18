@@ -8,12 +8,11 @@ class ComingSoonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = title ?? 'Próximamente';
+    final t = title ?? 'Coming soon';
     return Scaffold(
       appBar: AppBar(title: Text(t)),
       body: Stack(
         children: [
-          // Background illustration aligned to bottom-right
           Positioned.fill(
             child: IgnorePointer(
               child: Align(
@@ -21,7 +20,7 @@ class ComingSoonPage extends StatelessWidget {
                 child: FractionallySizedBox(
                   heightFactor: 0.9,
                   child: Image.asset(
-                    'assets/images/proximamente.png',
+                    'assets/images/barbershop_coming_soon.png',
                     fit: BoxFit.fitHeight,
                     errorBuilder: (c, e, s) => const SizedBox.shrink(),
                   ),
@@ -29,8 +28,6 @@ class ComingSoonPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Content overlay: pill flush to left with only-right radius and larger size
           Positioned(
             left: 0,
             top: 12,
@@ -58,10 +55,10 @@ class ComingSoonPage extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: const [
-                    Icon(Icons.logout, color: Colors.white, size: 20),
+                    Icon(Icons.content_cut, color: Colors.white, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      'Próximamente',
+                      'Coming soon',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,

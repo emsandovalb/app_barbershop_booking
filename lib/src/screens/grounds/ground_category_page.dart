@@ -20,7 +20,7 @@ class _GroundCategoryPageState extends State<GroundCategoryPage> {
     final loc = context.watch<LocalizationService>();
     final form = context.read<GroundFormProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('grounds_category_title', fallback: 'Ground category'))),
+      appBar: AppBar(title: Text(loc.t('grounds_category_title', fallback: 'Service type'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -41,6 +41,7 @@ class _GroundCategoryPageState extends State<GroundCategoryPage> {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () {
+            // Legacy category payload remains until the generic backend alias is available.
             form.merge({'category': category});
             Navigator.of(context).pushNamed(AppRoutes.addPhotos);
           },

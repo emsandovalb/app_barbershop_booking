@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/localization_service.dart';
 import '../../providers/auth_provider.dart';
-import '../search/filter_page.dart';
+import '../../services/localization_service.dart';
 import '../../widgets/court_image.dart';
-import '../ground/ground_detail_page.dart';
 import '../../widgets/pagination_bar.dart';
+import '../ground/ground_detail_page.dart';
+import '../search/filter_page.dart';
 
 class FilteredCourtsPage extends StatefulWidget {
   final Map<String, dynamic>? initialFilters;
   final String? title;
+
   const FilteredCourtsPage({super.key, this.initialFilters, this.title});
 
   @override
@@ -20,7 +21,7 @@ class FilteredCourtsPage extends StatefulWidget {
 class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
   static const int _pageSize = 10;
   Map<String, dynamic> filters = {};
-  List<dynamic> courts = [];
+  List<dynamic> resources = [];
   bool loading = true;
   int currentPage = 1;
   int lastPage = 1;
@@ -42,11 +43,11 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
   Future<void> _load({int page = 1}) async {
     setState(() {
       loading = true;
-      if (page == 1) courts = [];
+      if (page == 1) resources = [];
     });
     try {
       final api = context.read<AuthProvider>().api;
-      final res = await api.getCourts(
+      final res = await api.getResources(
         q: filters['q'] as String?,
         minPrice: filters['minPrice'] as double?,
         maxPrice: filters['maxPrice'] as double?,
@@ -59,16 +60,16 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
       if (!mounted) return;
       setState(() {
         final data = (res['data'] as List?) ?? [];
-        courts = data;
+        resources = data;
         final meta = _extractMeta(res, page);
         currentPage = meta['current_page'] as int? ?? page;
         lastPage = meta['last_page'] as int? ?? currentPage;
         totalItems = meta['total'] as int? ?? data.length;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
-        courts = [];
+        resources = [];
         currentPage = 1;
         lastPage = 1;
         totalItems = 0;
@@ -91,7 +92,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
   @override
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
-    final title = widget.title ?? loc.t('filter_results_title', fallback: 'Filtered courts');
+    final title = widget.title ?? loc.t('filter_results_title', fallback: 'Filtered resources');
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -101,7 +102,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : courts.isEmpty
+          : resources.isEmpty
               ? RefreshIndicator(
                   onRefresh: () => _load(page: 1),
                   child: ListView(
@@ -109,7 +110,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                     padding: const EdgeInsets.all(32),
                     children: [
                       const SizedBox(height: 120),
-                      Center(child: Text(loc.t('filters_empty', fallback: 'No courts found'))),
+                      Center(child: Text(loc.t('filters_empty', fallback: 'No resources found'))),
                     ],
                   ),
                 )
@@ -120,11 +121,11 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                         onRefresh: () => _load(page: 1),
                         child: ListView.separated(
                           padding: const EdgeInsets.all(16),
-                          itemCount: courts.length,
+                          itemCount: resources.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (_, i) {
-                            final court = courts[i] as Map<String, dynamic>;
-                            return _ResultCard(court: court);
+                            final resource = resources[i] as Map<String, dynamic>;
+                            return _ResultCard(resource: resource);
                           },
                         ),
                       ),
@@ -135,7 +136,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${loc.t('filters_showing', fallback: 'Showing')} ${courts.length} ${loc.t('filters_of', fallback: 'of')} $totalItems',
+                              '${loc.t('filters_showing', fallback: 'Showing')} ${resources.length} ${loc.t('filters_of', fallback: 'of')} $totalItems',
                               style: const TextStyle(color: Colors.white70),
                             ),
                           ),
@@ -167,16 +168,16 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
 }
 
 class _ResultCard extends StatelessWidget {
-  final Map<String, dynamic> court;
-  const _ResultCard({required this.court});
+  final Map<String, dynamic> resource;
+  const _ResultCard({required this.resource});
 
   @override
   Widget build(BuildContext context) {
-    final name = court['name']?.toString() ?? 'Ground';
-    final address = court['address']?.toString() ?? '';
+    final name = resource['name']?.toString() ?? 'Resource';
+    final address = resource['address']?.toString() ?? '';
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => GroundDetailPage(court: court)),
+        MaterialPageRoute(builder: (_) => GroundDetailPage(court: resource)),
       ),
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -185,10 +186,7 @@ class _ResultCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 180,
-              child: CourtImage(images: court['images']),
-            ),
+            SizedBox(height: 180, child: CourtImage(images: resource['images'])),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -199,7 +197,7 @@ class _ResultCard extends StatelessWidget {
                   Text(address, style: const TextStyle(color: Colors.white70), maxLines: 2, overflow: TextOverflow.ellipsis),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

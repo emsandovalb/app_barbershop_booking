@@ -52,13 +52,13 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(title: Text(loc.t('admin_reservations_title', fallback: 'Reservations'))),
+        appBar: AppBar(title: Text(loc.t('admin_reservations_title', fallback: 'Appointments'))),
         body: Center(child: Text(loc.t('grounds_admin_only', fallback: 'Only administrators can access this section'))),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.t('admin_reservations_title', fallback: 'Reservations today')),
+        title: Text(loc.t('admin_reservations_title', fallback: 'Appointments today')),
         actions: [
           IconButton(onPressed: _pickDay, icon: const Icon(Icons.calendar_month)),
         ],
@@ -73,7 +73,7 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
           if (items.isEmpty) {
             return Center(
               child: Text(
-                loc.t('admin_reservations_empty', fallback: 'No reservations for this day'),
+                loc.t('admin_reservations_empty', fallback: 'No appointments for this day'),
                 style: const TextStyle(color: Colors.white70),
               ),
             );
@@ -106,7 +106,8 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(court['name']?.toString() ?? 'Ground', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          // Legacy `court` payload is retained until the backend generic alias lands.
+                          Text(court['name']?.toString() ?? 'Service', style: const TextStyle(fontWeight: FontWeight.w700)),
                           const SizedBox(height: 4),
                           Text(timeSlot, style: const TextStyle(color: Colors.white70)),
                           const SizedBox(height: 4),

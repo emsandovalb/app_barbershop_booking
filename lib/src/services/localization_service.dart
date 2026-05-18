@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'barbershop_fallbacks.dart';
 import 'app_translations.dart';
 
 /// Handles downloading and caching UI translations from the backend.
@@ -68,7 +69,7 @@ class LocalizationService extends ChangeNotifier {
   Future<void> changeLanguage(String languageCode) => load(languageCode);
 
   String t(String key, {String? fallback}) =>
-      _translations.t(key, fallback: fallback);
+      _translations.t(key, fallback: fallback ?? barbershopFallbacks[key]);
 
   String? _normalize(String? code) {
     if (code == null) return null;

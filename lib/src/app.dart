@@ -1,33 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
-import 'theme/colors.dart';
+import 'config/app_config.dart';
 import 'navigation/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'services/api.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart';
 import 'providers/ground_form_provider.dart';
 import 'services/localization_service.dart';
 import 'widgets/inactivity_listener.dart';
 import 'navigation/nav_key.dart';
 
-class PlaygroundBookingApp extends StatelessWidget {
-  const PlaygroundBookingApp({super.key});
+class BarbershopBookingApp extends StatelessWidget {
+  final AppConfig config;
+
+  const BarbershopBookingApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
+    final brand = config.brand;
     final theme = ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.primaryBackground,
-      primaryColor: AppColors.primary,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        surface: AppColors.primaryBackground,
+      scaffoldBackgroundColor: brand.backgroundColor,
+      primaryColor: brand.primaryColor,
+      colorScheme: ColorScheme.dark(
+        primary: brand.primaryColor,
+        secondary: brand.secondaryColor,
+        surface: brand.surfaceColor,
         onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: AppColors.primaryText,
+        onSecondary: brand.backgroundColor,
+        onSurface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -41,7 +44,7 @@ class PlaygroundBookingApp extends StatelessWidget {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.black30,
+        fillColor: const Color(0xFF181310),
         hintStyle: TextStyle(color: Colors.white.withOpacity(.6)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -49,32 +52,43 @@ class PlaygroundBookingApp extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary),
+          borderSide: BorderSide(color: brand.primaryColor),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: brand.primaryColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           minimumSize: const Size.fromHeight(52),
         ),
       ),
       datePickerTheme: DatePickerThemeData(
-        backgroundColor: AppColors.primaryBackground,
-        headerBackgroundColor: AppColors.primaryBackground,
+        backgroundColor: brand.backgroundColor,
+        headerBackgroundColor: brand.backgroundColor,
         headerForegroundColor: Colors.white,
-        headerHeadlineStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+        headerHeadlineStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
         dayForegroundColor: const WidgetStatePropertyAll(Colors.white),
-        dayBackgroundColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? AppColors.primary : Colors.transparent),
+        dayBackgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? brand.primaryColor
+              : Colors.transparent,
+        ),
         todayForegroundColor: const WidgetStatePropertyAll(Colors.white),
-        todayBackgroundColor: WidgetStatePropertyAll(AppColors.primary.withOpacity(.25)),
+        todayBackgroundColor: WidgetStatePropertyAll(
+          brand.primaryColor.withOpacity(.25),
+        ),
       ),
       chipTheme: const ChipThemeData(
-        backgroundColor: AppColors.black30,
+        backgroundColor: Color(0xFF1A1411),
         labelStyle: TextStyle(color: Colors.white),
-        selectedColor: AppColors.primary,
+        selectedColor: Color(0xFFC9A56A),
       ),
     );
 
@@ -83,7 +97,9 @@ class PlaygroundBookingApp extends StatelessWidget {
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final base = defaultBase.isNotEmpty
         ? defaultBase
-        : (isAndroid ? 'http://10.0.2.2:8001/api/v1' : 'http://127.0.0.1:8001/api/v1');
+        : (isAndroid
+              ? 'http://10.0.2.2:8000/api/v1'
+              : 'http://127.0.0.1:8000/api/v1');
     final translationsBase = _translationsBase(base);
     // Simple debug log to verify runtime base URL
     // ignore: avoid_print
@@ -91,28 +107,41 @@ class PlaygroundBookingApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        Provider<AppConfig>.value(value: config),
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(ApiClient(baseUrl: base)),
+          create: (_) => AuthProvider(
+            ApiClient(
+              baseUrl: base,
+              resourceEndpointValue: config.resourceEndpoint,
+              reservationEndpointValue: config.reservationEndpoint,
+              myResourcesEndpointValue: config.myResourcesEndpoint,
+            ),
+          ),
         ),
         ChangeNotifierProvider(create: (_) => GroundFormProvider()),
         ChangeNotifierProvider(
           create: (_) {
-            final service = LocalizationService(translationsBaseUrl: translationsBase);
-            service.init(systemLocale: WidgetsBinding.instance.platformDispatcher.locale);
+            final service = LocalizationService(
+              translationsBaseUrl: translationsBase,
+            );
+            service.init(
+              systemLocale: WidgetsBinding.instance.platformDispatcher.locale,
+            );
             return service;
           },
         ),
       ],
-      child: Builder(
+        child: Builder(
         builder: (context) {
           final localization = context.watch<LocalizationService>();
           final app = InactivityListener(
             timeout: const Duration(minutes: 5),
             child: MaterialApp(
-              title: 'Bamos Al Fut',
+              title: brand.appName,
               debugShowCheckedModeBanner: false,
               theme: theme,
               navigatorKey: appNavigatorKey,
+              navigatorObservers: [appRouteObserver],
               onGenerateRoute: AppRouter.onGenerateRoute,
               initialRoute: AppRoutes.splash,
               locale: localization.locale,
@@ -129,7 +158,7 @@ class PlaygroundBookingApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: theme,
               home: const Scaffold(
-                backgroundColor: Colors.black,
+                backgroundColor: Color(0xFF070707),
                 body: SizedBox.expand(),
               ),
             );

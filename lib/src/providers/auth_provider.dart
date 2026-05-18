@@ -8,6 +8,23 @@ class AuthProvider extends ChangeNotifier {
   String? token;
   Map<String, dynamic>? user;
   bool get isLoggedIn => token != null;
+  bool get isAdmin => (user?['role']?.toString() ?? '') == 'admin';
+  List<Map<String, dynamic>> get manageableTeams {
+    final teams = (user?['teams'] as List?) ?? const [];
+    final currentUserId = user?['id'];
+    return teams
+        .where((entry) {
+          final team = Map<String, dynamic>.from(entry as Map);
+          if (currentUserId != null && team['user_id']?.toString() == currentUserId.toString()) {
+            return true;
+          }
+          final pivot = (team['pivot'] as Map?) ?? const {};
+          final role = pivot['role']?.toString() ?? '';
+          return role == 'owner' || role == 'captain' || role == 'manager';
+        })
+        .map((entry) => Map<String, dynamic>.from(entry as Map))
+        .toList(growable: false);
+  }
 
   AuthProvider(this.api) {
     _restore();
@@ -19,6 +36,13 @@ class AuthProvider extends ChangeNotifier {
     final u = sp.getString('auth_user');
     if (token != null) api.token = token;
     if (u != null) user = json.decode(u) as Map<String, dynamic>;
+    if (token != null) {
+      try {
+        await refreshUser();
+      } catch (_) {
+        // Keep restored state if the network request fails.
+      }
+    }
     notifyListeners();
   }
 
@@ -32,6 +56,7 @@ class AuthProvider extends ChangeNotifier {
         final sp = await SharedPreferences.getInstance();
         await sp.setString('auth_token', token!);
         await sp.setString('auth_user', json.encode(user));
+        await refreshUser();
         notifyListeners();
         return true;
       }
@@ -50,6 +75,7 @@ class AuthProvider extends ChangeNotifier {
       final sp = await SharedPreferences.getInstance();
       await sp.setString('auth_token', token!);
       await sp.setString('auth_user', json.encode(user));
+      await refreshUser();
       notifyListeners();
       return true;
     }
