@@ -31,6 +31,7 @@ class FeatureFlags {
   final bool showTournaments;
   final bool showStaff;
   final bool reservationStaffSelection;
+  final bool adminStaffManagement;
 
   const FeatureFlags({
     this.showResources = true,
@@ -43,6 +44,7 @@ class FeatureFlags {
     this.showTournaments = false,
     this.showStaff = false,
     this.reservationStaffSelection = false,
+    this.adminStaffManagement = false,
   });
 }
 
@@ -76,6 +78,11 @@ class TerminologyMap {
   String get availability => text('availability', fallback: 'Availability');
   String get availabilitySlot =>
       text('availability_slot', fallback: 'Availability slot');
+  String get staff => text('staff', fallback: 'Barber');
+  String get staffMembers => text('staff_members', fallback: 'Barbers');
+  String get provider => text('provider', fallback: 'Barber');
+  String get providers => text('providers', fallback: 'Barbers');
+  String get manageStaff => text('manage_staff', fallback: 'Manage barbers');
 }
 
 class AppConfig {
@@ -114,6 +121,7 @@ class AppConfig {
       showTournaments: false,
       showStaff: false,
       reservationStaffSelection: false,
+      adminStaffManagement: false,
     ),
     resourceEndpoint: 'resources',
     reservationEndpoint: 'reservations',
@@ -154,6 +162,7 @@ class AppConfig {
       showTournaments: false,
       showStaff: true,
       reservationStaffSelection: true,
+      adminStaffManagement: true,
     ),
     resourceEndpoint: 'resources',
     reservationEndpoint: 'reservations',
@@ -178,6 +187,11 @@ class AppConfig {
         'my_resources': 'My services',
         'availability': 'Availability',
         'availability_slot': 'Availability slot',
+        'staff': 'Barber',
+        'staff_members': 'Barbers',
+        'provider': 'Barber',
+        'providers': 'Barbers',
+        'manage_staff': 'Manage barbers',
       },
     ),
   );

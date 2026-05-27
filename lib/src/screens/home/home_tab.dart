@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import '../../theme/colors.dart';
@@ -260,6 +261,82 @@ class _HomeTabState extends State<HomeTab> {
                             itemCount: nearby.length,
                           ),
                   ),
+                  if (config.features.showStaff &&
+                      config.features.adminStaffManagement &&
+                      context.watch<AuthProvider>().isAdmin) ...[
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          loc.t('home_staff_title', fallback: terminology.staffMembers),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                        InkWell(
+                          onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminStaff),
+                          borderRadius: BorderRadius.circular(6),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            child: Text(
+                              loc.t('home_view_all', fallback: 'View all'),
+                              style: TextStyle(color: Colors.white.withOpacity(.8)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminStaff),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.black30,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(.16),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(Icons.content_cut_outlined, color: Colors.white),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    loc.t(
+                                      'home_staff_card_title',
+                                      fallback: 'Manage barbers and service assignments',
+                                    ),
+                                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    loc.t(
+                                      'home_staff_card_body',
+                                      fallback: 'Create, edit, activate, and assign barbers from one place.',
+                                    ),
+                                    style: TextStyle(color: Colors.white.withOpacity(.74)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right, color: Colors.white70),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                 ],
               ),

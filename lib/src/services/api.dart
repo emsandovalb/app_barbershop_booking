@@ -196,6 +196,20 @@ class ApiClient {
     );
   }
 
+  Future<Map<String, dynamic>> _patchJson(
+    Uri uri,
+    Map<String, dynamic> body, {
+    bool reservation = false,
+  }) async {
+    final headers = {..._headers, 'Content-Type': 'application/json'};
+    final res = await http.patch(uri, headers: headers, body: json.encode(body));
+    _ensureOk(res);
+    return _normalizeResponse(
+      json.decode(res.body) as Map<String, dynamic>,
+      reservation: reservation,
+    );
+  }
+
   Future<Map<String, dynamic>> _deleteJson(
     Uri uri, {
     bool reservation = false,
@@ -336,6 +350,46 @@ class ApiClient {
 
   Future<Map<String, dynamic>> getStaffById(int id) async {
     return _getJson(_apiUri('staff/$id'));
+  }
+
+  Future<Map<String, dynamic>> getStaffRoles() async {
+    return _getJson(_apiUri('staff/roles'));
+  }
+
+  Future<Map<String, dynamic>> createStaff(Map<String, dynamic> data) async {
+    return _postJson(_apiUri('staff'), data, expectCreated: true);
+  }
+
+  Future<Map<String, dynamic>> updateStaff(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    return _patchJson(_apiUri('staff/$id'), data);
+  }
+
+  Future<Map<String, dynamic>> deactivateStaff(int id) async {
+    return _patchJson(_apiUri('staff/$id/deactivate'), const {});
+  }
+
+  Future<Map<String, dynamic>> assignStaffToResource(
+    int staffId,
+    int resourceId, {
+    bool? isPrimary,
+  }) async {
+    return _postJson(
+      _apiUri('staff/$staffId/services'),
+      {
+        'resource_id': resourceId,
+        if (isPrimary != null) 'is_primary': isPrimary,
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> removeStaffFromResource(
+    int staffId,
+    int resourceId,
+  ) async {
+    return _deleteJson(_apiUri('staff/$staffId/services/$resourceId'));
   }
 
   Future<Map<String, dynamic>> getResourceStaff(int id) async {

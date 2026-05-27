@@ -17,6 +17,9 @@ import '../screens/grounds/add_ground_page.dart';
 import '../screens/grounds/add_photos_page.dart';
 import '../screens/common/coming_soon_page.dart';
 import '../screens/admin/admin_reservations_page.dart';
+import '../screens/admin/admin_staff_page.dart';
+import '../screens/admin/staff_form_page.dart';
+import '../screens/admin/staff_resource_assignment_page.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -43,6 +46,9 @@ class AppRoutes {
   static const teamForm = '/teams/form';
   static const comingSoon = '/coming-soon';
   static const adminReservations = '/admin/reservations';
+  static const adminStaff = '/admin/staff';
+  static const staffForm = '/admin/staff/form';
+  static const staffResourceAssignment = '/admin/staff/resources';
 }
 
 class AppRouter {
@@ -107,6 +113,25 @@ class AppRouter {
         return _material(settings, ComingSoonPage(title: args['title'] as String?));
       case AppRoutes.adminReservations:
         return _material(settings, const AdminReservationsPage());
+      case AppRoutes.adminStaff:
+        return _material(settings, const AdminStaffPage());
+      case AppRoutes.staffForm:
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        return _material(
+          settings,
+          StaffFormPage(
+            staff: args['staff'] as Map<String, dynamic>?,
+          ),
+        );
+      case AppRoutes.staffResourceAssignment:
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        return _material(
+          settings,
+          StaffResourceAssignmentPage(
+            staffId: args['staff_id'] as int,
+            initialStaff: args['staff'] as Map<String, dynamic>?,
+          ),
+        );
       default:
         return _material(settings, const SplashScreen());
     }
