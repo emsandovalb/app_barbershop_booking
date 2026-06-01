@@ -79,9 +79,9 @@ class AppRouter {
       case AppRoutes.orderPlaced:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(settings, OrderPlacedPage(
-          title: args['title'] as String? ?? 'Appointment confirmed',
-          subtitle: args['subtitle'] as String? ?? 'Your appointment has been confirmed successfully.',
-          buttonText: args['buttonText'] as String? ?? 'Back to home',
+          title: args['title'] as String? ?? 'Cita confirmada',
+          subtitle: args['subtitle'] as String? ?? 'Tu cita fue confirmada correctamente.',
+          buttonText: args['buttonText'] as String? ?? 'Volver al inicio',
           backRoute: args['backRoute'] as String? ?? AppRoutes.home,
         ));
       case AppRoutes.bookingShow:

@@ -32,6 +32,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     final timeText = (booking['time_slot'] ?? '').toString();
     final code = (booking['booking_code'] ?? '—').toString();
     final isUpcoming = when != null ? when.isAfter(DateTime.now()) : false;
+    final price = _formatCrc(booking['total_price'] ?? resource['price_per_hour']);
+    final duration = _durationLabel(
+      booking['duration_hours'] ?? resource['duration_hours'],
+      resource['duration_minutes'],
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -128,6 +133,13 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                 _kv(loc.t('booking_detail_date', fallback: 'Date'), dateText),
                 const SizedBox(height: 10),
                 _kv(loc.t('booking_detail_time', fallback: 'Time'), timeText),
+                const SizedBox(height: 10),
+                _kv(loc.t('booking_detail_price', fallback: 'Price'), price),
+                const SizedBox(height: 10),
+                _kv(
+                  loc.t('booking_detail_duration', fallback: 'Duration'),
+                  duration,
+                ),
                 if (barber.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   _kv(
@@ -182,15 +194,15 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     final when = DateTime.tryParse((booking['date'] ?? '').toString());
     if (when == null) return;
     final hoursUntil = when.difference(DateTime.now()).inHours;
-    if (hoursUntil < 24) {
+    if (hoursUntil < 4) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             loc.t(
               'booking_cancel_limit',
-              fallback:
-                  'Cancellation not allowed within 24 hours of start time',
+                fallback:
+                  'Cancellation not allowed within 4 hours of start time',
             ),
           ),
         ),
@@ -344,4 +356,35 @@ class _AmenityChip extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatCrc(dynamic value) {
+  final number = value is num
+      ? value.toDouble()
+      : double.tryParse(value?.toString() ?? '') ?? 0;
+  return NumberFormat.currency(
+    locale: 'es_CR',
+    symbol: 'CRC ',
+    decimalDigits: 0,
+  ).format(number);
+}
+
+String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
+  final minutes = durationMinutes is num
+      ? durationMinutes.toInt()
+      : int.tryParse(durationMinutes?.toString() ?? '');
+  if (minutes != null && minutes > 0) {
+    if (minutes % 60 == 0) {
+      final hours = minutes ~/ 60;
+      return hours == 1 ? '1 hora' : '$hours horas';
+    }
+    final hours = minutes ~/ 60;
+    final remainder = minutes % 60;
+    if (hours == 0) return '$remainder min';
+    return '${hours}h ${remainder}m';
+  }
+  final hours = durationHours is num
+      ? durationHours.toInt()
+      : int.tryParse(durationHours?.toString() ?? '1') ?? 1;
+  return hours == 1 ? '1 hora' : '$hours horas';
 }

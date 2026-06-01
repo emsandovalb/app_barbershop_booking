@@ -118,7 +118,7 @@ class ProfileTab extends StatelessWidget {
         if (isAdmin)
           _ProfileTile(
             title: localization.t('profile_my_grounds', fallback: 'My services'),
-            icon: Icons.sports_soccer_outlined,
+            icon: Icons.content_cut_outlined,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoutes.myGrounds);
             },

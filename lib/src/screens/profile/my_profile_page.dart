@@ -62,7 +62,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               child: CircleAvatar(
                 radius: 42,
                 backgroundImage: imageProvider,
-                child: imageProvider == null ? const Icon(Icons.person, size: 36) : null,
+                child: imageProvider == null ? const Icon(Icons.content_cut_outlined, size: 36) : null,
               ),
             ),
           ),

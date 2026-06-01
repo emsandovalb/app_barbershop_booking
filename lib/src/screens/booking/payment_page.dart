@@ -43,15 +43,15 @@ class _PaymentPageState extends State<PaymentPage> {
         config.features.reservationStaffSelection && service['id'] != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('payment_title', fallback: 'Payment'))),
+      appBar: AppBar(title: Text(loc.t('payment_title', fallback: 'Confirmar cita'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _tile(loc.t('payment_method_card', fallback: 'Card'), 'card'),
+          _tile(loc.t('payment_method_card', fallback: 'Tarjeta'), 'card'),
           const Divider(height: 1, color: Colors.white24),
           _tile('PayPal', 'paypal'),
           const Divider(height: 1, color: Colors.white24),
-          _tile(loc.t('payment_method_cash', fallback: 'Cash'), 'cash'),
+          _tile(loc.t('payment_method_cash', fallback: 'Efectivo'), 'cash'),
           if (showBarberSelection) ...[
             const SizedBox(height: 16),
             _BarberSection(
@@ -59,16 +59,16 @@ class _PaymentPageState extends State<PaymentPage> {
               subtitle: selectedBarber == null
                   ? loc.t(
                       'booking_barber_optional',
-                      fallback: 'No barber selected',
+                      fallback: 'Sin barbero seleccionado',
                     )
                   : (selectedBarber?['name']?.toString() ??
                         loc.t(
                           'booking_barber_selected',
-                          fallback: 'Barber selected',
+                          fallback: 'Barbero seleccionado',
                         )),
               actionLabel: loc.t(
                 'booking_barber_choose',
-                fallback: 'Choose barber',
+                fallback: 'Elegir barbero',
               ),
               onTap: loading ? null : () => _pickBarber(service),
             ),
@@ -94,9 +94,9 @@ class _PaymentPageState extends State<PaymentPage> {
         child: ElevatedButton(
           onPressed: loading ? null : _confirm,
           child: Text(
-            loading
-                ? loc.t('payment_processing', fallback: 'Processing...')
-                : loc.t('btn_continue', fallback: 'Continue'),
+              loading
+                ? loc.t('payment_processing', fallback: 'Procesando...')
+                : loc.t('btn_continue', fallback: 'Continuar'),
           ),
         ),
       ),

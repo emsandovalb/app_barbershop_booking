@@ -8,10 +8,10 @@ class AppColors {
   // In dark mode design, primary text is white
   static const primaryText = Color(0xFFFFFFFF);
   static const secondaryText = Color(0xFFB9AFA5);
-  static const primaryBackground = Color(0xFF070707);
-  static const secondaryBackground = Color(0xFF171411);
+  static const primaryBackground = Color(0xFF090909);
+  static const secondaryBackground = Color(0xFF1A1512);
 
-  static const accent1 = Color(0xFF5E4631);
+  static const accent1 = Color(0xFF3D2D22);
   static const accent2 = Color(0xFFC9A56A);
   static const accent3 = Color(0xFFE8D8B8);
   static const success = Color(0xFF04b155);
@@ -20,6 +20,6 @@ class AppColors {
 
   static const black10 = Color(0xFFF3F4F6);
   static const black20 = Color(0xFFE5E7EB);
-  static const black30 = Color(0xFF1F2937);
-  static const black40 = Color(0xFF6B7280);
+  static const black30 = Color(0xFF231C18);
+  static const black40 = Color(0xFF7A736C);
 }

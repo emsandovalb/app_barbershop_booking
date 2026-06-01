@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class BrandConfig {
   final String appName;
@@ -143,13 +143,13 @@ class AppConfig {
 
   static const barbershop = AppConfig(
     brand: BrandConfig(
-      appName: 'Barbershop Booking',
-      logoAsset: 'assets/icons/barbershop_logo.png',
-      splashAsset: 'assets/splash/barbershop_splash.png',
+      appName: 'Barbería Tres Amigos',
+      logoAsset: 'assets/branding/logo_transparent.png',
+      splashAsset: 'assets/branding/logo_transparent.png',
       primaryColor: Color(0xFFC9A56A),
       secondaryColor: Color(0xFFE8D8B8),
-      backgroundColor: Color(0xFF070707),
-      surfaceColor: Color(0xFF171411),
+      backgroundColor: Color(0xFF090909),
+      surfaceColor: Color(0xFF1A1512),
     ),
     features: FeatureFlags(
       showResources: true,
@@ -169,30 +169,31 @@ class AppConfig {
     myResourcesEndpoint: 'my/resources',
     terminology: TerminologyMap(
       labels: {
-        'resource': 'Service',
-        'resources': 'Services',
-        'reservation': 'Appointment',
-        'reservations': 'Appointments',
-        'service': 'Service',
-        'services': 'Services',
-        'appointment': 'Appointment',
-        'appointments': 'Appointments',
-        'shop_manager': 'Shop manager',
-        'shop_amenities': 'Shop amenities',
-        'barber': 'Barber',
-        'barbers': 'Barbers',
-        'service_detail': 'Service detail',
-        'amenity': 'Amenity',
-        'amenities': 'Amenities',
-        'my_resources': 'My services',
-        'availability': 'Availability',
-        'availability_slot': 'Availability slot',
-        'staff': 'Barber',
-        'staff_members': 'Barbers',
-        'provider': 'Barber',
-        'providers': 'Barbers',
-        'manage_staff': 'Manage barbers',
+        'resource': 'Servicio',
+        'resources': 'Servicios',
+        'reservation': 'Cita',
+        'reservations': 'Citas',
+        'service': 'Servicio',
+        'services': 'Servicios',
+        'appointment': 'Cita',
+        'appointments': 'Citas',
+        'shop_manager': 'Encargado de barbería',
+        'shop_amenities': 'Servicios del local',
+        'barber': 'Barbero',
+        'barbers': 'Barberos',
+        'service_detail': 'Detalle del servicio',
+        'amenity': 'Beneficio',
+        'amenities': 'Beneficios',
+        'my_resources': 'Mis servicios',
+        'availability': 'Disponibilidad',
+        'availability_slot': 'Horario disponible',
+        'staff': 'Barbero',
+        'staff_members': 'Barberos',
+        'provider': 'Barbero',
+        'providers': 'Barberos',
+        'manage_staff': 'Administrar barberos',
       },
     ),
   );
 }
+

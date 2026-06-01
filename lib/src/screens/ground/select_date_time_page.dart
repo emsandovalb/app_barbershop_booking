@@ -26,7 +26,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
   void initState() {
     super.initState();
     final resourceDuration = _parseInt(widget.court['duration_hours'], 1);
-    durationHours = resourceDuration >= 2 ? 1 : resourceDuration;
+    durationHours = resourceDuration.clamp(1, 2).toInt();
     openTime = _parseTime(widget.court['open_hour']) ?? const TimeOfDay(hour: 8, minute: 0);
     closeTime = _parseTime(widget.court['close_hour']) ?? const TimeOfDay(hour: 22, minute: 0);
     _rebuildSlots();

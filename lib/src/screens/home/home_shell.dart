@@ -65,9 +65,11 @@ class _HomeShellState extends State<HomeShell> {
           }
           setState(() => index = i);
         },
-        backgroundColor: const Color(0xFF0E0C0B),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withOpacity(.6),
+        backgroundColor: config.brand.backgroundColor,
+        selectedItemColor: config.brand.primaryColor,
+        unselectedItemColor: Colors.white.withOpacity(.58),
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
         type: BottomNavigationBarType.fixed,
         items: tabs.map((t) => t.item).toList(growable: false),
       ),

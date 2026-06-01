@@ -21,6 +21,7 @@ class BarbershopBookingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final brand = config.brand;
     final theme = ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: brand.backgroundColor,
       primaryColor: brand.primaryColor,
@@ -32,37 +33,72 @@ class BarbershopBookingApp extends StatelessWidget {
         onSecondary: brand.backgroundColor,
         onSurface: Colors.white,
       ),
+      cardTheme: CardThemeData(
+        color: brand.surfaceColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0x22FFFFFF)),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      dividerTheme: DividerThemeData(
+        color: Colors.white.withOpacity(.08),
+        thickness: 1,
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
         titleTextStyle: TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           fontSize: 20,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF181310),
+        fillColor: const Color(0xFF14100E),
         hintStyle: TextStyle(color: Colors.white.withOpacity(.6)),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.transparent),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.white.withOpacity(.06)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(color: brand.primaryColor),
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: brand.primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
           ),
           minimumSize: const Size.fromHeight(52),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: .4,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: BorderSide(color: brand.secondaryColor.withOpacity(.36)),
+          backgroundColor: const Color(0xFF15110E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          minimumSize: const Size.fromHeight(48),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: brand.secondaryColor,
         ),
       ),
       datePickerTheme: DatePickerThemeData(
@@ -86,9 +122,46 @@ class BarbershopBookingApp extends StatelessWidget {
         ),
       ),
       chipTheme: const ChipThemeData(
-        backgroundColor: Color(0xFF1A1411),
+        backgroundColor: Color(0xFF231C18),
         labelStyle: TextStyle(color: Colors.white),
         selectedColor: Color(0xFFC9A56A),
+        shape: StadiumBorder(),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: Colors.white,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: brand.backgroundColor,
+        selectedItemColor: brand.primaryColor,
+        unselectedItemColor: Colors.white.withOpacity(.55),
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: brand.surfaceColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+        contentTextStyle: TextStyle(
+          color: Colors.white.withOpacity(.78),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF171311),
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        behavior: SnackBarBehavior.floating,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: brand.surfaceColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
       ),
     );
 
@@ -158,7 +231,7 @@ class BarbershopBookingApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: theme,
               home: const Scaffold(
-                backgroundColor: Color(0xFF070707),
+                backgroundColor: Color(0xFF090909),
                 body: SizedBox.expand(),
               ),
             );

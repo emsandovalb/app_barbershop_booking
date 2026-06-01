@@ -12,9 +12,9 @@ class OrderPlacedPage extends StatelessWidget {
 
   const OrderPlacedPage({
     super.key,
-    this.title = 'Appointment confirmed',
-    this.subtitle = 'Your appointment has been created successfully.',
-    this.buttonText = 'Back to home',
+    this.title = 'Cita confirmada',
+    this.subtitle = 'Tu cita se registró correctamente.',
+    this.buttonText = 'Volver al inicio',
     this.backRoute = AppRoutes.home,
   });
 
@@ -22,7 +22,7 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('order_placed_title', fallback: 'Success'))),
+      appBar: AppBar(title: Text(loc.t('order_placed_title', fallback: 'Cita confirmada'))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +43,7 @@ class OrderPlacedPage extends StatelessWidget {
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t('booking_success_subtitle', fallback: 'Your appointment was placed successfully.'),
+                    : loc.t('booking_success_subtitle', fallback: 'Tu cita quedó registrada correctamente.'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),
@@ -55,7 +55,7 @@ class OrderPlacedPage extends StatelessWidget {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () => _handleAction(context),
-          child: Text(buttonText.isNotEmpty ? buttonText : loc.t('btn_back_home', fallback: 'Back to home')),
+          child: Text(buttonText.isNotEmpty ? buttonText : loc.t('btn_back_home', fallback: 'Volver al inicio')),
         ),
       ),
     );
