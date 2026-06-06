@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import '../../theme/colors.dart';
+import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
+import 'appointment_helpers.dart';
 
 class BookingDetailPage extends StatefulWidget {
   final Map<String, dynamic> booking;
@@ -20,169 +22,222 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.watch<LocalizationService>();
     final booking = widget.booking;
-    final resource =
-        (booking['resource'] as Map<String, dynamic>?) ??
-        (booking['court'] as Map<String, dynamic>?) ??
-        {};
-    final barber = (booking['staff'] as Map<String, dynamic>?) ?? {};
-    final when = DateTime.tryParse((booking['date'] ?? '').toString());
-    final dateText = when != null ? DateFormat('EEE. dd MMM').format(when) : '';
-    final timeText = (booking['time_slot'] ?? '').toString();
-    final code = (booking['booking_code'] ?? '—').toString();
-    final isUpcoming = when != null ? when.isAfter(DateTime.now()) : false;
-    final price = _formatCrc(booking['total_price'] ?? resource['price_per_hour']);
-    final duration = _durationLabel(
-      booking['duration_hours'] ?? resource['duration_hours'],
-      resource['duration_minutes'],
-    );
+    final resource = appointmentResource(booking);
+    final status = appointmentStatusBucket(booking);
+    final date = appointmentDate(booking);
+    final isUpcoming = date != null ? date.isAfter(DateTime.now()) : false;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(
-          loc.t('booking_details_title', fallback: 'Appointment details'),
-        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('Detalle de la cita'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            height: 160,
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            resource['name']?.toString() ?? 'Service',
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 16,
-                color: Colors.white70,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  resource['address']?.toString() ?? '',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-              ),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF0C0908),
+              Color(0xFF13100F),
+              Color(0xFF090909),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            loc.t('common_facilities', fallback: 'Shop amenities'),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _AmenityChip(
-                label: loc.t('facility_parking', fallback: 'Parking'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_camera', fallback: 'Security'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_waiting', fallback: 'Waiting area'),
-              ),
-              _AmenityChip(
-                label: loc.t(
-                  'facility_changing',
-                  fallback: 'Private prep room',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF282828),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _kv(
-                  loc.t('booking_detail_ground_label', fallback: 'Service'),
-                  resource['name']?.toString() ?? 'Service',
-                ),
-                const SizedBox(height: 10),
-                _kv(
-                  loc.t('booking_detail_code', fallback: 'Appointment code'),
-                  code,
-                ),
-                const SizedBox(height: 10),
-                _kv(loc.t('booking_detail_date', fallback: 'Date'), dateText),
-                const SizedBox(height: 10),
-                _kv(loc.t('booking_detail_time', fallback: 'Time'), timeText),
-                const SizedBox(height: 10),
-                _kv(loc.t('booking_detail_price', fallback: 'Price'), price),
-                const SizedBox(height: 10),
-                _kv(
-                  loc.t('booking_detail_duration', fallback: 'Duration'),
-                  duration,
-                ),
-                if (barber.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  _kv(
-                    loc.t('booking_detail_barber', fallback: 'Barber'),
-                    barber['name']?.toString() ??
-                        loc.t(
-                          'booking_barber_unassigned',
-                          fallback: 'Unassigned',
-                        ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 110, 16, 16),
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x59000000),
+                    blurRadius: 26,
+                    offset: Offset(0, 14),
                   ),
                 ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      height: 250,
+                      width: double.infinity,
+                      child: CourtImage(
+                        images: appointmentImageSource(booking),
+                        height: 250,
+                        radius: BorderRadius.circular(28),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.transparent,
+                              const Color(0xCC090909),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: 18,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _Badge(
+                            label: appointmentStatusLabel(status),
+                            foreground: appointmentStatusForeground(status),
+                            background: appointmentStatusBackground(status),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            appointmentServiceName(booking),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.content_cut_outlined,
+                                color: AppColors.secondary,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  appointmentBarberName(booking),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _InfoCard(
+              title: 'Resumen de la cita',
+              children: [
+                _kv('Servicio', appointmentServiceName(booking)),
+                _kv('Código de cita', appointmentCode(booking)),
+                _kv('Fecha', appointmentDateLabel(booking)),
+                _kv('Hora', appointmentTimeLabel(booking)),
+                _kv('Barbero', appointmentBarberName(booking)),
+                _kv('Precio', appointmentPriceLabel(booking)),
+                _kv(
+                  'Estado',
+                  appointmentStatusLabel(status),
+                  valueHighlight: true,
+                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            _InfoCard(
+              title: 'Detalles rápidos',
+              children: [
+                _kv(
+                  'Duración',
+                  _durationLabel(
+                    booking['duration_hours'] ?? resource['duration_hours'],
+                    resource['duration_minutes'],
+                  ),
+                ),
+                _kv(
+                  'Local',
+                  resource['address']?.toString().isNotEmpty == true
+                      ? resource['address'].toString()
+                      : 'Sin dirección disponible',
+                ),
+                _kv(
+                  'Código interno',
+                  '#${booking['id']?.toString() ?? '—'}',
+                  valueHighlight: true,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: loading
-              ? null
-              : () async {
-                  if (isUpcoming) {
-                    await _cancel();
-                  } else {
-                    await _rebook();
-                  }
-                },
-          child: Text(
-            loading
-                ? (isUpcoming
-                      ? loc.t(
-                          'booking_cancel_progress',
-                          fallback: 'Cancelling...',
+        child: Row(
+          children: [
+            if (isUpcoming) ...[
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: loading ? null : _cancel,
+                  icon: loading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : loc.t(
-                          'booking_rebook_progress',
-                          fallback: 'Rebooking...',
-                        ))
-                : (isUpcoming
-                      ? loc.t('booking_cancel_cta', fallback: 'Cancel')
-                      : loc.t('booking_rebook_cta', fallback: 'Rebook')),
-          ),
+                      : const Icon(Icons.close_outlined),
+                  label: Text(
+                    loading ? 'Cancelando...' : 'Cancelar cita',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF231315),
+                    foregroundColor: const Color(0xFFFF9D9D),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: loading ? null : _rebook,
+                icon: loading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.autorenew_outlined),
+                label: Text(
+                  loading ? 'Reprogramando...' : 'Reagendar',
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: const Color(0xFF090909),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -191,77 +246,61 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   Future<void> _cancel() async {
     final loc = context.read<LocalizationService>();
     final booking = widget.booking;
-    final when = DateTime.tryParse((booking['date'] ?? '').toString());
-    if (when == null) return;
-    final hoursUntil = when.difference(DateTime.now()).inHours;
-    if (hoursUntil < 4) {
+    final auth = context.read<AuthProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    if (!canCancelAppointment(booking)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             loc.t(
               'booking_cancel_limit',
-                fallback:
-                  'Cancellation not allowed within 4 hours of start time',
+              fallback: 'No se puede cancelar dentro de las 4 horas previas al inicio.',
             ),
           ),
         ),
       );
       return;
     }
-    final ok = await showDialog<bool>(
+
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1F1F1F),
-        title: Text(
-          loc.t('booking_cancel_title', fallback: 'Cancel appointment'),
-          style: const TextStyle(color: Colors.white),
+        backgroundColor: const Color(0xFF161110),
+        title: const Text(
+          'Cancelar cita',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
-        content: Text(
-          loc.t(
-            'booking_cancel_confirm',
-            fallback: 'Are you sure you want to cancel this appointment?',
-          ),
-          style: const TextStyle(color: Colors.white70),
+        content: const Text(
+          '¿Seguro que querés cancelar esta cita?',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(loc.t('btn_no', fallback: 'No')),
+            child: const Text('No'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              loc.t('booking_cancel_confirm_action', fallback: 'Yes, cancel'),
-            ),
+            child: const Text('Sí, cancelar'),
           ),
         ],
       ),
     );
-    if (ok != true) return;
+    if (confirmed != true) return;
 
     setState(() => loading = true);
     try {
-      await context.read<AuthProvider>().api.cancelReservation(
-        booking['id'] as int,
-      );
+      await auth.api.cancelReservation(_bookingId());
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t('booking_cancelled', fallback: 'Appointment cancelled'),
-          ),
-        ),
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Cita cancelada')),
       );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${loc.t('booking_cancel_failed', fallback: 'Cancel failed')}: $e',
-          ),
-        ),
+      messenger.showSnackBar(
+        SnackBar(content: Text('No se pudo cancelar: $e')),
       );
     } finally {
       if (mounted) setState(() => loading = false);
@@ -271,45 +310,46 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   Future<void> _rebook() async {
     final loc = context.read<LocalizationService>();
     final booking = widget.booking;
-    final resource =
-        (booking['resource'] as Map<String, dynamic>?) ??
-        (booking['court'] as Map<String, dynamic>?) ??
-        {};
-    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+    final resource = appointmentResource(booking);
+    final auth = context.read<AuthProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final result = await navigator.push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => SelectDateTimePage(court: resource)),
     );
     if (result == null) return;
+
     setState(() => loading = true);
     try {
-      await context.read<AuthProvider>().api.rebookReservation(
-        booking['id'] as int,
+      await auth.api.rebookReservation(
+        _bookingId(),
         {
           'date': result['iso'] as String,
           'time_slot': result['slot'] as String,
         },
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(
+      navigator.pushReplacementNamed(
         AppRoutes.orderPlaced,
         arguments: {
           'title': loc.t(
             'booking_rebook_success_title',
-            fallback: 'Appointment rebooked',
+            fallback: 'Cita reprogramada',
           ),
           'subtitle': loc.t(
             'booking_rebook_success_subtitle',
-            fallback: 'Your appointment has been rescheduled.',
+            fallback: 'Tu cita fue reprogramada correctamente.',
           ),
-          'buttonText': loc.t('btn_back_home', fallback: 'Back to home'),
+          'buttonText': loc.t('btn_back_home', fallback: 'Volver al inicio'),
           'backRoute': AppRoutes.home,
         },
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text(
-              '${loc.t('booking_rebook_failed', fallback: 'Rebook failed')}: $e',
+              '${loc.t('booking_rebook_failed', fallback: 'No se pudo reprogramar')}: $e',
             ),
           ),
         );
@@ -319,54 +359,112 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     }
   }
 
-  Widget _kv(String k, String v) => Row(
-    children: [
-      Text(k, style: const TextStyle(color: Colors.white70)),
-      const Spacer(),
-      Text(
-        v,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    ],
-  );
-}
+  int _bookingId() {
+    final raw = widget.booking['id'];
+    if (raw is int) return raw;
+    return int.tryParse(raw?.toString() ?? '') ?? 0;
+  }
 
-class _AmenityChip extends StatelessWidget {
-  final String label;
-  const _AmenityChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF282828),
-        borderRadius: BorderRadius.circular(14),
-      ),
+  Widget _kv(
+    String key,
+    String value, {
+    bool valueHighlight = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_outline, size: 18, color: Colors.white),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: Colors.white)),
+          Expanded(
+            child: Text(
+              key,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: valueHighlight ? AppColors.primary : Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-String _formatCrc(dynamic value) {
-  final number = value is num
-      ? value.toDouble()
-      : double.tryParse(value?.toString() ?? '') ?? 0;
-  return NumberFormat.currency(
-    locale: 'es_CR',
-    symbol: 'CRC ',
-    decimalDigits: 0,
-  ).format(number);
+class _InfoCard extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _InfoCard({
+    required this.title,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF151110),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.primary.withValues(alpha: .16)),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color foreground;
+  final Color background;
+
+  const _Badge({
+    required this.label,
+    required this.foreground,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: foreground.withValues(alpha: .28)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          color: foreground,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          letterSpacing: .9,
+        ),
+      ),
+    );
+  }
 }
 
 String _durationLabel(dynamic durationHours, dynamic durationMinutes) {

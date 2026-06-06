@@ -1,11 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
-import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/localization_service.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
@@ -21,11 +19,12 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   static const int _homePageSize = 5;
+
   String q = '';
   List<dynamic> popular = [];
-  List<dynamic> nearby = [];
+  List<dynamic> premium = [];
   bool loadingPopular = false;
-  bool loadingNearby = false;
+  bool loadingPremium = false;
 
   @override
   void initState() {
@@ -34,10 +33,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _refreshAll() async {
-    await Future.wait([
-      _loadPopular(page: 1),
-      _loadNearby(page: 1),
-    ]);
+    await Future.wait([_loadPopular(page: 1), _loadPremium(page: 1)]);
   }
 
   Future<void> _loadPopular({required int page}) async {
@@ -45,7 +41,11 @@ class _HomeTabState extends State<HomeTab> {
     setState(() => loadingPopular = true);
     try {
       final api = context.read<AuthProvider>().api;
-      final res = await api.getResources(sort: 'rating', page: page, perPage: _homePageSize);
+      final res = await api.getResources(
+        sort: 'rating',
+        page: page,
+        perPage: _homePageSize,
+      );
       if (!mounted) return;
       final data = (res['data'] as List?) ?? [];
       setState(() => popular = data);
@@ -57,9 +57,9 @@ class _HomeTabState extends State<HomeTab> {
     }
   }
 
-  Future<void> _loadNearby({required int page}) async {
-    if (loadingNearby) return;
-    setState(() => loadingNearby = true);
+  Future<void> _loadPremium({required int page}) async {
+    if (loadingPremium) return;
+    setState(() => loadingPremium = true);
     try {
       final api = context.read<AuthProvider>().api;
       final res = await api.getResources(
@@ -70,12 +70,12 @@ class _HomeTabState extends State<HomeTab> {
       );
       if (!mounted) return;
       final data = (res['data'] as List?) ?? [];
-      setState(() => nearby = data);
+      setState(() => premium = data);
     } catch (_) {
       if (!mounted) return;
-      setState(() => nearby = []);
+      setState(() => premium = []);
     } finally {
-      if (mounted) setState(() => loadingNearby = false);
+      if (mounted) setState(() => loadingPremium = false);
     }
   }
 
@@ -94,10 +94,12 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
     final brand = config.brand;
-    final terminology = config.terminology;
-    final loc = context.watch<LocalizationService>();
     final auth = context.watch<AuthProvider>();
-    final name = (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Cliente').toString();
+    final name =
+        (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Admin Demo')
+            .toString();
+
+    final featuredServices = _mergeFeaturedServices(popular, premium);
 
     return RefreshIndicator(
       onRefresh: _refreshAll,
@@ -108,195 +110,424 @@ class _HomeTabState extends State<HomeTab> {
             pinned: true,
             backgroundColor: const Color(0xFF090909),
             surfaceTintColor: Colors.transparent,
+            toolbarHeight: 84,
+            titleSpacing: 16,
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${loc.t('home_hello', fallback: 'Hola')}, $name',
-                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                  'Hola, $name',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  loc.t('home_good_morning', fallback: 'Buenos días'),
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
+                const Text(
+                  'Buenos dias',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1,
+                  ),
                 ),
               ],
             ),
             actions: [
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.notifications_none),
+                icon: const Icon(Icons.notifications_none_rounded),
               ),
             ],
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _HeroCard(
                     brand: brand,
-                    loc: loc,
-                    logoAsset: brand.logoAsset ?? 'assets/branding/logo_transparent.png',
+                    logoAsset:
+                        brand.logoAsset ?? 'assets/branding/logo_transparent.png',
                   ),
                   const SizedBox(height: 14),
                   Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          onChanged: (v) => q = v,
-                          onSubmitted: (_) {
-                            final query = q.trim();
-                            if (query.isEmpty) return;
-                            _openFilteredResults(
-                              filters: {'q': query},
-                              title: loc.t('home_search_results', fallback: '${terminology.services} resultados'),
-                            );
-                          },
-                          decoration: InputDecoration(
-                            hintText: loc.t('home_search_hint', fallback: 'Buscar servicios, barberos...'),
-                            prefixIcon: const Icon(Icons.search),
+                        child: SizedBox(
+                          height: 56,
+                          child: TextField(
+                            onChanged: (value) => q = value,
+                            onSubmitted: (_) {
+                              final query = q.trim();
+                              if (query.isEmpty) return;
+                              _openFilteredResults(
+                                filters: {'q': query},
+                                title: 'Resultados de servicios',
+                              );
+                            },
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                            cursorColor: AppColors.primary,
+                            decoration: InputDecoration(
+                              hintText: 'Buscar servicios, barberos...',
+                              hintStyle: TextStyle(
+                                color: Colors.white.withValues(alpha: .50),
+                                fontSize: 14,
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 16,
+                                  right: 12,
+                                ),
+                                child: Icon(
+                                  Icons.search_rounded,
+                                  size: 22,
+                                  color: Colors.white.withValues(alpha: .88),
+                                ),
+                              ),
+                              prefixIconConstraints: const BoxConstraints(
+                                minWidth: 0,
+                                minHeight: 0,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 17,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFF171311),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withValues(alpha: .06),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withValues(alpha: .06),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                  color: brand.primaryColor.withValues(
+                                    alpha: .70,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => _openFilteredResults(
-                          title: loc.t('filter_results_title', fallback: 'Servicios filtrados'),
+                      const SizedBox(width: 10),
+                      Container(
+                        height: 56,
+                        width: 56,
+                        decoration: BoxDecoration(
+                          color: brand.primaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: brand.primaryColor.withValues(alpha: .30),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                        child: Container(
-                          height: 54,
-                          width: 54,
-                          decoration: BoxDecoration(
-                            color: brand.primaryColor,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: brand.primaryColor.withOpacity(.28),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
+                        child: IconButton(
+                          onPressed: () => _openFilteredResults(
+                            title: 'Servicios filtrados',
                           ),
-                          child: const Icon(Icons.tune_rounded, color: Colors.black),
+                          icon: const Icon(
+                            Icons.tune_rounded,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  const _InfoStrip(),
+                  const SizedBox(height: 14),
+                  const _BusinessInfoCards(),
                   const SizedBox(height: 16),
                   SectionHeader(
-                    title: loc.t('home_featured_title', fallback: 'Servicios destacados'),
-                    actionLabel: loc.t('home_view_all', fallback: 'Ver todo'),
+                    title: 'Servicios destacados',
+                    actionLabel: 'Ver todos',
                     onTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title: loc.t('home_featured_title', fallback: 'Servicios destacados'),
+                      title: 'Servicios destacados',
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 296,
-                    child: loadingPopular
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (_, i) => _ServiceCard(
-                              index: i,
-                              data: i < popular.length ? popular[i] : null,
-                            ),
-                            separatorBuilder: (_, __) => const SizedBox(width: 12),
-                            itemCount: popular.length,
-                          ),
+                  _ServiceCarousel(
+                    isLoading: loadingPopular || loadingPremium,
+                    items: featuredServices,
+                    emptyMessage: 'No hay servicios destacados disponibles.',
+                    onEmptyTap: () => _openFilteredResults(
+                      filters: const {'sort': 'rating'},
+                      title: 'Servicios destacados',
+                    ),
+                    itemBuilder: (index, data) => _ServiceCard(
+                      index: index,
+                      data: data,
+                    ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 20),
                   SectionHeader(
-                    title: loc.t('home_premium_title', fallback: 'Experiencias premium'),
-                    actionLabel: loc.t('home_view_all', fallback: 'Ver todo'),
+                    title: 'Servicios populares',
+                    actionLabel: 'Ver todos',
+                    onTap: () => _openFilteredResults(
+                      filters: const {'sort': 'rating'},
+                      title: 'Servicios populares',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _ServiceCarousel(
+                    isLoading: loadingPopular,
+                    items: popular,
+                    emptyMessage: 'No hay servicios populares disponibles.',
+                    onEmptyTap: () => _openFilteredResults(
+                      filters: const {'sort': 'rating'},
+                      title: 'Servicios populares',
+                    ),
+                    itemBuilder: (index, data) => _ServiceCard(
+                      index: index,
+                      data: data,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SectionHeader(
+                    title: 'Experiencias premium',
+                    actionLabel: 'Ver todos',
                     onTap: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
-                      title: loc.t('home_premium_title', fallback: 'Experiencias premium'),
+                      title: 'Experiencias premium',
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 296,
-                    child: loadingNearby
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (_, i) => _ServiceCard(
-                              index: i,
-                              data: i < nearby.length ? nearby[i] : null,
-                            ),
-                            separatorBuilder: (_, __) => const SizedBox(width: 12),
-                            itemCount: nearby.length,
-                          ),
+                  _ServiceCarousel(
+                    isLoading: loadingPremium,
+                    items: premium,
+                    emptyMessage: 'No hay experiencias premium disponibles.',
+                    onEmptyTap: () => _openFilteredResults(
+                      filters: const {'category': 'premium', 'sort': 'rating'},
+                      title: 'Experiencias premium',
+                    ),
+                    itemBuilder: (index, data) => _ServiceCard(
+                      index: index,
+                      data: data,
+                    ),
                   ),
-                  if (config.features.showStaff &&
-                      config.features.adminStaffManagement &&
-                      auth.isAdmin) ...[
-                    const SizedBox(height: 24),
-                    SectionHeader(
-                      title: loc.t('home_staff_title', fallback: terminology.staffMembers),
-                      actionLabel: loc.t('home_view_all', fallback: 'Ver todo'),
-                      onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminStaff),
-                    ),
-                    const SizedBox(height: 12),
-                    InkWell(
-                      onTap: () => Navigator.of(context).pushNamed(AppRoutes.adminStaff),
-                      borderRadius: BorderRadius.circular(24),
-                      child: BarbershopPremiumCard(
-                        padding: const EdgeInsets.all(16),
-                        radius: 24,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: brand.primaryColor.withOpacity(.16),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: const Icon(Icons.content_cut_outlined, color: Colors.white),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    loc.t(
-                                      'home_staff_card_title',
-                                      fallback: 'Administrar barberos y asignaciones',
-                                    ),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    loc.t(
-                                      'home_staff_card_body',
-                                      fallback: 'Creá, editá, activá y asigná barberos desde un solo lugar.',
-                                    ),
-                                    style: TextStyle(color: Colors.white.withOpacity(.74)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right, color: Colors.white70),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroCard extends StatelessWidget {
+  final BrandConfig brand;
+  final String logoAsset;
+
+  const _HeroCard({required this.brand, required this.logoAsset});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: SizedBox(
+        height: 292,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/branding/barbershop_hero_bg.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF050505).withValues(alpha: .26),
+                    const Color(0xFF050505).withValues(alpha: .46),
+                    const Color(0xFF050505).withValues(alpha: .84),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFB77A3E).withValues(alpha: .12),
+                      Colors.transparent,
+                    ],
+                    radius: .98,
+                    center: const Alignment(0, -.14),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+              child: Column(
+                children: [
+                  const Align(
+                    alignment: Alignment.topCenter,
+                    child: PremiumBadge(label: 'PREMIUM EXPERIENCE'),
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Center(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final logoSize = (constraints.maxWidth * .40).clamp(
+                            112.0,
+                            154.0,
+                          );
+                          return BarbershopLogoMark(
+                            assetPath: logoAsset,
+                            size: logoSize,
+                            glowColor: brand.primaryColor,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'BARBERIA',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.6,
+                      height: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'TRES AMIGOS',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 33,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .3,
+                      height: .95,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BusinessInfoCards extends StatelessWidget {
+  const _BusinessInfoCards();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Expanded(
+          child: _InfoCard(
+            icon: Icons.schedule_rounded,
+            title: 'Horario de atencion',
+            body:
+                'Lun 10:00 AM - 7:00 PM\nMar - Jue 10:00 AM - 12:00 PM\n2:00 PM - 8:00 PM\nVie - Sab 10:00 AM - 7:00 PM\nDomingo cerrado',
+          ),
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _InfoCard(
+            icon: Icons.location_on_rounded,
+            title: 'Ubicacion y contacto',
+            body:
+                'Puntarenas, El Roble,\nCosta Rica\n\n+506 8888-3366\n\nhola@barberiatresamigos.com',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF14100E),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: .05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .22),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: .15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 18),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+              height: 1.15,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            body,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: .72),
+              fontSize: 11.5,
+              height: 1.45,
             ),
           ),
         ],
@@ -313,11 +544,12 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final staff = (data?['staff'] as List?) ?? const [];
     final isPremium = _isPremium(data);
     final price = _formatCrc(data?['price_per_hour']);
-    final duration = _durationLabel(data?['duration_hours'], data?['duration_minutes']);
-    final description = data?['description']?.toString() ?? '';
+    final duration = _durationLabel(
+      data?['duration_hours'],
+      data?['duration_minutes'],
+    );
     final title = data?['name']?.toString() ?? 'Servicio ${index + 1}';
 
     return InkWell(
@@ -328,327 +560,117 @@ class _ServiceCard extends StatelessWidget {
           );
         }
       },
+      borderRadius: BorderRadius.circular(22),
       child: SizedBox(
-        width: 242,
-        child: BarbershopPremiumCard(
-          padding: EdgeInsets.zero,
-          radius: 24,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 160,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CourtImage(
-                        images: data?['images'],
-                        radius: const BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
-                        ),
+        width: 176,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF14100E),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white.withValues(alpha: .06)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .24),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 128,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CourtImage(
+                      images: data?['images'],
+                      radius: const BorderRadius.only(
+                        topLeft: Radius.circular(22),
+                        topRight: Radius.circular(22),
                       ),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(.72),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                      if (isPremium)
-                        const Positioned(
-                          left: 10,
-                          top: 10,
-                          child: PremiumBadge(label: 'Premium', compact: true),
-                        ),
-                      Positioned(
-                        right: 10,
-                        top: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(.45),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: Colors.white.withOpacity(.10)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.schedule_rounded, size: 13, color: Colors.white),
-                              const SizedBox(width: 4),
-                              Text(
-                                duration,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 14,
-                        right: 14,
-                        bottom: 12,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.payments_outlined, size: 16, color: AppColors.secondary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  price,
-                                  style: const TextStyle(
-                                    color: AppColors.secondary,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const Spacer(),
-                                if (isPremium)
-                                  const PremiumBadge(label: 'Premium', compact: true),
-                              ],
-                            ),
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: .45),
                           ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        description.isNotEmpty
-                            ? description
-                            : (data?['address']?.toString() ?? 'Servicio premium'),
+                    ),
+                    Positioned(
+                      left: 10,
+                      right: 10,
+                      bottom: 10,
+                      child: Text(
+                        title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(.74),
-                          fontSize: 12,
-                          height: 1.35,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          height: 1.05,
                         ),
                       ),
-                      if (staff.isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: staff.take(2).map((item) {
-                            final member = item is Map ? Map<String, dynamic>.from(item) : const <String, dynamic>{};
-                            final memberName = member['name']?.toString() ?? 'Barbero';
-                            return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1F1915),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(color: Colors.white.withOpacity(.06)),
-                              ),
-                              child: Text(
-                                memberName,
-                                style: const TextStyle(fontSize: 11, color: Colors.white),
-                              ),
-                            );
-                          }).toList(growable: false),
+                    ),
+                    if (isPremium)
+                      const Positioned(
+                        top: 8,
+                        right: 8,
+                        child: PremiumBadge(label: 'PREMIUM', compact: true),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: Colors.white70,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            duration,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _HeroCard extends StatelessWidget {
-  final BrandConfig brand;
-  final LocalizationService loc;
-  final String logoAsset;
-
-  const _HeroCard({
-    required this.brand,
-    required this.loc,
-    required this.logoAsset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 344,
-      child: BarbershopCinematicPanel(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
-        radius: 30,
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-        opacity: .56,
-        blurSigma: 2,
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: PremiumBadge(label: loc.t('home_brand_badge', fallback: 'Premium Experience')),
-            ),
-            const Spacer(),
-            Center(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final logoSize = (constraints.maxWidth * .38).clamp(108.0, 150.0);
-                  return BarbershopLogoMark(
-                    assetPath: logoAsset,
-                    size: logoSize,
-                    glowColor: brand.primaryColor,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'BARBER�A',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(.88),
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const SizedBox(height: 2),
-            const Text(
-              'TRES AMIGOS',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 33,
-                fontWeight: FontWeight.w900,
-                letterSpacing: .4,
-                height: .95,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              loc.t(
-                'home_hero_subtitle',
-                fallback: 'Cortes, barba y experiencias premium',
-              ),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(.80),
-                fontSize: 14,
-                height: 1.35,
-              ),
-            ),
-            const Spacer(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoStrip extends StatelessWidget {
-  const _InfoStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = context.watch<LocalizationService>();
-    return Row(
-      children: [
-        Expanded(
-          child: _MiniInfoCard(
-            icon: Icons.schedule_outlined,
-            title: loc.t('home_business_hours_title', fallback: 'Horario de atención'),
-            body: loc.t(
-              'home_hours_card_body',
-              fallback: 'Lun 10:00 AM - 7:00 PM · Mar 10:00 AM - 12:00 PM · 2:00 PM - 8:00 PM · Vie-Sáb 10:00 AM - 7:00 PM · Domingo cerrado',
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _MiniInfoCard(
-            icon: Icons.storefront_outlined,
-            title: loc.t('home_location_title', fallback: 'Ubicación y contacto'),
-            body: loc.t(
-              'home_contact_card_body',
-              fallback: '+506 8888-3366 · hola@barberiatresamigos.com',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MiniInfoCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String body;
-
-  const _MiniInfoCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BarbershopPremiumCard(
-      padding: const EdgeInsets.all(14),
-      radius: 22,
-      backgroundColor: const Color(0xFF15110E),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(.14),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppColors.secondary, size: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 12, height: 1.35),
-          ),
-        ],
       ),
     );
   }
@@ -658,8 +680,11 @@ String _formatCrc(dynamic value) {
   final number = value is num
       ? value.toDouble()
       : double.tryParse(value?.toString() ?? '') ?? 0;
-  return NumberFormat.currency(locale: 'es_CR', symbol: 'CRC ', decimalDigits: 0)
-      .format(number);
+  return NumberFormat.currency(
+    locale: 'en_US',
+    symbol: '₡',
+    decimalDigits: 0,
+  ).format(number);
 }
 
 String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
@@ -667,19 +692,40 @@ String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
       ? durationMinutes.toInt()
       : int.tryParse(durationMinutes?.toString() ?? '');
   if (minutes != null && minutes > 0) {
-    if (minutes % 60 == 0) {
-      final hours = minutes ~/ 60;
-      return hours == 1 ? '1 h' : '$hours h';
-    }
     final hours = minutes ~/ 60;
     final remainder = minutes % 60;
     if (hours == 0) return '$remainder min';
-    return '${hours}h ${remainder}m';
+    if (remainder == 0) return hours == 1 ? '1 h' : '$hours h';
+    return '${hours == 1 ? '1' : hours} h $remainder min';
   }
+
   final hours = durationHours is num
       ? durationHours.toInt()
       : int.tryParse(durationHours?.toString() ?? '1') ?? 1;
   return hours == 1 ? '1 h' : '$hours h';
+}
+
+List<dynamic> _mergeFeaturedServices(List<dynamic> popular, List<dynamic> premium) {
+  final seen = <String>{};
+  final merged = <dynamic>[];
+  for (final item in <dynamic>[...popular, ...premium]) {
+    final key = _serviceKey(item);
+    if (seen.add(key)) {
+      merged.add(item);
+    }
+    if (merged.length >= 5) break;
+  }
+  return merged;
+}
+
+String _serviceKey(dynamic data) {
+  if (data is Map<String, dynamic>) {
+    final id = data['id'];
+    if (id != null) return id.toString();
+    final name = data['name'];
+    if (name != null) return name.toString().toLowerCase();
+  }
+  return data?.hashCode.toString() ?? 'null';
 }
 
 bool _isPremium(dynamic data) {
@@ -688,4 +734,62 @@ bool _isPremium(dynamic data) {
   return name.contains('premium') || category == 'premium';
 }
 
+class _ServiceCarousel extends StatelessWidget {
+  final bool isLoading;
+  final List<dynamic> items;
+  final String emptyMessage;
+  final VoidCallback onEmptyTap;
+  final Widget Function(int index, dynamic data) itemBuilder;
 
+  const _ServiceCarousel({
+    required this.isLoading,
+    required this.items,
+    required this.emptyMessage,
+    required this.onEmptyTap,
+    required this.itemBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading && items.isEmpty) {
+      return const SizedBox(
+        height: 224,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (items.isEmpty) {
+      return InkWell(
+        onTap: onEmptyTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: const Color(0xFF14100E),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withValues(alpha: .05)),
+          ),
+          child: Text(
+            emptyMessage,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: .70),
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 224,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (_, index) => itemBuilder(index, items[index]),
+      ),
+    );
+  }
+}
