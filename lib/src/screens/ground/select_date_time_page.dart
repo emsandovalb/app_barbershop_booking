@@ -7,7 +7,12 @@ import '../../services/localization_service.dart';
 
 class SelectDateTimePage extends StatefulWidget {
   final Map<String, dynamic> court;
-  const SelectDateTimePage({super.key, required this.court});
+  final Map<String, dynamic>? preferredStaff;
+  const SelectDateTimePage({
+    super.key,
+    required this.court,
+    this.preferredStaff,
+  });
 
   @override
   State<SelectDateTimePage> createState() => _SelectDateTimePageState();
@@ -139,6 +144,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
               'iso': start.toIso8601String(),
               'slot': selected!.label,
               'duration_hours': durationHours,
+              if (widget.preferredStaff != null) 'staff': widget.preferredStaff,
             });
           },
           child: Text(loc.t('btn_continue', fallback: 'Continue')),

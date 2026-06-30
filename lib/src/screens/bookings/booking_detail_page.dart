@@ -24,9 +24,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   Widget build(BuildContext context) {
     final booking = widget.booking;
     final resource = appointmentResource(booking);
+    final barber = appointmentBarber(booking);
     final status = appointmentStatusBucket(booking);
     final date = appointmentDate(booking);
     final isUpcoming = date != null ? date.isAfter(DateTime.now()) : false;
+    final canOpenBarberProfile = barber['id'] != null;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -114,24 +116,43 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.content_cut_outlined,
-                                color: AppColors.secondary,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  appointmentBarberName(booking),
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.w600,
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: canOpenBarberProfile
+                                ? () {
+                                    Navigator.of(context).pushNamed(
+                                      AppRoutes.staffDetail,
+                                      arguments: {'staff': barber},
+                                    );
+                                  }
+                                : null,
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.content_cut_outlined,
+                                  color: AppColors.secondary,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    appointmentBarberName(booking),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                if (canOpenBarberProfile) ...[
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Colors.white54,
+                                    size: 18,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ],
                       ),

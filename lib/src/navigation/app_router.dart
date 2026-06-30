@@ -8,6 +8,7 @@ import '../screens/auth/reset_password_page.dart';
 import '../screens/auth/change_password_page.dart';
 import '../screens/auth/signup_page.dart';
 import '../screens/home/home_shell.dart';
+import '../screens/business/business_profile_page.dart';
 import '../screens/bookings/booking_detail_page.dart';
 import '../screens/bookings/ground_booking_detail_page.dart';
 import '../screens/booking/payment_page.dart';
@@ -20,6 +21,7 @@ import '../screens/admin/admin_reservations_page.dart';
 import '../screens/admin/admin_staff_page.dart';
 import '../screens/admin/staff_form_page.dart';
 import '../screens/admin/staff_resource_assignment_page.dart';
+import '../screens/staff/staff_detail_page.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -30,6 +32,7 @@ class AppRoutes {
   static const changePassword = '/auth/password-change';
   static const signup = '/signup';
   static const home = '/home';
+  static const businessProfile = '/business/profile';
   static const bookingDetail = '/booking/detail';
   static const payment = '/booking/payment';
   static const orderPlaced = '/booking/order-placed';
@@ -49,6 +52,7 @@ class AppRoutes {
   static const adminStaff = '/admin/staff';
   static const staffForm = '/admin/staff/form';
   static const staffResourceAssignment = '/admin/staff/resources';
+  static const staffDetail = '/staff/detail';
 }
 
 class AppRouter {
@@ -70,6 +74,8 @@ class AppRouter {
         return _material(settings, const SignUpPage());
       case AppRoutes.home:
         return _material(settings, const HomeShell());
+      case AppRoutes.businessProfile:
+        return _material(settings, const BusinessProfilePage());
       case AppRoutes.bookingDetail:
         final args = settings.arguments as Map<String, dynamic>;
         return _material(settings, GroundBookingDetailPage(args: args));
@@ -130,6 +136,17 @@ class AppRouter {
           StaffResourceAssignmentPage(
             staffId: args['staff_id'] as int,
             initialStaff: args['staff'] as Map<String, dynamic>?,
+          ),
+        );
+      case AppRoutes.staffDetail:
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        final staff = args['staff'];
+        return _material(
+          settings,
+          StaffDetailPage(
+            staff: staff is Map
+                ? Map<String, dynamic>.from(staff)
+                : const <String, dynamic>{},
           ),
         );
       default:

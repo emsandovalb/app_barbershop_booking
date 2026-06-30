@@ -6,12 +6,18 @@ import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/app_config.dart';
 import '../../services/localization_service.dart';
+import '../../theme/colors.dart';
 import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 
 class GroundDetailPage extends StatelessWidget {
   final Map<String, dynamic> court;
-  const GroundDetailPage({super.key, required this.court});
+  final Map<String, dynamic>? preferredStaff;
+  const GroundDetailPage({
+    super.key,
+    required this.court,
+    this.preferredStaff,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +30,7 @@ class GroundDetailPage extends StatelessWidget {
     final duration = _durationLabel(resource['duration_hours'], resource['duration_minutes']);
     final description = resource['description']?.toString() ?? '';
     final businessHours = resource['business_hours_note']?.toString() ?? '';
+    final selectedStaffName = preferredStaff?['name']?.toString() ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -81,6 +88,29 @@ class GroundDetailPage extends StatelessWidget {
                 : loc.t('ground_description_placeholder', fallback: 'Reserve this service by choosing an available time slot.'),
             style: TextStyle(color: Colors.white.withOpacity(.85)),
           ),
+          if (selectedStaffName.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1D1712),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.primary.withOpacity(.18)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.person_outline, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Barbero seleccionado: $selectedStaffName',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(
             children: [
@@ -209,7 +239,12 @@ class GroundDetailPage extends StatelessWidget {
               return;
             }
             final result = await Navigator.of(context).push<Map<String, dynamic>>(
-              MaterialPageRoute(builder: (_) => SelectDateTimePage(court: resource)),
+              MaterialPageRoute(
+                builder: (_) => SelectDateTimePage(
+                  court: resource,
+                  preferredStaff: preferredStaff,
+                ),
+              ),
             );
             if (result == null) return;
             if (!context.mounted) return;
@@ -220,6 +255,7 @@ class GroundDetailPage extends StatelessWidget {
               'slot': result['slot'],
               'duration': result['duration_hours'],
               'duration_hours': result['duration_hours'],
+              if (result['staff'] != null) 'staff': result['staff'],
             });
           },
           child: Text(loc.t('ground_book_now', fallback: 'Reservar cita')),

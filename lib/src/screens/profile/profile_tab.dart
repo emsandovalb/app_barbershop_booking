@@ -100,6 +100,11 @@ class ProfileTab extends StatelessWidget {
           onTap: () => _coming(context, localization.t('profile_about', fallback: 'About us')),
         ),
         _ProfileTile(
+          title: 'Perfil de Barbería Tres Amigos',
+          icon: Icons.storefront_outlined,
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.businessProfile),
+        ),
+        _ProfileTile(
           title: localization.t('profile_rate_us', fallback: 'Rate us'),
           icon: Icons.star_outline,
           onTap: () => _coming(context, localization.t('profile_rate_us', fallback: 'Rate us')),

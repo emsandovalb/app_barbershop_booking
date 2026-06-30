@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
@@ -149,10 +150,16 @@ class _HomeTabState extends State<HomeTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HeroCard(
-                    brand: brand,
-                    logoAsset:
-                        brand.logoAsset ?? 'assets/branding/logo_transparent.png',
+                  InkWell(
+                    onTap: () => Navigator.of(context).pushNamed(
+                      AppRoutes.businessProfile,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    child: _HeroCard(
+                      brand: brand,
+                      logoAsset:
+                          brand.logoAsset ?? 'assets/branding/logo_transparent.png',
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -255,6 +262,12 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   const SizedBox(height: 14),
                   const _BusinessInfoCards(),
+                  const SizedBox(height: 16),
+                  _BusinessProfileTeaser(
+                    onTap: () => Navigator.of(context).pushNamed(
+                      AppRoutes.businessProfile,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   SectionHeader(
                     title: 'Servicios destacados',
@@ -468,6 +481,84 @@ class _BusinessInfoCards extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _BusinessProfileTeaser extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _BusinessProfileTeaser({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF17110D),
+              const Color(0xFF120E0B).withValues(alpha: .96),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: AppColors.primary.withValues(alpha: .20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .24),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: .14),
+              ),
+              child: const Icon(
+                Icons.storefront_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Conocé la barbería',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Entrá al perfil premium de Barbería Tres Amigos.',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          ],
+        ),
+      ),
     );
   }
 }

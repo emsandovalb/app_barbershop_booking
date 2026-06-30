@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 
@@ -187,6 +188,15 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                                     style: const TextStyle(
                                       color: Colors.white70,
                                     ),
+                                  ),
+                                  trailing: TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                        AppRoutes.staffDetail,
+                                        arguments: {'staff': barber},
+                                      );
+                                    },
+                                    child: const Text('Ver perfil'),
                                   ),
                                   onTap: () =>
                                       Navigator.of(context).pop(barber),

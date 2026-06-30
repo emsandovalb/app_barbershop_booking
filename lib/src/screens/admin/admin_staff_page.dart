@@ -202,6 +202,16 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                         runSpacing: 8,
                         children: [
                           OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pushNamed(
+                                AppRoutes.staffDetail,
+                                arguments: {'staff': staff},
+                              );
+                            },
+                            icon: const Icon(Icons.person_outline),
+                            label: const Text('Ver perfil'),
+                          ),
+                          OutlinedButton.icon(
                             onPressed: () async {
                               final saved = await Navigator.of(context).pushNamed(
                                 AppRoutes.staffForm,
