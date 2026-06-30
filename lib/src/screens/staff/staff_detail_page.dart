@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
+import '../reviews/reviews_page.dart';
 import '../ground/ground_detail_page.dart';
 
 class StaffDetailPage extends StatefulWidget {
@@ -106,6 +107,16 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                   isActive: isActive,
                 ),
                 const SizedBox(height: 16),
+                _ReviewsPreviewCard(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ReviewsPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
                 _SectionCard(
                   title: 'Sobre mí',
                   child: Text(
@@ -787,6 +798,75 @@ class _SectionCard extends StatelessWidget {
           const SizedBox(height: 12),
           child,
         ],
+      ),
+    );
+  }
+}
+
+class _ReviewsPreviewCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReviewsPreviewCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xFF14100E),
+          border: Border.all(color: AppColors.primary.withValues(alpha: .16)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: .12),
+              ),
+              child: const Icon(
+                Icons.star_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Opiniones de clientes',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '4.9 basado en 128 opiniones',
+                    style: TextStyle(color: Colors.white70, height: 1.3),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Ver opiniones',
+                    style: TextStyle(
+                      color: AppColors.secondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          ],
+        ),
       ),
     );
   }

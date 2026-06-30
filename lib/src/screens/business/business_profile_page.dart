@@ -8,6 +8,7 @@ import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
+import '../reviews/reviews_page.dart';
 
 class BusinessProfilePage extends StatefulWidget {
   const BusinessProfilePage({super.key});
@@ -170,6 +171,16 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SectionHeader(title: 'Opiniones'),
                       const SizedBox(height: 12),
                       const _ReviewsList(),
+                      const SizedBox(height: 12),
+                      _ReviewsCta(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ReviewsPage(),
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 20),
                       BarbershopPremiumCard(
                         padding: const EdgeInsets.all(18),
@@ -1112,6 +1123,67 @@ class _ReviewsList extends StatelessWidget {
             ),
           )
           .toList(growable: false),
+    );
+  }
+}
+
+class _ReviewsCta extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReviewsCta({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF14100E),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: .12),
+              ),
+              child: const Icon(
+                Icons.rate_review_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ver todas las opiniones',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Abrí la experiencia premium de reseñas y testimonios.',
+                    style: TextStyle(color: Colors.white70, height: 1.3),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          ],
+        ),
+      ),
     );
   }
 }

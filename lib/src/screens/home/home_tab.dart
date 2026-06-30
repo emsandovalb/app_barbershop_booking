@@ -11,6 +11,7 @@ import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../grounds/filtered_courts_page.dart';
+import '../reviews/reviews_page.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -267,6 +268,14 @@ class _HomeTabState extends State<HomeTab> {
                     onTap: () => Navigator.of(
                       context,
                     ).pushNamed(AppRoutes.businessProfile),
+                  ),
+                  const SizedBox(height: 10),
+                  _ReviewsPromoCard(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ReviewsPage(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Align(
@@ -564,6 +573,89 @@ class _BusinessProfileTeaser extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewsPromoCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ReviewsPromoCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF18120F),
+              const Color(0xFF120E0B).withValues(alpha: .96),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .24),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: .14),
+              ),
+              child: const Icon(
+                Icons.favorite_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Clientes felices',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '4.9 basado en 128 opiniones',
+                    style: TextStyle(color: Colors.white70, height: 1.35),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Ver opiniones',
+                    style: TextStyle(
+                      color: AppColors.secondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
             const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
           ],
         ),
