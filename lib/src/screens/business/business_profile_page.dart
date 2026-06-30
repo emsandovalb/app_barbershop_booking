@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
+import '../gallery/gallery_page.dart';
 
 class BusinessProfilePage extends StatefulWidget {
   const BusinessProfilePage({super.key});
@@ -67,9 +68,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   }
 
   void _showPlaceholderAction(String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label aún no está configurado.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$label aún no está configurado.')));
   }
 
   void _openBookingFlow() {
@@ -96,10 +97,18 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
             child: FutureBuilder<_BusinessProfileData>(
               future: _future,
               builder: (context, snapshot) {
-                final data = snapshot.data ?? const _BusinessProfileData(staff: [], resources: []);
-                final staff = data.staff.isNotEmpty ? data.staff : _fallbackStaff;
-                final resources = data.resources.isNotEmpty ? data.resources : _fallbackResources;
-                final isLoading = snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData;
+                final data =
+                    snapshot.data ??
+                    const _BusinessProfileData(staff: [], resources: []);
+                final staff = data.staff.isNotEmpty
+                    ? data.staff
+                    : _fallbackStaff;
+                final resources = data.resources.isNotEmpty
+                    ? data.resources
+                    : _fallbackResources;
+                final isLoading =
+                    snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData;
 
                 return ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -108,7 +117,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                     if (isLoading) ...[
                       const SizedBox(height: 220),
                       const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
                       ),
                       const SizedBox(height: 220),
                     ] else ...[
@@ -144,7 +155,15 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 12),
                       _ServiceGrid(resources: resources),
                       const SizedBox(height: 20),
-                      const SectionHeader(title: 'Galería'),
+                      SectionHeader(
+                        title: 'Galería',
+                        actionLabel: 'Ver galería',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const GalleryPage(),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       const _GalleryGrid(),
                       const SizedBox(height: 20),
@@ -186,7 +205,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: const Color(0xFF090909),
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(18),
                                   ),
@@ -242,10 +263,7 @@ class _HeroSection extends StatelessWidget {
   final int staffCount;
   final int serviceCount;
 
-  const _HeroSection({
-    required this.staffCount,
-    required this.serviceCount,
-  });
+  const _HeroSection({required this.staffCount, required this.serviceCount});
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +326,10 @@ class _HeroSection extends StatelessWidget {
                     children: const [
                       _HeroInfoPill(icon: Icons.star_rounded, text: '4.9'),
                       _HeroInfoPill(icon: Icons.cut_rounded, text: 'Premium'),
-                      _HeroInfoPill(icon: Icons.location_on_rounded, text: 'El Roble'),
+                      _HeroInfoPill(
+                        icon: Icons.location_on_rounded,
+                        text: 'El Roble',
+                      ),
                     ],
                   ),
                 ],
@@ -537,7 +558,9 @@ class _ActionButton extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(color: AppColors.primary.withValues(alpha: .30)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: .30),
+                ),
               ),
               child: Icon(icon, color: AppColors.primary, size: 22),
             ),
@@ -577,14 +600,14 @@ class _BusinessInfoSection extends StatelessWidget {
         _BusinessInfoCard(
           icon: Icons.event_busy_rounded,
           title: 'Política de cancelación',
-          body:
-              'Podés cancelar o reprogramar hasta 4 horas antes de tu cita.',
+          body: 'Podés cancelar o reprogramar hasta 4 horas antes de tu cita.',
         ),
         SizedBox(height: 12),
         _BusinessInfoCard(
           icon: Icons.location_on_rounded,
           title: 'Ubicación y contacto',
-          body: 'Puntarenas, El Roble, Costa Rica\n\n+506 8888-3366\nhola@barberiatresamigos.com',
+          body:
+              'Puntarenas, El Roble, Costa Rica\n\n+506 8888-3366\nhola@barberiatresamigos.com',
         ),
       ],
     );
@@ -677,20 +700,34 @@ class _StaffCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final api = context.read<AuthProvider>().api;
-    final rawAvatar = _stringValue(
-      staff,
-      ['avatar_url', 'avatar', 'photo', 'image', 'profile_image'],
-    );
+    final rawAvatar = _stringValue(staff, [
+      'avatar_url',
+      'avatar',
+      'photo',
+      'image',
+      'profile_image',
+    ]);
     final avatar = api.resolveAssetUrl(rawAvatar);
-    final name = _stringValue(staff, ['name', 'full_name'], fallback: 'Barbero premium');
-    final title = _stringValue(
-      staff,
-      ['title', 'role_name', 'specialty', 'headline'],
-      fallback: 'Estilista senior',
-    );
-    final rating = _doubleValue(staff, ['rating', 'average_rating'], fallback: 4.9);
+    final name = _stringValue(staff, [
+      'name',
+      'full_name',
+    ], fallback: 'Barbero premium');
+    final title = _stringValue(staff, [
+      'title',
+      'role_name',
+      'specialty',
+      'headline',
+    ], fallback: 'Estilista senior');
+    final rating = _doubleValue(staff, [
+      'rating',
+      'average_rating',
+    ], fallback: 4.9);
     final specialties = _splitSpecialties(
-      _stringValue(staff, ['specialties', 'bio', 'description'], fallback: 'Fade · Barba · Corte clásico'),
+      _stringValue(staff, [
+        'specialties',
+        'bio',
+        'description',
+      ], fallback: 'Fade · Barba · Corte clásico'),
     );
 
     return SizedBox(
@@ -745,7 +782,11 @@ class _StaffCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.star_rounded, color: AppColors.primary, size: 16),
+                const Icon(
+                  Icons.star_rounded,
+                  color: AppColors.primary,
+                  size: 16,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   rating.toStringAsFixed(1),
@@ -770,9 +811,7 @@ class _StaffCard extends StatelessWidget {
               runSpacing: 6,
               children: specialties
                   .take(2)
-                  .map(
-                    (item) => _MiniChip(label: item),
-                  )
+                  .map((item) => _MiniChip(label: item))
                   .toList(growable: false),
             ),
           ],
@@ -840,9 +879,15 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = _stringValue(resource, ['name', 'title'], fallback: 'Servicio premium');
+    final name = _stringValue(resource, [
+      'name',
+      'title',
+    ], fallback: 'Servicio premium');
     final price = _formatCrc(resource['price_per_hour'] ?? resource['price']);
-    final duration = _durationLabel(resource['duration_hours'], resource['duration_minutes']);
+    final duration = _durationLabel(
+      resource['duration_hours'],
+      resource['duration_minutes'],
+    );
     final category = _stringValue(resource, ['category'], fallback: 'premium');
 
     return BarbershopPremiumCard(
@@ -902,7 +947,11 @@ class _ServiceCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.schedule_rounded, color: Colors.white70, size: 12),
+                    const Icon(
+                      Icons.schedule_rounded,
+                      color: Colors.white70,
+                      size: 12,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -1094,10 +1143,7 @@ class _BusinessProfileData {
   final List<Map<String, dynamic>> staff;
   final List<Map<String, dynamic>> resources;
 
-  const _BusinessProfileData({
-    required this.staff,
-    required this.resources,
-  });
+  const _BusinessProfileData({required this.staff, required this.resources});
 }
 
 class _GalleryTileData {
@@ -1170,10 +1216,22 @@ const List<Map<String, dynamic>> _fallbackResources = [
 ];
 
 const List<_GalleryTileData> _galleryTiles = [
-  _GalleryTileData('assets/branding/barbershop_hero_bg.png', 'Ambiente premium'),
-  _GalleryTileData('assets/branding/logo_transparent.png', 'Identidad Tres Amigos'),
-  _GalleryTileData('assets/branding/barber_placeholder.png', 'Barberos expertos'),
-  _GalleryTileData('assets/branding/service_placeholder_premium.png', 'Detalles de precisión'),
+  _GalleryTileData(
+    'assets/branding/barbershop_hero_bg.png',
+    'Ambiente premium',
+  ),
+  _GalleryTileData(
+    'assets/branding/logo_transparent.png',
+    'Identidad Tres Amigos',
+  ),
+  _GalleryTileData(
+    'assets/branding/barber_placeholder.png',
+    'Barberos expertos',
+  ),
+  _GalleryTileData(
+    'assets/branding/service_placeholder_premium.png',
+    'Detalles de precisión',
+  ),
 ];
 
 const List<_ReviewData> _reviews = [

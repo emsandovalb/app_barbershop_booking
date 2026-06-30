@@ -10,11 +10,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_barbershop_booking/src/app.dart';
 import 'package:app_barbershop_booking/src/config/app_config.dart';
+import 'package:app_barbershop_booking/src/screens/gallery/gallery_page.dart';
 
 void main() {
   testWidgets('App bootstrap smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const BarbershopBookingApp(config: AppConfig.barbershop));
+    await tester.pumpWidget(
+      const BarbershopBookingApp(config: AppConfig.barbershop),
+    );
 
     expect(find.byType(MaterialApp), findsOneWidget);
+  });
+
+  testWidgets('Gallery page renders hero content', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: GalleryPage()));
+
+    expect(find.text('GALERÍA'), findsOneWidget);
+    expect(find.text('Conocé nuestro trabajo'), findsOneWidget);
+    expect(find.text('Featured Work'), findsOneWidget);
   });
 }

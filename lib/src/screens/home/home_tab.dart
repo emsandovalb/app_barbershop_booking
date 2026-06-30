@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
+import '../gallery/gallery_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../grounds/filtered_courts_page.dart';
 
@@ -83,10 +84,8 @@ class _HomeTabState extends State<HomeTab> {
   void _openFilteredResults({Map<String, dynamic>? filters, String? title}) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => FilteredCourtsPage(
-          initialFilters: filters,
-          title: title,
-        ),
+        builder: (_) =>
+            FilteredCourtsPage(initialFilters: filters, title: title),
       ),
     );
   }
@@ -151,14 +150,15 @@ class _HomeTabState extends State<HomeTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   InkWell(
-                    onTap: () => Navigator.of(context).pushNamed(
-                      AppRoutes.businessProfile,
-                    ),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.businessProfile),
                     borderRadius: BorderRadius.circular(30),
                     child: _HeroCard(
                       brand: brand,
                       logoAsset:
-                          brand.logoAsset ?? 'assets/branding/logo_transparent.png',
+                          brand.logoAsset ??
+                          'assets/branding/logo_transparent.png',
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -264,8 +264,26 @@ class _HomeTabState extends State<HomeTab> {
                   const _BusinessInfoCards(),
                   const SizedBox(height: 16),
                   _BusinessProfileTeaser(
-                    onTap: () => Navigator.of(context).pushNamed(
-                      AppRoutes.businessProfile,
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.businessProfile),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const GalleryPage()),
+                      ),
+                      icon: const Icon(Icons.photo_library_outlined, size: 18),
+                      label: const Text('Ver galería'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.secondary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -286,10 +304,8 @@ class _HomeTabState extends State<HomeTab> {
                       filters: const {'sort': 'rating'},
                       title: 'Servicios destacados',
                     ),
-                    itemBuilder: (index, data) => _ServiceCard(
-                      index: index,
-                      data: data,
-                    ),
+                    itemBuilder: (index, data) =>
+                        _ServiceCard(index: index, data: data),
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
@@ -309,10 +325,8 @@ class _HomeTabState extends State<HomeTab> {
                       filters: const {'sort': 'rating'},
                       title: 'Servicios populares',
                     ),
-                    itemBuilder: (index, data) => _ServiceCard(
-                      index: index,
-                      data: data,
-                    ),
+                    itemBuilder: (index, data) =>
+                        _ServiceCard(index: index, data: data),
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
@@ -332,10 +346,8 @@ class _HomeTabState extends State<HomeTab> {
                       filters: const {'category': 'premium', 'sort': 'rating'},
                       title: 'Experiencias premium',
                     ),
-                    itemBuilder: (index, data) => _ServiceCard(
-                      index: index,
-                      data: data,
-                    ),
+                    itemBuilder: (index, data) =>
+                        _ServiceCard(index: index, data: data),
                   ),
                 ],
               ),
@@ -546,10 +558,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     'Entrá al perfil premium de Barbería Tres Amigos.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      height: 1.35,
-                    ),
+                    style: TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],
               ),
@@ -796,7 +805,10 @@ String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
   return hours == 1 ? '1 h' : '$hours h';
 }
 
-List<dynamic> _mergeFeaturedServices(List<dynamic> popular, List<dynamic> premium) {
+List<dynamic> _mergeFeaturedServices(
+  List<dynamic> popular,
+  List<dynamic> premium,
+) {
   final seen = <String>{};
   final merged = <dynamic>[];
   for (final item in <dynamic>[...popular, ...premium]) {
