@@ -48,7 +48,10 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
         ),
         body: Center(
           child: Text(
-            loc.t('admin_only', fallback: 'Only administrators can access this section'),
+            loc.t(
+              'admin_only',
+              fallback: 'Only administrators can access this section',
+            ),
           ),
         ),
       );
@@ -59,14 +62,18 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
         title: Text(loc.t('manage_staff', fallback: 'Manage barbers')),
         actions: [
           IconButton(
-            onPressed: _refresh,
-            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+            icon: const Icon(Icons.dashboard_outlined),
           ),
+          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final saved = await Navigator.of(context).pushNamed(AppRoutes.staffForm);
+          final saved = await Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.staffForm);
           if (saved == true) {
             await _refresh();
           }
@@ -77,7 +84,9 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: _future,
         builder: (context, snap) {
-          if (snap.connectionState != ConnectionState.done && !snap.hasData && !snap.hasError) {
+          if (snap.connectionState != ConnectionState.done &&
+              !snap.hasData &&
+              !snap.hasError) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snap.hasError) {
@@ -131,12 +140,19 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                         children: [
                           CircleAvatar(
                             radius: 24,
-                            backgroundColor: config.brand.primaryColor.withOpacity(.18),
-                            backgroundImage: (staff['avatar_url']?.toString() ?? '').isNotEmpty
+                            backgroundColor: config.brand.primaryColor
+                                .withOpacity(.18),
+                            backgroundImage:
+                                (staff['avatar_url']?.toString() ?? '')
+                                    .isNotEmpty
                                 ? NetworkImage(staff['avatar_url'].toString())
                                 : null,
-                            child: (staff['avatar_url']?.toString() ?? '').isEmpty
-                                ? const Icon(Icons.content_cut_outlined, color: Colors.white)
+                            child:
+                                (staff['avatar_url']?.toString() ?? '').isEmpty
+                                ? const Icon(
+                                    Icons.content_cut_outlined,
+                                    color: Colors.white,
+                                  )
                                 : null,
                           ),
                           const SizedBox(width: 12),
@@ -145,7 +161,8 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  staff['name']?.toString() ?? loc.t('staff_title', fallback: 'Barber'),
+                                  staff['name']?.toString() ??
+                                      loc.t('staff_title', fallback: 'Barber'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
@@ -155,12 +172,16 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   role['name']?.toString() ?? '',
-                                  style: TextStyle(color: Colors.white.withOpacity(.7)),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(.7),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '${services.length} ${loc.t('staff_services', fallback: 'services')}',
-                                  style: TextStyle(color: Colors.white.withOpacity(.7)),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(.7),
+                                  ),
                                 ),
                               ],
                             ),
@@ -169,14 +190,17 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                             value: isActive,
                             onChanged: (value) async {
                               if (value) {
-                                await context.read<AuthProvider>().api.updateStaff(
-                                  staff['id'] as int,
-                                  {'is_active': true},
-                                );
+                                await context
+                                    .read<AuthProvider>()
+                                    .api
+                                    .updateStaff(staff['id'] as int, {
+                                      'is_active': true,
+                                    });
                               } else {
-                                await context.read<AuthProvider>().api.deactivateStaff(
-                                  staff['id'] as int,
-                                );
+                                await context
+                                    .read<AuthProvider>()
+                                    .api
+                                    .deactivateStaff(staff['id'] as int);
                               }
                               await _refresh();
                             },
@@ -187,13 +211,17 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                       if ((staff['email']?.toString() ?? '').isNotEmpty)
                         Text(
                           staff['email'].toString(),
-                          style: TextStyle(color: Colors.white.withOpacity(.78)),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.78),
+                          ),
                         ),
                       if ((staff['phone']?.toString() ?? '').isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
                           staff['phone'].toString(),
-                          style: TextStyle(color: Colors.white.withOpacity(.78)),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.78),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 12),
@@ -213,10 +241,11 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                           ),
                           OutlinedButton.icon(
                             onPressed: () async {
-                              final saved = await Navigator.of(context).pushNamed(
-                                AppRoutes.staffForm,
-                                arguments: {'staff': staff},
-                              );
+                              final saved = await Navigator.of(context)
+                                  .pushNamed(
+                                    AppRoutes.staffForm,
+                                    arguments: {'staff': staff},
+                                  );
                               if (saved == true) {
                                 await _refresh();
                               }
@@ -226,13 +255,14 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                           ),
                           OutlinedButton.icon(
                             onPressed: () async {
-                              final saved = await Navigator.of(context).pushNamed(
-                                AppRoutes.staffResourceAssignment,
-                                arguments: {
-                                  'staff_id': staff['id'],
-                                  'staff': staff,
-                                },
-                              );
+                              final saved = await Navigator.of(context)
+                                  .pushNamed(
+                                    AppRoutes.staffResourceAssignment,
+                                    arguments: {
+                                      'staff_id': staff['id'],
+                                      'staff': staff,
+                                    },
+                                  );
                               if (saved == true) {
                                 await _refresh();
                               }

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../navigation/app_router.dart';
 import '../../services/localization_service.dart';
 import '../../widgets/court_image.dart';
 
@@ -52,15 +53,36 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(title: Text(loc.t('admin_reservations_title', fallback: 'Appointments'))),
-        body: Center(child: Text(loc.t('grounds_admin_only', fallback: 'Only administrators can access this section'))),
+        appBar: AppBar(
+          title: Text(
+            loc.t('admin_reservations_title', fallback: 'Appointments'),
+          ),
+        ),
+        body: Center(
+          child: Text(
+            loc.t(
+              'grounds_admin_only',
+              fallback: 'Only administrators can access this section',
+            ),
+          ),
+        ),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.t('admin_reservations_title', fallback: 'Appointments today')),
+        title: Text(
+          loc.t('admin_reservations_title', fallback: 'Appointments today'),
+        ),
         actions: [
-          IconButton(onPressed: _pickDay, icon: const Icon(Icons.calendar_month)),
+          IconButton(
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+            icon: const Icon(Icons.dashboard_outlined),
+          ),
+          IconButton(
+            onPressed: _pickDay,
+            icon: const Icon(Icons.calendar_month),
+          ),
         ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -73,7 +95,10 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
           if (items.isEmpty) {
             return Center(
               child: Text(
-                loc.t('admin_reservations_empty', fallback: 'No appointments for this day'),
+                loc.t(
+                  'admin_reservations_empty',
+                  fallback: 'No appointments for this day',
+                ),
                 style: const TextStyle(color: Colors.white70),
               ),
             );
@@ -99,7 +124,10 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
                     SizedBox(
                       width: 72,
                       height: 72,
-                      child: CourtImage(images: court['images'], radius: BorderRadius.circular(12)),
+                      child: CourtImage(
+                        images: court['images'],
+                        radius: BorderRadius.circular(12),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -107,20 +135,38 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Legacy `court` payload is retained until the backend generic alias lands.
-                          Text(court['name']?.toString() ?? 'Service', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          Text(
+                            court['name']?.toString() ?? 'Service',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
                           const SizedBox(height: 4),
-                          Text(timeSlot, style: const TextStyle(color: Colors.white70)),
+                          Text(
+                            timeSlot,
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                           const SizedBox(height: 4),
-                          Text('${user['name'] ?? user['email'] ?? ''}', style: const TextStyle(color: Colors.white70)),
+                          Text(
+                            '${user['name'] ?? user['email'] ?? ''}',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(price, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                        Text(
+                          price,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 8),
-                        Text('#${booking['id']}', style: const TextStyle(color: Colors.white54)),
+                        Text(
+                          '#${booking['id']}',
+                          style: const TextStyle(color: Colors.white54),
+                        ),
                       ],
                     ),
                   ],

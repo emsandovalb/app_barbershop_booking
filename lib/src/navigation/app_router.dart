@@ -17,6 +17,7 @@ import '../screens/grounds/my_grounds_page.dart';
 import '../screens/grounds/add_ground_page.dart';
 import '../screens/grounds/add_photos_page.dart';
 import '../screens/common/coming_soon_page.dart';
+import '../screens/admin/admin_dashboard_page.dart';
 import '../screens/admin/admin_reservations_page.dart';
 import '../screens/admin/admin_staff_page.dart';
 import '../screens/admin/staff_form_page.dart';
@@ -48,6 +49,7 @@ class AppRoutes {
   static const myTeams = '/teams';
   static const teamForm = '/teams/form';
   static const comingSoon = '/coming-soon';
+  static const adminDashboard = '/admin/dashboard';
   static const adminReservations = '/admin/reservations';
   static const adminStaff = '/admin/staff';
   static const staffForm = '/admin/staff/form';
@@ -84,39 +86,76 @@ class AppRouter {
         return _material(settings, PaymentPage(args: args));
       case AppRoutes.orderPlaced:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(settings, OrderPlacedPage(
-          title: args['title'] as String? ?? 'Cita confirmada',
-          subtitle: args['subtitle'] as String? ?? 'Tu cita fue confirmada correctamente.',
-          buttonText: args['buttonText'] as String? ?? 'Volver al inicio',
-          backRoute: args['backRoute'] as String? ?? AppRoutes.home,
-        ));
+        return _material(
+          settings,
+          OrderPlacedPage(
+            title: args['title'] as String? ?? 'Cita confirmada',
+            subtitle:
+                args['subtitle'] as String? ??
+                'Tu cita fue confirmada correctamente.',
+            buttonText: args['buttonText'] as String? ?? 'Volver al inicio',
+            backRoute: args['backRoute'] as String? ?? AppRoutes.home,
+          ),
+        );
       case AppRoutes.bookingShow:
         final args = settings.arguments as Map<String, dynamic>;
-        return _material(settings, BookingDetailPage(booking: args['booking'] as Map<String, dynamic>));
+        return _material(
+          settings,
+          BookingDetailPage(booking: args['booking'] as Map<String, dynamic>),
+        );
       case AppRoutes.myGrounds:
         return _material(settings, const MyGroundsPage());
       case AppRoutes.addGround:
         return _material(settings, const AddGroundPage());
       case AppRoutes.categoryGround:
-        return _material(settings, const ComingSoonPage(title: 'Service categories unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Service categories unavailable'),
+        );
       case AppRoutes.addPhotos:
         final args = settings.arguments as Map<String, dynamic>?;
-        return _material(settings, AddPhotosPage(initialData: args ?? const {}));
+        return _material(
+          settings,
+          AddPhotosPage(initialData: args ?? const {}),
+        );
       case AppRoutes.categories:
-        return _material(settings, const ComingSoonPage(title: 'Service categories unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Service categories unavailable'),
+        );
       case AppRoutes.tournaments:
-        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Promotions unavailable'),
+        );
       case AppRoutes.tournamentDetail:
-        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Promotions unavailable'),
+        );
       case AppRoutes.tournamentForm:
-        return _material(settings, const ComingSoonPage(title: 'Promotions unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Promotions unavailable'),
+        );
       case AppRoutes.myTeams:
-        return _material(settings, const ComingSoonPage(title: 'Teams unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Teams unavailable'),
+        );
       case AppRoutes.teamForm:
-        return _material(settings, const ComingSoonPage(title: 'Teams unavailable'));
+        return _material(
+          settings,
+          const ComingSoonPage(title: 'Teams unavailable'),
+        );
       case AppRoutes.comingSoon:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(settings, ComingSoonPage(title: args['title'] as String?));
+        return _material(
+          settings,
+          ComingSoonPage(title: args['title'] as String?),
+        );
+      case AppRoutes.adminDashboard:
+        return _material(settings, const AdminDashboardPage());
       case AppRoutes.adminReservations:
         return _material(settings, const AdminReservationsPage());
       case AppRoutes.adminStaff:
@@ -125,9 +164,7 @@ class AppRouter {
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(
           settings,
-          StaffFormPage(
-            staff: args['staff'] as Map<String, dynamic>?,
-          ),
+          StaffFormPage(staff: args['staff'] as Map<String, dynamic>?),
         );
       case AppRoutes.staffResourceAssignment:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};

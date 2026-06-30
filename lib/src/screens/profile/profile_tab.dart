@@ -20,14 +20,22 @@ class ProfileTab extends StatelessWidget {
     final localization = context.watch<LocalizationService>();
     final config = context.watch<AppConfig>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
-    final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com').toString();
-    final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])?.toString();
+    final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
+        .toString();
+    final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])
+        ?.toString();
     final avatar = auth.api.resolveAssetUrl(rawAvatar);
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     final currentLang = localization.locale.languageCode;
     final languageOptions = <Map<String, String>>[
-      {'code': 'es', 'label': localization.t('language_es', fallback: 'Español')},
-      {'code': 'en', 'label': localization.t('language_en', fallback: 'English')},
+      {
+        'code': 'es',
+        'label': localization.t('language_es', fallback: 'Español'),
+      },
+      {
+        'code': 'en',
+        'label': localization.t('language_en', fallback: 'English'),
+      },
     ];
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -47,7 +55,9 @@ class ProfileTab extends StatelessWidget {
               radius: 28,
               backgroundColor: const Color(0xFF2A2A2A),
               backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-              child: avatar.isEmpty ? const Icon(Icons.person, color: Colors.white70) : null,
+              child: avatar.isEmpty
+                  ? const Icon(Icons.person, color: Colors.white70)
+                  : null,
             ),
             const SizedBox(width: 12),
             Column(
@@ -74,7 +84,10 @@ class ProfileTab extends StatelessWidget {
           onTap: () => _go(context, const MyProfilePage()),
         ),
         _ProfileTile(
-          title: localization.t('profile_change_password', fallback: 'Change password'),
+          title: localization.t(
+            'profile_change_password',
+            fallback: 'Change password',
+          ),
           icon: Icons.lock_outline,
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.changePassword),
@@ -82,32 +95,55 @@ class ProfileTab extends StatelessWidget {
         _ProfileTile(
           title: localization.t('profile_settings', fallback: 'Settings'),
           icon: Icons.settings_outlined,
-          onTap: () => _coming(context, localization.t('profile_settings', fallback: 'Settings')),
+          onTap: () => _coming(
+            context,
+            localization.t('profile_settings', fallback: 'Settings'),
+          ),
         ),
         _ProfileTile(
           title: localization.t('profile_privacy', fallback: 'Privacy policy'),
           icon: Icons.privacy_tip_outlined,
-          onTap: () => _coming(context, localization.t('profile_privacy', fallback: 'Privacy policy')),
+          onTap: () => _coming(
+            context,
+            localization.t('profile_privacy', fallback: 'Privacy policy'),
+          ),
         ),
         _ProfileTile(
           title: localization.t('profile_help', fallback: 'Help'),
           icon: Icons.help_outline,
-          onTap: () => _coming(context, localization.t('profile_help', fallback: 'Help')),
+          onTap: () => _coming(
+            context,
+            localization.t('profile_help', fallback: 'Help'),
+          ),
         ),
         _ProfileTile(
           title: localization.t('profile_about', fallback: 'About us'),
           icon: Icons.info_outline,
-          onTap: () => _coming(context, localization.t('profile_about', fallback: 'About us')),
+          onTap: () => _coming(
+            context,
+            localization.t('profile_about', fallback: 'About us'),
+          ),
         ),
         _ProfileTile(
           title: 'Perfil de Barbería Tres Amigos',
           icon: Icons.storefront_outlined,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.businessProfile),
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.businessProfile),
         ),
+        if (isAdmin)
+          _ProfileTile(
+            title: 'Panel administrativo',
+            icon: Icons.dashboard_outlined,
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+          ),
         _ProfileTile(
           title: localization.t('profile_rate_us', fallback: 'Rate us'),
           icon: Icons.star_outline,
-          onTap: () => _coming(context, localization.t('profile_rate_us', fallback: 'Rate us')),
+          onTap: () => _coming(
+            context,
+            localization.t('profile_rate_us', fallback: 'Rate us'),
+          ),
         ),
         _ProfileTile(
           title: localization.t('nav_history', fallback: 'History'),
@@ -122,7 +158,10 @@ class ProfileTab extends StatelessWidget {
           ),
         if (isAdmin)
           _ProfileTile(
-            title: localization.t('profile_my_grounds', fallback: 'My services'),
+            title: localization.t(
+              'profile_my_grounds',
+              fallback: 'My services',
+            ),
             icon: Icons.content_cut_outlined,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoutes.myGrounds);
@@ -153,7 +192,9 @@ class ProfileTab extends StatelessWidget {
                     ? null
                     : (value) {
                         if (value != null) {
-                          context.read<LocalizationService>().changeLanguage(value);
+                          context.read<LocalizationService>().changeLanguage(
+                            value,
+                          );
                         }
                       },
                 title: Text(
@@ -179,17 +220,24 @@ class ProfileTab extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
                 content: Text(
-                  localization.t('profile_logout_confirm', fallback: 'Are you sure you want to log out?'),
+                  localization.t(
+                    'profile_logout_confirm',
+                    fallback: 'Are you sure you want to log out?',
+                  ),
                   style: const TextStyle(color: Colors.white70),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(localization.t('btn_cancel', fallback: 'Cancel')),
+                    child: Text(
+                      localization.t('btn_cancel', fallback: 'Cancel'),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(localization.t('profile_logout', fallback: 'Log out')),
+                    child: Text(
+                      localization.t('profile_logout', fallback: 'Log out'),
+                    ),
                   ),
                 ],
               ),
