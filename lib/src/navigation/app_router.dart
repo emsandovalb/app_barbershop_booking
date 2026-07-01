@@ -18,10 +18,13 @@ import '../screens/grounds/add_ground_page.dart';
 import '../screens/grounds/add_photos_page.dart';
 import '../screens/common/coming_soon_page.dart';
 import '../screens/admin/admin_dashboard_page.dart';
+import '../screens/admin/admin_services_page.dart';
 import '../screens/admin/admin_reservations_page.dart';
 import '../screens/admin/admin_staff_page.dart';
 import '../screens/admin/staff_form_page.dart';
 import '../screens/admin/staff_resource_assignment_page.dart';
+import '../screens/admin/service_barber_assignment_page.dart';
+import '../screens/admin/service_form_page.dart';
 import '../screens/staff/staff_detail_page.dart';
 
 class AppRoutes {
@@ -50,10 +53,13 @@ class AppRoutes {
   static const teamForm = '/teams/form';
   static const comingSoon = '/coming-soon';
   static const adminDashboard = '/admin/dashboard';
+  static const adminServices = '/admin/services';
+  static const adminServiceForm = '/admin/services/form';
   static const adminReservations = '/admin/reservations';
   static const adminStaff = '/admin/staff';
   static const staffForm = '/admin/staff/form';
   static const staffResourceAssignment = '/admin/staff/resources';
+  static const adminServiceAssignment = '/admin/services/barbers';
   static const staffDetail = '/staff/detail';
 }
 
@@ -156,10 +162,28 @@ class AppRouter {
         );
       case AppRoutes.adminDashboard:
         return _material(settings, const AdminDashboardPage());
+      case AppRoutes.adminServices:
+        return _material(settings, const AdminServicesPage());
+      case AppRoutes.adminServiceForm:
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        return _material(
+          settings,
+          ServiceFormPage(service: args['service'] as Map<String, dynamic>?),
+        );
       case AppRoutes.adminReservations:
         return _material(settings, const AdminReservationsPage());
       case AppRoutes.adminStaff:
         return _material(settings, const AdminStaffPage());
+      case AppRoutes.adminServiceAssignment:
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        return _material(
+          settings,
+          ServiceBarberAssignmentPage(
+            service: Map<String, dynamic>.from(
+              args['service'] as Map? ?? const <String, dynamic>{},
+            ),
+          ),
+        );
       case AppRoutes.staffForm:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(

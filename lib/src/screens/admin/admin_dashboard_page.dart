@@ -195,7 +195,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _SectionHeaderRow(
                               title: 'Servicios más reservados',
                               actionLabel: 'Administrar servicios',
-                              onTap: () => _openNamedRoute(AppRoutes.myGrounds),
+                              onTap: () => _openNamedRoute(AppRoutes.adminServices),
                             ),
                             const SizedBox(height: 12),
                             _TopServicesList(items: topServices),
@@ -214,7 +214,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                     _openNamedRoute(AppRoutes.adminStaff);
                                     return;
                                   case 'services':
-                                    _openNamedRoute(AppRoutes.myGrounds);
+                                    _openNamedRoute(AppRoutes.adminServices);
                                     return;
                                   case 'reservations':
                                     _openNamedRoute(

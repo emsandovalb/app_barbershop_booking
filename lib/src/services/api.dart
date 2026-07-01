@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
@@ -121,7 +122,9 @@ class ApiClient {
     return reservation ? _normalizeReservation(data) : _normalizeResource(data);
   }
 
-  Map<String, dynamic> _resourcePayload(Map<String, dynamic> data) {
+  Future<Map<String, dynamic>> _resourcePayload(
+    Map<String, dynamic> data,
+  ) async {
     final payload = Map<String, dynamic>.from(data);
     if (payload['court_id'] == null && payload['resource_id'] != null) {
       payload['court_id'] = payload['resource_id'];
@@ -129,11 +132,54 @@ class ApiClient {
     if (payload['resource_id'] == null && payload['court_id'] != null) {
       payload['resource_id'] = payload['court_id'];
     }
+    if (payload['price_per_hour'] == null && payload['price'] != null) {
+      payload['price_per_hour'] = payload['price'];
+    }
+    if (payload['duration_minutes'] == null &&
+        payload['durationMinutes'] != null) {
+      payload['duration_minutes'] = payload['durationMinutes'];
+    }
     if (payload['duration_hours'] == null && payload['duration'] != null) {
       payload['duration_hours'] = payload['duration'];
     }
+    if (payload['duration_hours'] == null) {
+      final minutes = _intValue(
+        payload['duration_minutes'] ?? payload['durationMinutes'],
+      );
+      if (minutes != null && minutes > 0) {
+        payload['duration_hours'] = (minutes / 60).ceil().clamp(1, 9999);
+      }
+    }
     if (payload['facilities'] == null && payload['amenities'] != null) {
       payload['facilities'] = payload['amenities'];
+    }
+    if (payload['address'] == null ||
+        payload['address'].toString().trim().isEmpty) {
+      final fallbackAddress = payload['name']?.toString().trim();
+      if (fallbackAddress != null && fallbackAddress.isNotEmpty) {
+        payload['address'] = fallbackAddress;
+      } else if (payload['category']?.toString().trim().isNotEmpty == true) {
+        payload['address'] = payload['category'];
+      } else {
+        payload['address'] = 'Barbería Tres Amigos';
+      }
+    }
+
+    final images = <dynamic>[];
+    final rawImages = payload.remove('images');
+    if (rawImages is List) {
+      images.addAll(rawImages);
+    } else if (rawImages is String && rawImages.trim().isNotEmpty) {
+      images.add(rawImages);
+    }
+    for (final key in const ['image_url', 'image_path', 'service_image', 'image']) {
+      final value = payload.remove(key);
+      if (value is String && value.trim().isNotEmpty) {
+        images.add(value);
+      }
+    }
+    if (images.isNotEmpty) {
+      payload['images'] = await _prepareResourceImages(images);
     }
     return payload;
   }
@@ -396,14 +442,26 @@ class ApiClient {
     return _getJson(_apiUri('resources/$id/staff'));
   }
 
-  Future<Map<String, dynamic>> getMyResources() async {
-    return _getJson(_apiUri(myResourcesEndpoint));
+  Future<Map<String, dynamic>> getMyResources({
+    int page = 1,
+    int? perPage,
+  }) async {
+    return _getJson(
+      _apiUri(
+        myResourcesEndpoint,
+        queryParameters: {
+          if (page > 1) 'page': '$page',
+          if (perPage != null) 'per_page': '$perPage',
+        },
+      ),
+    );
   }
 
   Future<Map<String, dynamic>> createResource(Map<String, dynamic> data) async {
+    final payload = await _resourcePayload(data);
     return _postJson(
       _apiUri(resourceEndpoint),
-      _resourcePayload(data),
+      payload,
       expectCreated: true,
     );
   }
@@ -412,7 +470,8 @@ class ApiClient {
     int id,
     Map<String, dynamic> data,
   ) async {
-    return _putJson(_apiUri('$resourceEndpoint/$id'), _resourcePayload(data));
+    final payload = await _resourcePayload(data);
+    return _putJson(_apiUri('$resourceEndpoint/$id'), payload);
   }
 
   Future<Map<String, dynamic>> deleteResource(int id) async {
@@ -908,6 +967,77 @@ class ApiClient {
     } catch (_) {
       return null;
     }
+  }
+
+  int? _intValue(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  Future<List<String>> _prepareResourceImages(List<dynamic> images) async {
+    final prepared = <String>[];
+    for (final value in images) {
+      final raw = value?.toString().trim() ?? '';
+      if (raw.isEmpty) continue;
+      final image = await _prepareResourceImage(raw);
+      if (image != null && image.isNotEmpty) {
+        prepared.add(image);
+      }
+    }
+    return prepared;
+  }
+
+  Future<String?> _prepareResourceImage(String value) async {
+    if (value.startsWith('data:image')) {
+      return value;
+    }
+    if (RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(value) && value.length > 120) {
+      return value;
+    }
+    if (value.startsWith('/storage/')) {
+      return value;
+    }
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      final response = await http.get(
+        Uri.parse(value),
+        headers: const {'Accept': 'image/*'},
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return null;
+      }
+      final mime = _guessImageMime(
+        value,
+        contentType: response.headers['content-type'],
+      );
+      return 'data:$mime;base64,${base64Encode(response.bodyBytes)}';
+    }
+    if (value.startsWith('asset:') || value.startsWith('assets/')) {
+      final key = value.startsWith('asset:') ? value.substring(6) : value;
+      final data = await rootBundle.load(key);
+      final mime = _guessImageMime(value);
+      return 'data:$mime;base64,${base64Encode(data.buffer.asUint8List())}';
+    }
+    final file = File(value);
+    if (await file.exists()) {
+      final bytes = await file.readAsBytes();
+      final mime = _guessImageMime(value);
+      return 'data:$mime;base64,${base64Encode(bytes)}';
+    }
+    return null;
+  }
+
+  String _guessImageMime(String source, {String? contentType}) {
+    final header = (contentType ?? '').toLowerCase();
+    if (header.contains('png')) return 'image/png';
+    if (header.contains('webp')) return 'image/webp';
+    if (header.contains('gif')) return 'image/gif';
+    if (header.contains('jpeg') || header.contains('jpg')) return 'image/jpeg';
+    final lower = source.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.gif')) return 'image/gif';
+    return 'image/jpeg';
   }
 
   String resolveAssetUrl(String? path) {
