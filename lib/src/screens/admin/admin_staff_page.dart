@@ -35,6 +35,15 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
     });
   }
 
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF132018),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
@@ -71,9 +80,13 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
         onPressed: () async {
           final saved = await Navigator.of(
             context,
-          ).pushNamed(AppRoutes.staffForm);
+          ).pushNamed<bool>(
+            AppRoutes.staffForm,
+            arguments: const {'createMode': true},
+          );
           if (saved == true) {
             await _refresh();
+            _showSuccess('Barbero creado correctamente.');
           }
         },
         icon: const Icon(Icons.add),
@@ -242,7 +255,10 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                               final saved = await Navigator.of(context)
                                   .pushNamed(
                                     AppRoutes.staffForm,
-                                    arguments: {'staff': staff},
+                                    arguments: {
+                                      'staff': staff,
+                                      'createMode': false,
+                                    },
                                   );
                               if (saved == true) {
                                 await _refresh();

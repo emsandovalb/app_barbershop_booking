@@ -38,6 +38,15 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
     });
   }
 
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF132018),
+      ),
+    );
+  }
+
   List<Map<String, dynamic>> _extractItems(Map<String, dynamic> response) {
     final data = response['data'];
     if (data is List) {
@@ -52,10 +61,18 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
   Future<void> _openForm({Map<String, dynamic>? service}) async {
     final result = await Navigator.of(context).pushNamed<bool>(
       AppRoutes.adminServiceForm,
-      arguments: {'service': service},
+      arguments: {
+        'service': service,
+        'createMode': service == null,
+      },
     );
     if (result == true && mounted) {
       await _refresh();
+      _showSuccess(
+        service == null
+            ? 'Servicio creado correctamente.'
+            : 'Servicio actualizado correctamente.',
+      );
     }
   }
 

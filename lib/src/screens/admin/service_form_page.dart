@@ -12,8 +12,13 @@ import 'admin_page_scaffold.dart';
 
 class ServiceFormPage extends StatefulWidget {
   final Map<String, dynamic>? service;
+  final bool createMode;
 
-  const ServiceFormPage({super.key, this.service});
+  const ServiceFormPage({
+    super.key,
+    this.service,
+    this.createMode = false,
+  });
 
   @override
   State<ServiceFormPage> createState() => _ServiceFormPageState();
@@ -31,6 +36,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
   bool _saving = false;
 
   bool get _isEditing => widget.service != null;
+  bool get _isCreating => widget.createMode || widget.service == null;
 
   @override
   void initState() {
@@ -73,7 +79,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       backgroundColor: AppColors.primaryBackground,
       appBar: buildAdminAppBar(
         context,
-        title: _isEditing ? 'Editar servicio' : 'Nuevo servicio',
+        title: _isCreating ? 'Nuevo servicio' : 'Editar servicio',
       ),
       body: BarbershopCinematicPanel(
         backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
@@ -124,7 +130,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              _isEditing ? serviceName(service) : 'Nuevo servicio',
+                              _isCreating ? 'Nuevo servicio' : serviceName(service),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -147,7 +153,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                 ),
                 const SizedBox(height: 16),
                 _SectionTitle(
-                  title: _isEditing ? 'Editar servicio' : 'Crear servicio',
+                  title: _isCreating ? 'Crear servicio' : 'Editar servicio',
                   subtitle: 'Completa la información comercial del servicio.',
                 ),
                 const SizedBox(height: 12),

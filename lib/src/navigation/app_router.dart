@@ -81,7 +81,13 @@ class AppRouter {
       case AppRoutes.signup:
         return _material(settings, const SignUpPage());
       case AppRoutes.home:
-        return _material(settings, const HomeShell());
+        final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
+        return _material(
+          settings,
+          HomeShell(
+            initialTab: args['tab'] as String?,
+          ),
+        );
       case AppRoutes.businessProfile:
         return _material(settings, const BusinessProfilePage());
       case AppRoutes.bookingDetail:
@@ -168,7 +174,10 @@ class AppRouter {
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(
           settings,
-          ServiceFormPage(service: args['service'] as Map<String, dynamic>?),
+          ServiceFormPage(
+            service: args['service'] as Map<String, dynamic>?,
+            createMode: args['createMode'] == true,
+          ),
         );
       case AppRoutes.adminReservations:
         return _material(settings, const AdminReservationsPage());
@@ -188,7 +197,10 @@ class AppRouter {
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(
           settings,
-          StaffFormPage(staff: args['staff'] as Map<String, dynamic>?),
+          StaffFormPage(
+            staff: args['staff'] as Map<String, dynamic>?,
+            createMode: args['createMode'] == true,
+          ),
         );
       case AppRoutes.staffResourceAssignment:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};

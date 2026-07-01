@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,7 @@ class AdminDashboardPage extends StatefulWidget {
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   late Future<_AdminDashboardData> _future;
+  bool _quickActionBusy = false;
 
   @override
   void initState() {
@@ -100,19 +103,73 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF132018),
+      ),
+    );
+  }
+
   void _openBooking(Map<String, dynamic> booking) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => BookingDetailPage(booking: booking)),
     );
   }
 
-  void _openNamedRoute(String route, {Map<String, dynamic>? arguments}) {
-    final navigator = Navigator.of(context);
+  Future<void> _openNamedRoute(
+    String route, {
+    Map<String, dynamic>? arguments,
+    String? successMessage,
+  }) async {
+    if (_quickActionBusy) return;
+    setState(() => _quickActionBusy = true);
     try {
-      navigator.pushNamed(route, arguments: arguments);
+      final result = await Navigator.of(context).pushNamed(
+        route,
+        arguments: arguments,
+      );
+      if (!mounted) return;
+      if (successMessage != null && result == true) {
+        _showSuccess(successMessage);
+      }
     } catch (_) {
-      _showPlaceholder('Esta sección todavía no está disponible.');
+      if (mounted) {
+        _showPlaceholder('Esta sección todavía no está disponible.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _quickActionBusy = false);
+      }
     }
+  }
+
+  Future<void> _openBookingEntryPoint() {
+    return _openNamedRoute(
+      AppRoutes.home,
+      arguments: const {'tab': 'services'},
+    );
+  }
+
+  Future<void> _createBarber() {
+    return _openNamedRoute(
+      AppRoutes.staffForm,
+      arguments: const {'createMode': true},
+      successMessage: 'Barbero creado correctamente.',
+    );
+  }
+
+  Future<void> _createService() {
+    return _openNamedRoute(
+      AppRoutes.adminServiceForm,
+      arguments: const {'createMode': true},
+      successMessage: 'Servicio creado correctamente.',
+    );
+  }
+
+  Future<void> _openAgenda() {
+    return _openNamedRoute(AppRoutes.adminReservations);
   }
 
   @override
@@ -250,17 +307,20 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             ),
                             const SizedBox(height: 12),
                             _QuickActionsRail(
+                              isBusy: _quickActionBusy,
                               onAction: (action) {
                                 switch (action.id) {
                                   case 'new_appointment':
+                                    unawaited(_openBookingEntryPoint());
+                                    return;
                                   case 'new_barber':
+                                    unawaited(_createBarber());
+                                    return;
                                   case 'new_service':
-                                    _showPlaceholder(
-                                      'Esta acción todavía no está disponible.',
-                                    );
+                                    unawaited(_createService());
                                     return;
                                   case 'schedule':
-                                    _openNamedRoute(AppRoutes.adminReservations);
+                                    unawaited(_openAgenda());
                                     return;
                                 }
                               },
@@ -654,24 +714,34 @@ class _HeroMetaChip extends StatelessWidget {
 
 class _QuickActionsRail extends StatelessWidget {
   final void Function(_QuickActionData action) onAction;
+  final bool isBusy;
 
-  const _QuickActionsRail({required this.onAction});
+  const _QuickActionsRail({
+    required this.onAction,
+    required this.isBusy,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: [
-          for (var i = 0; i < _quickActions.length; i++) ...[
-            _QuickActionCard(
-              action: _quickActions[i],
-              onTap: () => onAction(_quickActions[i]),
-            ),
-            if (i != _quickActions.length - 1) const SizedBox(width: 12),
-          ],
-        ],
+    return AbsorbPointer(
+      absorbing: isBusy,
+      child: Opacity(
+        opacity: isBusy ? .72 : 1,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (var i = 0; i < _quickActions.length; i++) ...[
+                _QuickActionCard(
+                  action: _quickActions[i],
+                  onTap: () => onAction(_quickActions[i]),
+                ),
+                if (i != _quickActions.length - 1) const SizedBox(width: 12),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -10,7 +10,12 @@ import '../profile/profile_tab.dart';
 import 'home_tab.dart';
 
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key});
+  final String? initialTab;
+
+  const HomeShell({
+    super.key,
+    this.initialTab,
+  });
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -32,6 +37,12 @@ class _TabConfig {
 
 class _HomeShellState extends State<HomeShell> {
   int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    index = _initialIndexFromTab(widget.initialTab);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +87,22 @@ class _HomeShellState extends State<HomeShell> {
         items: tabs.map((t) => t.item).toList(growable: false),
       ),
     );
+  }
+}
+
+int _initialIndexFromTab(String? tab) {
+  switch (tab?.toLowerCase()) {
+    case 'services':
+      return 1;
+    case 'bookings':
+      return 2;
+    case 'reservations':
+      return 3;
+    case 'profile':
+      return 4;
+    case 'home':
+    default:
+      return 0;
   }
 }
 

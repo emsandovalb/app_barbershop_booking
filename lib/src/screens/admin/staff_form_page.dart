@@ -8,10 +8,12 @@ import 'admin_page_scaffold.dart';
 
 class StaffFormPage extends StatefulWidget {
   final Map<String, dynamic>? staff;
+  final bool createMode;
 
   const StaffFormPage({
     super.key,
     this.staff,
+    this.createMode = false,
   });
 
   @override
@@ -30,6 +32,8 @@ class _StaffFormPageState extends State<StaffFormPage> {
   bool _saving = false;
   List<Map<String, dynamic>> _roles = [];
   int? _selectedRoleId;
+
+  bool get _isCreating => widget.createMode || widget.staff == null;
 
   @override
   void initState() {
@@ -96,7 +100,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
         'is_active': _isActive,
       };
 
-      if (widget.staff == null) {
+      if (_isCreating) {
         await api.createStaff(payload);
       } else {
         await api.updateStaff(widget.staff!['id'] as int, payload);
@@ -120,7 +124,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
     final loc = context.watch<LocalizationService>();
-    final title = widget.staff == null
+    final title = _isCreating
         ? loc.t('add_staff', fallback: 'Add barber')
         : loc.t('edit_staff', fallback: 'Edit barber');
 
