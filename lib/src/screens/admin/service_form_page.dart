@@ -8,6 +8,7 @@ import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import 'service_management_utils.dart';
+import 'admin_page_scaffold.dart';
 
 class ServiceFormPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -70,10 +71,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.black.withValues(alpha: .22),
-        foregroundColor: Colors.white,
-        title: Text(_isEditing ? 'Editar servicio' : 'Nuevo servicio'),
+      appBar: buildAdminAppBar(
+        context,
+        title: _isEditing ? 'Editar servicio' : 'Nuevo servicio',
       ),
       body: BarbershopCinematicPanel(
         backgroundAsset: 'assets/branding/barbershop_hero_bg.png',

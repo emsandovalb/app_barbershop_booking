@@ -6,6 +6,7 @@ import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import 'service_management_utils.dart';
+import 'admin_page_scaffold.dart';
 
 class ServiceBarberAssignmentPage extends StatefulWidget {
   final Map<String, dynamic> service;
@@ -77,10 +78,9 @@ class _ServiceBarberAssignmentPageState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.black.withValues(alpha: .22),
-        foregroundColor: Colors.white,
-        title: const Text('Asignar barberos'),
+      appBar: buildAdminAppBar(
+        context,
+        title: 'Asignar barberos',
       ),
       body: BarbershopCinematicPanel(
         backgroundAsset: 'assets/branding/barbershop_hero_bg.png',

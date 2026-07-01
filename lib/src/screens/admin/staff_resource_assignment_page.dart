@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import 'admin_page_scaffold.dart';
 
 class StaffResourceAssignmentPage extends StatefulWidget {
   final int staffId;
@@ -65,8 +66,9 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.t('staff_resources', fallback: 'Services')),
+      appBar: buildAdminAppBar(
+        context,
+        title: loc.t('staff_resources', fallback: 'Services'),
         actions: [
           IconButton(
             onPressed: _refresh,

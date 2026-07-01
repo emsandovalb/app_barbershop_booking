@@ -638,7 +638,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Panel administrativo',
+                    'Centro administrativo',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -647,7 +647,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Ver métricas, citas de hoy, barberos y servicios más reservados.',
+                    'Gestioná tu barbería desde un solo lugar.',
                     style: TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],

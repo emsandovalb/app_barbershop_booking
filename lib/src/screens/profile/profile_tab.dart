@@ -132,18 +132,10 @@ class ProfileTab extends StatelessWidget {
         ),
         if (isAdmin)
           _ProfileTile(
-            title: 'Panel administrativo',
+            title: 'Centro administrativo',
             icon: Icons.dashboard_outlined,
             onTap: () =>
                 Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
-          ),
-        if (isAdmin)
-          _ProfileTile(
-            title: 'Administrar servicios',
-            icon: Icons.content_cut_outlined,
-            onTap: () => Navigator.of(context).pushNamed(
-              AppRoutes.adminServices,
-            ),
           ),
         _ProfileTile(
           title: localization.t('profile_rate_us', fallback: 'Rate us'),

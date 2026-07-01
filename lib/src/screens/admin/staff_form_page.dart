@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import 'admin_page_scaffold.dart';
 
 class StaffFormPage extends StatefulWidget {
   final Map<String, dynamic>? staff;
@@ -124,7 +125,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
         : loc.t('edit_staff', fallback: 'Edit barber');
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: buildAdminAppBar(context, title: title),
       body: _loadingRoles
           ? const Center(child: CircularProgressIndicator())
           : GestureDetector(

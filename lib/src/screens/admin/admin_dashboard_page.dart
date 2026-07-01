@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../config/app_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../bookings/appointment_helpers.dart';
@@ -147,9 +148,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     snapshot.connectionState == ConnectionState.waiting &&
                     !snapshot.hasData;
 
+                final config = context.watch<AppConfig>();
                 final metrics = _buildMetrics(data);
                 final topServices = _buildTopServices(data);
                 final performance = _buildPerformance(data);
+                final modules = _buildModules(config);
 
                 return CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -163,19 +166,20 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _TopHero(
                               isLoading: isLoading,
                               onRefresh: _refresh,
-                              onGoToReservations: () =>
-                                  _openNamedRoute(AppRoutes.adminReservations),
-                              onGoToStaff: () =>
-                                  _openNamedRoute(AppRoutes.adminStaff),
                             ),
                             const SizedBox(height: 14),
+                            const _SectionIntro(
+                              title: 'Resumen de hoy',
+                              subtitle:
+                                  'Indicadores, agenda, desempeño y servicios destacados.',
+                            ),
+                            const SizedBox(height: 12),
                             _KpiGrid(metrics: metrics),
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
                               title: 'Citas de hoy',
-                              actionLabel: 'Ver todas',
-                              onTap: () =>
-                                  _openNamedRoute(AppRoutes.adminReservations),
+                              actionLabel: 'Ver agenda',
+                              onTap: () => _openNamedRoute(AppRoutes.adminReservations),
                             ),
                             const SizedBox(height: 12),
                             _TodayAppointmentsList(
@@ -185,9 +189,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
                               title: 'Rendimiento de barberos',
-                              actionLabel: 'Administrar barberos',
-                              onTap: () =>
-                                  _openNamedRoute(AppRoutes.adminStaff),
+                              actionLabel: 'Centro administrativo',
+                              onTap: () => _openNamedRoute(AppRoutes.adminDashboard),
                             ),
                             const SizedBox(height: 12),
                             _PerformanceList(items: performance),
@@ -199,27 +202,28 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             ),
                             const SizedBox(height: 12),
                             _TopServicesList(items: topServices),
-                            const SizedBox(height: 18),
-                            _SectionHeaderRow(
-                              title: 'Accesos rápidos',
-                              actionLabel: 'Perfil del negocio',
-                              onTap: () =>
-                                  _openNamedRoute(AppRoutes.businessProfile),
+                            const SizedBox(height: 24),
+                            const _SectionIntro(
+                              title: 'Gestión',
+                              subtitle:
+                                  'Accesos directos a los módulos del centro administrativo.',
                             ),
                             const SizedBox(height: 12),
-                            _QuickActionsGrid(
-                              onAction: (action) {
-                                switch (action.id) {
+                            _AdminModuleGrid(
+                              modules: modules,
+                              onTap: (module) {
+                                switch (module.id) {
+                                  case 'reservations':
+                                    _openNamedRoute(AppRoutes.adminReservations);
+                                    return;
                                   case 'staff':
                                     _openNamedRoute(AppRoutes.adminStaff);
                                     return;
                                   case 'services':
                                     _openNamedRoute(AppRoutes.adminServices);
                                     return;
-                                  case 'reservations':
-                                    _openNamedRoute(
-                                      AppRoutes.adminReservations,
-                                    );
+                                  case 'business':
+                                    _openNamedRoute(AppRoutes.businessProfile);
                                     return;
                                   case 'gallery':
                                     Navigator.of(context).push(
@@ -235,16 +239,31 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                       ),
                                     );
                                     return;
-                                  case 'business':
-                                    _openNamedRoute(AppRoutes.businessProfile);
-                                    return;
                                 }
                               },
                             ),
-                            const SizedBox(height: 18),
-                            _SummaryCard(
-                              onGoToBusiness: () =>
-                                  _openNamedRoute(AppRoutes.businessProfile),
+                            const SizedBox(height: 24),
+                            const _SectionIntro(
+                              title: 'Acciones rápidas',
+                              subtitle:
+                                  'Atajos para operar sin perder el contexto del centro administrativo.',
+                            ),
+                            const SizedBox(height: 12),
+                            _QuickActionsRail(
+                              onAction: (action) {
+                                switch (action.id) {
+                                  case 'new_appointment':
+                                  case 'new_barber':
+                                  case 'new_service':
+                                    _showPlaceholder(
+                                      'Esta acción todavía no está disponible.',
+                                    );
+                                    return;
+                                  case 'schedule':
+                                    _openNamedRoute(AppRoutes.adminReservations);
+                                    return;
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -260,14 +279,59 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
+  List<_AdminModuleData> _buildModules(AppConfig config) {
+    return [
+      const _AdminModuleData(
+        id: 'reservations',
+        icon: Icons.event_available_rounded,
+        title: 'Citas',
+        subtitle: 'Gestionar citas',
+        badge: 'Activo',
+      ),
+      _AdminModuleData(
+        id: 'staff',
+        icon: Icons.groups_rounded,
+        title: 'Barberos',
+        subtitle: 'Equipo y perfiles',
+        badge: config.features.adminStaffManagement ? 'Activo' : 'Demo',
+      ),
+      const _AdminModuleData(
+        id: 'services',
+        icon: Icons.content_cut_rounded,
+        title: 'Servicios',
+        subtitle: 'Precios, duración y asignaciones',
+        badge: 'Activo',
+      ),
+      const _AdminModuleData(
+        id: 'business',
+        icon: Icons.storefront_rounded,
+        title: 'Perfil del negocio',
+        subtitle: 'Horarios, contacto y descripción',
+        badge: 'Activo',
+      ),
+      const _AdminModuleData(
+        id: 'gallery',
+        icon: Icons.photo_library_rounded,
+        title: 'Galería',
+        subtitle: 'Trabajos recientes',
+        badge: 'Nuevo',
+      ),
+      const _AdminModuleData(
+        id: 'reviews',
+        icon: Icons.rate_review_rounded,
+        title: 'Opiniones',
+        subtitle: 'Reputación y testimonios',
+        badge: 'Activo',
+      ),
+    ];
+  }
+
   List<_MetricData> _buildMetrics(_AdminDashboardData data) {
     final reservations = data.reservations;
     final staff = data.staff;
     final resources = data.resources;
 
-    final activeBarbers = staff
-        .where((item) => _isActive(item))
-        .toList(growable: false);
+    final activeBarbers = staff.where((item) => _isActive(item)).toList(growable: false);
     final serviceCounts = _serviceCounts(reservations);
     final serviceRevenue = _estimatedRevenueByService(reservations, resources);
     final totalRevenue = _estimatedRevenue(reservations, resources);
@@ -282,9 +346,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         icon: Icons.event_available_rounded,
         label: 'Citas de hoy',
         value: '${reservations.length}',
-        footnote: pendingCount > 0
-            ? '$pendingCount pendientes'
-            : 'Flujo estable',
+        footnote: pendingCount > 0 ? '$pendingCount pendientes' : 'Flujo estable',
       ),
       _MetricData(
         icon: Icons.payments_rounded,
@@ -298,9 +360,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         icon: Icons.groups_rounded,
         label: 'Barberos activos',
         value: '${activeBarbers.length}',
-        footnote: activeBarbers.isNotEmpty
-            ? 'Equipo disponible'
-            : 'Sin actividad',
+        footnote: activeBarbers.isNotEmpty ? 'Equipo disponible' : 'Sin actividad',
       ),
       _MetricData(
         icon: Icons.content_cut_rounded,
@@ -324,8 +384,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       final name = _staffName(barber);
       appointmentsByStaff[name] = (appointmentsByStaff[name] ?? 0) + 1;
       revenueByStaff[name] =
-          (revenueByStaff[name] ?? 0) +
-          _bookingRevenue(booking, data.resources);
+          (revenueByStaff[name] ?? 0) + _bookingRevenue(booking, data.resources);
     }
 
     final items =
@@ -348,9 +407,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             return b.revenue.compareTo(a.revenue);
           });
 
-    if (items.isNotEmpty) {
-      return items;
-    }
+    if (items.isNotEmpty) return items;
 
     return _fallbackStaff
         .map(
@@ -369,10 +426,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final reservations = data.reservations;
     final resources = data.resources;
     final counts = _serviceCounts(reservations);
-    final revenueByService = _estimatedRevenueByService(
-      reservations,
-      resources,
-    );
+    final revenueByService = _estimatedRevenueByService(reservations, resources);
     final resourceLookup = <String, Map<String, dynamic>>{};
 
     for (final resource in resources) {
@@ -391,8 +445,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   resourceLookup[key] ??
                   const <String, dynamic>{};
               final estimatedRevenue =
-                  revenueByService[key] ??
-                  _servicePrice(resource) * entry.value;
+                  revenueByService[key] ?? _servicePrice(resource) * entry.value;
               return _TopServiceData(
                 name: key,
                 reservations: entry.value,
@@ -409,9 +462,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             return b.revenue.compareTo(a.revenue);
           });
 
-    if (items.isNotEmpty) {
-      return items;
-    }
+    if (items.isNotEmpty) return items;
 
     return _fallbackResources
         .take(4)
@@ -430,14 +481,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 class _TopHero extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onRefresh;
-  final VoidCallback onGoToReservations;
-  final VoidCallback onGoToStaff;
 
   const _TopHero({
     required this.isLoading,
     required this.onRefresh,
-    required this.onGoToReservations,
-    required this.onGoToStaff,
   });
 
   @override
@@ -449,90 +496,99 @@ class _TopHero extends StatelessWidget {
       opacity: .52,
       blurSigma: 3,
       child: SizedBox(
-        height: 270,
+        height: 254,
         child: Stack(
           children: [
             const Positioned(
               top: 0,
               right: 0,
-              child: PremiumBadge(label: 'PANEL ADMINISTRATIVO'),
+              child: PremiumBadge(label: 'CENTRO ADMINISTRATIVO'),
             ),
-            Positioned(
-              top: 42,
-              left: 0,
-              right: 0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  BarbershopLogoMark(
-                    assetPath: 'assets/branding/logo_transparent.png',
-                    size: 102,
-                    glowColor: AppColors.primary,
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'BARBERÍA TRES AMIGOS',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      height: 1,
-                      letterSpacing: .2,
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 36, 0, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        BarbershopLogoMark(
+                          assetPath: 'assets/branding/logo_transparent.png',
+                          size: 96,
+                          glowColor: AppColors.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'BARBERÍA TRES AMIGOS',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            height: 1,
+                            letterSpacing: .3,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Centro administrativo',
+                          style: TextStyle(
+                            color: AppColors.secondary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Gestioná citas, servicios, barberos y la presencia digital de tu barbería.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: .72),
+                            fontSize: 12.5,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Panel administrativo',
-                    style: TextStyle(
-                      color: AppColors.secondary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _HeroMetaChip(
+                          icon: Icons.event_available_rounded,
+                          label: 'Hoy',
+                          value: DateFormat('d MMM', 'es').format(DateTime.now()),
+                        ),
+                        _HeroMetaChip(
+                          icon: Icons.shield_rounded,
+                          label: 'Estado',
+                          value: isLoading ? 'Sincronizando' : 'Listo',
+                        ),
+                        TextButton.icon(
+                          onPressed: onRefresh,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: .10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text(
+                            'Actualizar',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Hoy · ${DateFormat('EEEE, d MMMM', 'es').format(DateTime.now())}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: .70),
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _HeroActionCard(
-                      icon: Icons.event_note_rounded,
-                      label: 'Ver citas',
-                      onTap: onGoToReservations,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _HeroActionCard(
-                      icon: Icons.groups_rounded,
-                      label: 'Barberos',
-                      onTap: onGoToStaff,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _HeroActionCard(
-                      icon: Icons.refresh_rounded,
-                      label: isLoading ? 'Cargando' : 'Actualizar',
-                      onTap: onRefresh,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -542,42 +598,135 @@ class _TopHero extends StatelessWidget {
   }
 }
 
-class _HeroActionCard extends StatelessWidget {
+class _HeroMetaChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final String value;
 
-  const _HeroActionCard({
+  const _HeroMetaChip({
     required this.icon,
     required this.label,
-    required this.onTap,
+    required this.value,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF120E0B).withValues(alpha: .92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: .06)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 17),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: .60),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionsRail extends StatelessWidget {
+  final void Function(_QuickActionData action) onAction;
+
+  const _QuickActionsRail({required this.onAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          for (var i = 0; i < _quickActions.length; i++) ...[
+            _QuickActionCard(
+              action: _quickActions[i],
+              onTap: () => onAction(_quickActions[i]),
+            ),
+            if (i != _quickActions.length - 1) const SizedBox(width: 12),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionCard extends StatelessWidget {
+  final _QuickActionData action;
+  final VoidCallback onTap;
+
+  const _QuickActionCard({required this.action, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(22),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        width: 156,
+        height: 120,
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF120E0B).withValues(alpha: .92),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withValues(alpha: .06)),
+          color: const Color(0xFF130F0C).withValues(alpha: .94),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: AppColors.primary, size: 22),
-            const SizedBox(height: 6),
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(action.icon, color: AppColors.primary, size: 22),
+            ),
+            const SizedBox(height: 4),
             Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              action.label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              action.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: .64),
+                fontSize: 11,
+                height: 1.2,
               ),
             ),
           ],
@@ -587,7 +736,164 @@ class _HeroActionCard extends StatelessWidget {
   }
 }
 
+class _AdminModuleGrid extends StatelessWidget {
+  final List<_AdminModuleData> modules;
+  final void Function(_AdminModuleData module) onTap;
+
+  const _AdminModuleGrid({required this.modules, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: modules.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: .92,
+      ),
+      itemBuilder: (_, index) {
+        final module = modules[index];
+        return _AdminModuleCard(
+          module: module,
+          onTap: () => onTap(module),
+        );
+      },
+    );
+  }
+}
+
+class _AdminModuleCard extends StatelessWidget {
+  final _AdminModuleData module;
+  final VoidCallback onTap;
+
+  const _AdminModuleCard({required this.module, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: BarbershopPremiumCard(
+        radius: 24,
+        padding: const EdgeInsets.all(16),
+        backgroundColor: const Color(0xFF120E0B).withValues(alpha: .96),
+        borderColor: Colors.white.withValues(alpha: .08),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: .14),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(module.icon, color: AppColors.primary, size: 22),
+                ),
+                const Spacer(),
+                _ModuleBadge(label: module.badge),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              module.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                height: 1.08,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              module.subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: .70),
+                fontSize: 12,
+                height: 1.32,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModuleBadge extends StatelessWidget {
+  final String label;
+
+  const _ModuleBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: .22)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.secondary,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionIntro extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SectionIntro({
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: .68),
+            height: 1.35,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _KpiGrid extends StatelessWidget {
+
+
+
   final List<_MetricData> metrics;
 
   const _KpiGrid({required this.metrics});
@@ -1014,147 +1320,6 @@ class _TopServiceCard extends StatelessWidget {
   }
 }
 
-class _QuickActionsGrid extends StatelessWidget {
-  final void Function(_QuickActionData action) onAction;
-
-  const _QuickActionsGrid({required this.onAction});
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _quickActions.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.25,
-      ),
-      itemBuilder: (_, index) {
-        final action = _quickActions[index];
-        return InkWell(
-          onTap: () => onAction(action),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF130F0C).withValues(alpha: .94),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: .18),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: .14),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(action.icon, color: AppColors.primary),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  action.label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(
-                  action.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: .64),
-                    fontSize: 11,
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final VoidCallback onGoToBusiness;
-
-  const _SummaryCard({required this.onGoToBusiness});
-
-  @override
-  Widget build(BuildContext context) {
-    return BarbershopPremiumCard(
-      radius: 24,
-      padding: const EdgeInsets.all(16),
-      backgroundColor: const Color(0xFF120E0B).withValues(alpha: .94),
-      borderColor: AppColors.primary.withValues(alpha: .16),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .14),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.storefront_rounded,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Perfil del negocio',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Revisá la experiencia pública, la galería y las opiniones con un vistazo premium.',
-                  style: TextStyle(color: Colors.white70, height: 1.35),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          TextButton(
-            onPressed: onGoToBusiness,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              backgroundColor: AppColors.primary.withValues(alpha: .10),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: const Text(
-              'Abrir',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SectionHeaderRow extends StatelessWidget {
   final String title;
   final String actionLabel;
@@ -1285,6 +1450,22 @@ class _TopServiceData {
   });
 }
 
+class _AdminModuleData {
+  final String id;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String badge;
+
+  const _AdminModuleData({
+    required this.id,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+  });
+}
+
 class _QuickActionData {
   final String id;
   final IconData icon;
@@ -1319,40 +1500,28 @@ class _AdminDashboardData {
 
 const List<_QuickActionData> _quickActions = [
   _QuickActionData(
-    id: 'staff',
-    icon: Icons.groups_rounded,
-    label: 'Administrar barberos',
-    description: 'Equipo, estados y asignaciones.',
+    id: 'new_appointment',
+    icon: Icons.event_available_rounded,
+    label: 'Nueva cita',
+    description: 'Atajo premium para comenzar una reserva.',
   ),
   _QuickActionData(
-    id: 'services',
+    id: 'new_barber',
+    icon: Icons.person_add_alt_1_rounded,
+    label: 'Nuevo barbero',
+    description: 'Sumá un perfil al equipo de la barbería.',
+  ),
+  _QuickActionData(
+    id: 'new_service',
     icon: Icons.content_cut_rounded,
-    label: 'Administrar servicios',
-    description: 'Catálogo y rendimiento comercial.',
+    label: 'Nuevo servicio',
+    description: 'Creá un servicio con tarifa y duración.',
   ),
   _QuickActionData(
-    id: 'reservations',
-    icon: Icons.event_note_rounded,
-    label: 'Ver citas',
-    description: 'Agenda completa de hoy.',
-  ),
-  _QuickActionData(
-    id: 'gallery',
-    icon: Icons.photo_library_rounded,
-    label: 'Galería',
-    description: 'Imágenes y presentación pública.',
-  ),
-  _QuickActionData(
-    id: 'reviews',
-    icon: Icons.rate_review_rounded,
-    label: 'Opiniones',
-    description: 'Reseñas y percepción del cliente.',
-  ),
-  _QuickActionData(
-    id: 'business',
-    icon: Icons.storefront_rounded,
-    label: 'Perfil del negocio',
-    description: 'Marca, contacto y narrativa premium.',
+    id: 'schedule',
+    icon: Icons.calendar_month_rounded,
+    label: 'Ver agenda',
+    description: 'Abrí las citas del día en una vista rápida.',
   ),
 ];
 

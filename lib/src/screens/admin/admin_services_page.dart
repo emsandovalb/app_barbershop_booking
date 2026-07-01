@@ -7,6 +7,7 @@ import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import 'service_management_utils.dart';
+import 'admin_page_scaffold.dart';
 
 class AdminServicesPage extends StatefulWidget {
   const AdminServicesPage({super.key});
@@ -121,6 +122,17 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
+      appBar: buildAdminAppBar(
+        context,
+        title: 'Administrar servicios',
+        subtitle: 'Catálogo, precios y asignaciones',
+        actions: [
+          IconButton(
+            onPressed: _actionInProgress ? null : _refresh,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _actionInProgress ? null : () => _openForm(),
         backgroundColor: AppColors.primary,

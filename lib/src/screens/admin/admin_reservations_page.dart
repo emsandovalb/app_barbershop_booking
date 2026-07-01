@@ -3,9 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
-import '../../navigation/app_router.dart';
 import '../../services/localization_service.dart';
 import '../../widgets/court_image.dart';
+import 'admin_page_scaffold.dart';
 
 class AdminReservationsPage extends StatefulWidget {
   const AdminReservationsPage({super.key});
@@ -53,10 +53,9 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
     final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            loc.t('admin_reservations_title', fallback: 'Appointments'),
-          ),
+        appBar: buildAdminAppBar(
+          context,
+          title: loc.t('admin_reservations_title', fallback: 'Appointments'),
         ),
         body: Center(
           child: Text(
@@ -69,16 +68,10 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
       );
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          loc.t('admin_reservations_title', fallback: 'Appointments today'),
-        ),
+      appBar: buildAdminAppBar(
+        context,
+        title: loc.t('admin_reservations_title', fallback: 'Appointments today'),
         actions: [
-          IconButton(
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
-            icon: const Icon(Icons.dashboard_outlined),
-          ),
           IconButton(
             onPressed: _pickDay,
             icon: const Icon(Icons.calendar_month),

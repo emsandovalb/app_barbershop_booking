@@ -5,6 +5,7 @@ import '../../config/app_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import 'admin_page_scaffold.dart';
 
 class AdminStaffPage extends StatefulWidget {
   const AdminStaffPage({super.key});
@@ -43,8 +44,9 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
 
     if (!canManage) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(loc.t('manage_staff', fallback: 'Manage barbers')),
+        appBar: buildAdminAppBar(
+          context,
+          title: loc.t('manage_staff', fallback: 'Manage barbers'),
         ),
         body: Center(
           child: Text(
@@ -58,14 +60,10 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.t('manage_staff', fallback: 'Manage barbers')),
+      appBar: buildAdminAppBar(
+        context,
+        title: loc.t('manage_staff', fallback: 'Manage barbers'),
         actions: [
-          IconButton(
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
-            icon: const Icon(Icons.dashboard_outlined),
-          ),
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),
