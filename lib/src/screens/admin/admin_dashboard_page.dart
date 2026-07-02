@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../bookings/appointment_helpers.dart';
@@ -175,6 +176,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final whiteLabel =
+        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
+        WhiteLabelConfig.tresAmigos;
     if (!auth.isAdmin) {
       return const Scaffold(
         backgroundColor: Color(0xFF090909),
@@ -190,7 +194,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return Scaffold(
       backgroundColor: AppColors.primaryBackground,
       body: BarbershopPremiumBackdrop(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: whiteLabel.heroBackground,
         backgroundOpacity: .22,
         blurSigma: 14,
         child: SafeArea(

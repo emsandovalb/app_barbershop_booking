@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
+import '../../config/white_label_config.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 
@@ -166,12 +168,15 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final whiteLabel =
+        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
+        WhiteLabelConfig.tresAmigos;
     final items = _filteredItems;
 
     return Scaffold(
       backgroundColor: const Color(0xFF090909),
       body: BarbershopPremiumBackdrop(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: whiteLabel.heroBackground,
         backgroundOpacity: .10,
         blurSigma: 22,
         child: SafeArea(

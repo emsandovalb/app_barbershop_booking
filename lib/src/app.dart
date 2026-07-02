@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
+import 'config/white_label_config.dart';
 import 'navigation/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'services/api.dart';
@@ -14,31 +15,37 @@ import 'navigation/nav_key.dart';
 
 class BarbershopBookingApp extends StatelessWidget {
   final AppConfig config;
+  final WhiteLabelConfig whiteLabelConfig;
 
-  const BarbershopBookingApp({super.key, required this.config});
+  const BarbershopBookingApp({
+    super.key,
+    required this.config,
+    required this.whiteLabelConfig,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final brand = config.brand;
+    final whiteLabel = whiteLabelConfig;
+    final colors = whiteLabel.colors;
     final theme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: brand.backgroundColor,
-      primaryColor: brand.primaryColor,
+      scaffoldBackgroundColor: colors.background,
+      primaryColor: colors.primaryGold,
       colorScheme: ColorScheme.dark(
-        primary: brand.primaryColor,
-        secondary: brand.secondaryColor,
-        surface: brand.surfaceColor,
+        primary: colors.primaryGold,
+        secondary: colors.primaryGoldLight,
+        surface: colors.surface,
         onPrimary: Colors.white,
-        onSecondary: brand.backgroundColor,
+        onSecondary: colors.background,
         onSurface: Colors.white,
       ),
       cardTheme: CardThemeData(
-        color: brand.surfaceColor,
+        color: colors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: Color(0x22FFFFFF)),
+          side: BorderSide(color: colors.border),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -66,13 +73,13 @@ class BarbershopBookingApp extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: brand.primaryColor),
+          borderSide: BorderSide(color: colors.primaryGold),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: brand.primaryColor,
+          backgroundColor: colors.primaryGold,
           foregroundColor: Colors.black,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -88,7 +95,7 @@ class BarbershopBookingApp extends StatelessWidget {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
-          side: BorderSide(color: brand.secondaryColor.withOpacity(.36)),
+          side: BorderSide(color: colors.primaryGoldLight.withOpacity(.36)),
           backgroundColor: const Color(0xFF15110E),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
@@ -98,12 +105,12 @@ class BarbershopBookingApp extends StatelessWidget {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: brand.secondaryColor,
+          foregroundColor: colors.primaryGoldLight,
         ),
       ),
       datePickerTheme: DatePickerThemeData(
-        backgroundColor: brand.backgroundColor,
-        headerBackgroundColor: brand.backgroundColor,
+        backgroundColor: colors.background,
+        headerBackgroundColor: colors.background,
         headerForegroundColor: Colors.white,
         headerHeadlineStyle: const TextStyle(
           fontSize: 20,
@@ -113,18 +120,18 @@ class BarbershopBookingApp extends StatelessWidget {
         dayForegroundColor: const WidgetStatePropertyAll(Colors.white),
         dayBackgroundColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? brand.primaryColor
+              ? colors.primaryGold
               : Colors.transparent,
         ),
         todayForegroundColor: const WidgetStatePropertyAll(Colors.white),
         todayBackgroundColor: WidgetStatePropertyAll(
-          brand.primaryColor.withOpacity(.25),
+          colors.primaryGold.withOpacity(.25),
         ),
       ),
       chipTheme: const ChipThemeData(
         backgroundColor: Color(0xFF231C18),
         labelStyle: TextStyle(color: Colors.white),
-        selectedColor: Color(0xFFC9A56A),
+        selectedColor: Color(0xFFD4A84F),
         shape: StadiumBorder(),
       ),
       listTileTheme: ListTileThemeData(
@@ -133,14 +140,14 @@ class BarbershopBookingApp extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: brand.backgroundColor,
-        selectedItemColor: brand.primaryColor,
+        backgroundColor: colors.background,
+        selectedItemColor: colors.primaryGold,
         unselectedItemColor: Colors.white.withOpacity(.55),
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: brand.surfaceColor,
+        backgroundColor: colors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         titleTextStyle: const TextStyle(
           color: Colors.white,
@@ -158,7 +165,7 @@ class BarbershopBookingApp extends StatelessWidget {
         behavior: SnackBarBehavior.floating,
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: brand.surfaceColor,
+        backgroundColor: colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
         ),
@@ -181,6 +188,7 @@ class BarbershopBookingApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<AppConfig>.value(value: config),
+        Provider<WhiteLabelConfig>.value(value: whiteLabelConfig),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             ApiClient(
@@ -204,13 +212,13 @@ class BarbershopBookingApp extends StatelessWidget {
           },
         ),
       ],
-        child: Builder(
+      child: Builder(
         builder: (context) {
           final localization = context.watch<LocalizationService>();
           final app = InactivityListener(
             timeout: const Duration(minutes: 5),
             child: MaterialApp(
-              title: brand.appName,
+              title: whiteLabel.appName,
               debugShowCheckedModeBanner: false,
               theme: theme,
               navigatorKey: appNavigatorKey,

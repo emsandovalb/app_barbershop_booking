@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../config/white_label_config.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
@@ -85,10 +86,11 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     return Scaffold(
       backgroundColor: const Color(0xFF090909),
       body: BarbershopPremiumBackdrop(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: whiteLabel.heroBackground,
         backgroundOpacity: .18,
         blurSigma: 18,
         child: SafeArea(
@@ -142,7 +144,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 18),
                       SectionHeader(
                         title: 'Nuestro equipo',
-                        actionLabel: 'Reservar cita',
+                        actionLabel: whiteLabel.appointmentLabel,
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
@@ -150,14 +152,14 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 20),
                       SectionHeader(
                         title: 'Servicios destacados',
-                        actionLabel: 'Conocé la barbería',
+                        actionLabel: whiteLabel.businessProfileLabel,
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
                       _ServiceGrid(resources: resources),
                       const SizedBox(height: 20),
                       SectionHeader(
-                        title: 'Galería',
+                        title: whiteLabel.galleryLabel,
                         actionLabel: 'Ver galería',
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
@@ -189,7 +191,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                           children: [
                             const PremiumBadge(label: 'RESERVÁ AHORA'),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'Reservá tu próxima cita con una experiencia premium.',
                               style: TextStyle(
                                 color: Colors.white,

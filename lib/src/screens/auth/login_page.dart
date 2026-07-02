@@ -5,15 +5,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import '../../widgets/barbershop_branding.dart';
-
-const Color tresAmigosGold = Color(0xFFD4A84F);
-const Color tresAmigosGoldLight = Color(0xFFE8C36A);
-const Color tresAmigosGoldDark = Color(0xFF9B6F24);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -65,55 +61,51 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final brand = context.watch<AppConfig>().brand;
-    final logo = brand.logoAsset ?? 'assets/branding/logo_transparent.png';
+    final whiteLabel = context.watch<WhiteLabelConfig>();
+    final colors = whiteLabel.colors;
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 1.1, sigmaY: 1.1),
-                  child: Image.asset(
-                    'assets/branding/barbershop_hero_bg.png',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF050505).withOpacity(.42),
-                        const Color(0xFF090909).withOpacity(.30),
-                        const Color(0xFF050505).withOpacity(.62),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: -90,
-                  left: -90,
-                  child: _GlowOrb(color: tresAmigosGold.withOpacity(.18), size: 240),
-                ),
-                Positioned(
-                  top: 80,
-                  right: -80,
-                  child: _GlowOrb(color: tresAmigosGoldDark.withOpacity(.14), size: 180),
-                ),
-                Positioned(
-                  bottom: -110,
-                  left: -110,
-                  child: _GlowOrb(color: Colors.white.withOpacity(.05), size: 260),
-                ),
-              ],
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 1.1, sigmaY: 1.1),
+            child: Image.asset(
+              whiteLabel.heroBackground,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF050505).withOpacity(.42),
+                  const Color(0xFF090909).withOpacity(.30),
+                  const Color(0xFF050505).withOpacity(.62),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: -90,
+            left: -90,
+            child: _GlowOrb(color: colors.primaryGold.withOpacity(.18), size: 240),
+          ),
+          Positioned(
+            top: 80,
+            right: -80,
+            child: _GlowOrb(
+              color: colors.primaryGoldDark.withOpacity(.14),
+              size: 180,
+            ),
+          ),
+          Positioned(
+            bottom: -110,
+            left: -110,
+            child: _GlowOrb(color: Colors.white.withOpacity(.05), size: 260),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -127,23 +119,23 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
                       style: TextButton.styleFrom(
-                        foregroundColor: tresAmigosGoldLight,
+                        foregroundColor: colors.primaryGoldLight,
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                       child: const Text('Omitir'),
                     ),
                   ),
-                  const SizedBox(height: 0),
+                  const SizedBox(height: 4),
                   Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         BarbershopLogoMark(
-                          assetPath: logo,
+                          assetPath: whiteLabel.logoTransparent,
                           size: 172,
-                          glowColor: tresAmigosGold,
+                          glowColor: colors.primaryGold,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(24),
                           child: BackdropFilter(
@@ -163,22 +155,22 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: Column(
                                 children: [
-                                  const Text(
-                                    'BARBERÍA',
+                                  Text(
+                                    whiteLabel.displayName.split(' ').first,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.w800,
-                                      color: tresAmigosGold,
+                                      color: colors.primaryGold,
                                       height: 1.0,
                                       letterSpacing: .7,
                                     ),
                                   ),
                                   const SizedBox(height: 1),
-                                  const Text(
-                                    'TRES AMIGOS',
+                                  Text(
+                                    whiteLabel.shortName.toUpperCase(),
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 31,
                                       fontWeight: FontWeight.w900,
                                       color: Colors.white,
@@ -196,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                                             gradient: LinearGradient(
                                               colors: [
                                                 Colors.transparent,
-                                                tresAmigosGold.withOpacity(.72),
+                                                colors.primaryGold.withOpacity(.72),
                                               ],
                                             ),
                                           ),
@@ -205,10 +197,10 @@ class _LoginPageState extends State<LoginPage> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 12),
                                         child: Text(
-                                          'TU ESTILO, TU EXPERIENCIA',
+                                          whiteLabel.subtitle.toUpperCase(),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            color: tresAmigosGoldLight,
+                                            color: colors.primaryGoldLight,
                                             fontSize: 13,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 1.15,
@@ -221,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
-                                                tresAmigosGold.withOpacity(.72),
+                                                colors.primaryGold.withOpacity(.72),
                                                 Colors.transparent,
                                               ],
                                             ),
@@ -238,12 +230,12 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
-                        const SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   BarbershopPremiumCard(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                     radius: 30,
                     backgroundColor: const Color(0xFF120E0B).withOpacity(.92),
-                    borderColor: tresAmigosGoldDark.withOpacity(.45),
+                    borderColor: colors.primaryGoldDark.withOpacity(.45),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(.34),
@@ -258,7 +250,7 @@ class _LoginPageState extends State<LoginPage> {
                           'Bienvenido de nuevo',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: tresAmigosGoldLight,
+                            color: colors.primaryGoldLight,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             letterSpacing: .2,
@@ -297,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () => Navigator.of(context).pushNamed(AppRoutes.forgot),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
-                              foregroundColor: tresAmigosGoldLight,
+                              foregroundColor: colors.primaryGoldLight,
                             ),
                             child: const Text('¿Olvidaste tu contraseña?'),
                           ),
@@ -327,7 +319,7 @@ class _LoginPageState extends State<LoginPage> {
                                     setState(() => isBusy = false);
                                   },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: tresAmigosGoldLight,
+                              backgroundColor: colors.primaryGoldLight,
                               foregroundColor: Colors.black,
                               minimumSize: const Size.fromHeight(54),
                               shape: RoundedRectangleBorder(
@@ -343,7 +335,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const _SocialDivider(label: 'O CONTINUAR CON'),
+                        _SocialDivider(
+                          label: 'O CONTINUAR CON',
+                          lineColor: colors.primaryGoldDark,
+                          textColor: colors.primaryGoldLight,
+                        ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -351,6 +347,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: _SocialButton(
                                 label: 'Google',
                                 icon: const _GoogleBrandIcon(),
+                                borderColor: colors.primaryGold.withOpacity(.52),
                                 onTap: () => _notImplemented(context, 'Google Sign-In'),
                               ),
                             ),
@@ -363,6 +360,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Color(0xFF1877F2),
                                   size: 20,
                                 ),
+                                borderColor: colors.primaryGold.withOpacity(.52),
                                 onTap: () => _notImplemented(context, 'Facebook Login'),
                               ),
                             ),
@@ -375,6 +373,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                   size: 20,
                                 ),
+                                borderColor: colors.primaryGold.withOpacity(.52),
                                 onTap: () => _notImplemented(context, 'Apple / Face ID'),
                               ),
                             ),
@@ -393,7 +392,7 @@ class _LoginPageState extends State<LoginPage> {
                                 TextSpan(
                                   text: 'Regístrate',
                                   style: TextStyle(
-                                    color: tresAmigosGoldLight,
+                                    color: colors.primaryGoldLight,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -418,11 +417,13 @@ class _SocialButton extends StatelessWidget {
   final String label;
   final Widget icon;
   final VoidCallback onTap;
+  final Color borderColor;
 
   const _SocialButton({
     required this.label,
     required this.icon,
     required this.onTap,
+    required this.borderColor,
   });
 
   @override
@@ -434,7 +435,7 @@ class _SocialButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
           backgroundColor: const Color(0xFF15100D),
-          side: BorderSide(color: tresAmigosGold.withOpacity(.52), width: 1),
+          side: BorderSide(color: borderColor, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           padding: const EdgeInsets.symmetric(horizontal: 10),
         ),
@@ -466,8 +467,14 @@ class _SocialButton extends StatelessWidget {
 
 class _SocialDivider extends StatelessWidget {
   final String label;
+  final Color lineColor;
+  final Color textColor;
 
-  const _SocialDivider({required this.label});
+  const _SocialDivider({
+    required this.label,
+    required this.lineColor,
+    required this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +487,7 @@ class _SocialDivider extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  tresAmigosGoldDark.withOpacity(.55),
+                  lineColor.withOpacity(.55),
                 ],
               ),
             ),
@@ -491,7 +498,7 @@ class _SocialDivider extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: tresAmigosGoldLight,
+              color: textColor,
               fontWeight: FontWeight.w800,
               letterSpacing: .7,
               fontSize: 11,
@@ -504,7 +511,7 @@ class _SocialDivider extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  tresAmigosGoldDark.withOpacity(.55),
+                  lineColor.withOpacity(.55),
                   Colors.transparent,
                 ],
               ),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
@@ -95,6 +96,9 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
     final brand = config.brand;
+    final whiteLabel =
+        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
+        WhiteLabelConfig.tresAmigos;
     final auth = context.watch<AuthProvider>();
     final name =
         (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Admin Demo')
@@ -157,9 +161,8 @@ class _HomeTabState extends State<HomeTab> {
                     borderRadius: BorderRadius.circular(30),
                     child: _HeroCard(
                       brand: brand,
-                      logoAsset:
-                          brand.logoAsset ??
-                          'assets/branding/logo_transparent.png',
+                      logoAsset: whiteLabel.logoTransparent,
+                      whiteLabel: whiteLabel,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -170,14 +173,14 @@ class _HomeTabState extends State<HomeTab> {
                           height: 56,
                           child: TextField(
                             onChanged: (value) => q = value,
-                            onSubmitted: (_) {
+                          onSubmitted: (_) {
                               final query = q.trim();
                               if (query.isEmpty) return;
                               _openFilteredResults(
                                 filters: {'q': query},
-                                title: 'Resultados de servicios',
-                              );
-                            },
+                              title: 'Resultados de servicios',
+                            );
+                          },
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -225,7 +228,7 @@ class _HomeTabState extends State<HomeTab> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide(
-                                  color: brand.primaryColor.withValues(
+                              color: brand.primaryColor.withValues(
                                     alpha: .70,
                                   ),
                                 ),
@@ -377,8 +380,13 @@ class _HomeTabState extends State<HomeTab> {
 class _HeroCard extends StatelessWidget {
   final BrandConfig brand;
   final String logoAsset;
+  final WhiteLabelConfig whiteLabel;
 
-  const _HeroCard({required this.brand, required this.logoAsset});
+  const _HeroCard({
+    required this.brand,
+    required this.logoAsset,
+    required this.whiteLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +398,7 @@ class _HeroCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.asset(
-              'assets/branding/barbershop_hero_bg.png',
+              whiteLabel.heroBackground,
               fit: BoxFit.cover,
               alignment: Alignment.center,
             ),
@@ -427,7 +435,7 @@ class _HeroCard extends StatelessWidget {
                 children: [
                   const Align(
                     alignment: Alignment.topCenter,
-                    child: PremiumBadge(label: 'PREMIUM EXPERIENCE'),
+                    child: PremiumBadge(label: 'EXPERIENCIA PREMIUM'),
                   ),
                   const SizedBox(height: 10),
                   Expanded(
@@ -449,7 +457,7 @@ class _HeroCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'BARBERIA',
+                    'BARBERÍA',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.primary,
@@ -493,16 +501,16 @@ class _BusinessInfoCards extends StatelessWidget {
         Expanded(
           child: _InfoCard(
             icon: Icons.schedule_rounded,
-            title: 'Horario de atencion',
+            title: 'Horario de atención',
             body:
-                'Lun 10:00 AM - 7:00 PM\nMar - Jue 10:00 AM - 12:00 PM\n2:00 PM - 8:00 PM\nVie - Sab 10:00 AM - 7:00 PM\nDomingo cerrado',
+                'Lun 10:00 AM - 7:00 PM\nMar - Jue 10:00 AM - 12:00 PM\n2:00 PM - 8:00 PM\nVie - Sáb 10:00 AM - 7:00 PM\nDomingo cerrado',
           ),
         ),
         SizedBox(width: 10),
         Expanded(
           child: _InfoCard(
             icon: Icons.location_on_rounded,
-            title: 'Ubicacion y contacto',
+            title: 'Ubicación y contacto',
             body:
                 'Puntarenas, El Roble,\nCosta Rica\n\n+506 8888-3366\n\nhola@barberiatresamigos.com',
           ),

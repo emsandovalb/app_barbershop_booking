@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
-import '../config/app_config.dart';
+import '../config/white_label_config.dart';
 import '../navigation/app_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/barbershop_branding.dart';
@@ -44,15 +44,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final config = context.watch<AppConfig>();
-    final brand = config.brand;
-    final logo = brand.splashAsset?.isNotEmpty == true
-        ? brand.splashAsset!
-        : brand.logoAsset ?? 'assets/branding/logo_transparent.png';
+    final whiteLabel = context.watch<WhiteLabelConfig>();
 
     return Scaffold(
       body: BarbershopPremiumBackdrop(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: whiteLabel.heroBackground,
         backgroundOpacity: .24,
         blurSigma: 20,
         child: SafeArea(
@@ -67,13 +63,13 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   BarbershopLogoMark(
-                    assetPath: logo,
+                    assetPath: whiteLabel.logoTransparent,
                     size: 200,
-                    glowColor: brand.primaryColor,
+                    glowColor: whiteLabel.primaryGold,
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'BARBERÍA',
+                    whiteLabel.displayName.split(' ').first,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 22,
@@ -83,10 +79,10 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    'TRES AMIGOS',
+                  Text(
+                    whiteLabel.shortName.toUpperCase(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
@@ -96,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Cortes, barba y experiencias premium',
+                    whiteLabel.tagline,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,
@@ -113,4 +109,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../config/white_label_config.dart';
 import '../../theme/colors.dart';
 import '../../widgets/barbershop_branding.dart';
 
@@ -15,6 +17,9 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final whiteLabel =
+        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
+        WhiteLabelConfig.tresAmigos;
     final visibleReviews = _demoReviews
         .where((review) => review.matches(_filter))
         .toList(growable: false);
@@ -39,7 +44,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
         ),
       ),
       body: BarbershopPremiumBackdrop(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: whiteLabel.heroBackground,
         backgroundOpacity: .18,
         blurSigma: 20,
         child: SafeArea(
@@ -49,8 +54,8 @@ class _ReviewsPageState extends State<ReviewsPage> {
               const _HeaderSection(),
               const SizedBox(height: 18),
               _RatingSummaryCard(
-                rating: _summaryRating,
-                totalReviews: _totalReviews,
+                rating: whiteLabel.rating,
+                totalReviews: whiteLabel.reviewCount,
                 distribution: _ratingDistribution,
               ),
               const SizedBox(height: 16),

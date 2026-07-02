@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'my_profile_page.dart';
-// ignore: unused_import
-import '../common/simple_page.dart';
-import '../../navigation/app_router.dart';
-import '../common/coming_soon_page.dart';
-import '../bookings/bookings_tab.dart';
-import '../../config/app_config.dart';
 import 'package:provider/provider.dart';
+
+import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
+import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
-import '../../theme/colors.dart';
+import '../bookings/bookings_tab.dart';
+import '../common/coming_soon_page.dart';
+import 'my_profile_page.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -19,6 +18,7 @@ class ProfileTab extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final localization = context.watch<LocalizationService>();
     final config = context.watch<AppConfig>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
     final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
         .toString();
@@ -124,13 +124,14 @@ class ProfileTab extends StatelessWidget {
             localization.t('profile_about', fallback: 'About us'),
           ),
         ),
-        _ProfileTile(
-          title: 'Perfil de Barbería Tres Amigos',
-          icon: Icons.storefront_outlined,
-          onTap: () =>
-              Navigator.of(context).pushNamed(AppRoutes.businessProfile),
-        ),
-        if (isAdmin)
+        if (whiteLabel.features.showBusinessProfile)
+          _ProfileTile(
+            title: whiteLabel.businessProfileLabel,
+            icon: Icons.storefront_outlined,
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoutes.businessProfile),
+          ),
+        if (isAdmin && whiteLabel.features.showAdminDashboard)
           _ProfileTile(
             title: 'Centro administrativo',
             icon: Icons.dashboard_outlined,
@@ -160,7 +161,7 @@ class ProfileTab extends StatelessWidget {
           _ProfileTile(
             title: localization.t(
               'profile_my_grounds',
-              fallback: 'My services',
+              fallback: whiteLabel.servicesLabel,
             ),
             icon: Icons.content_cut_outlined,
             onTap: () {
@@ -201,7 +202,7 @@ class ProfileTab extends StatelessWidget {
                   lang['label']!,
                   style: const TextStyle(color: Colors.white),
                 ),
-                activeColor: AppColors.primary,
+                activeColor: whiteLabel.primaryGold,
               );
             }).toList(),
           ),

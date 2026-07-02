@@ -10,12 +10,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_barbershop_booking/src/app.dart';
 import 'package:app_barbershop_booking/src/config/app_config.dart';
+import 'package:app_barbershop_booking/src/config/white_label_config.dart';
 import 'package:app_barbershop_booking/src/screens/gallery/gallery_page.dart';
 
 void main() {
   testWidgets('App bootstrap smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const BarbershopBookingApp(config: AppConfig.barbershop),
+      const BarbershopBookingApp(
+        config: AppConfig.barbershop,
+        whiteLabelConfig: WhiteLabelConfig.tresAmigos,
+      ),
     );
 
     expect(find.byType(MaterialApp), findsOneWidget);

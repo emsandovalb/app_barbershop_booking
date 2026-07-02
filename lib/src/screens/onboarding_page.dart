@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../config/white_label_config.dart';
 import '../navigation/app_router.dart';
 import '../widgets/barbershop_branding.dart';
 
@@ -8,13 +9,15 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final whiteLabel = WhiteLabelConfig.tresAmigos;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/branding/barbershop_hero_bg.png',
+              whiteLabel.heroBackground,
               fit: BoxFit.cover,
               alignment: Alignment.center,
               filterQuality: FilterQuality.high,
@@ -43,7 +46,7 @@ class OnboardingPage extends StatelessWidget {
                   center: const Alignment(0.0, -0.10),
                   radius: .82,
                   colors: [
-                    const Color(0xFFD4A84F).withValues(alpha: .09),
+                    whiteLabel.primaryGold.withValues(alpha: .09),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 1.0],
@@ -81,15 +84,15 @@ class OnboardingPage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           BarbershopLogoMark(
-                            assetPath: 'assets/branding/logo_transparent.png',
+                            assetPath: whiteLabel.logoTransparent,
                             size: 232,
                             glowSize: .75,
-                            glowColor: const Color(0xFFD4A84F),
+                            glowColor: whiteLabel.primaryGold,
                             showGlow: true,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'BARBERÍA',
+                            whiteLabel.displayName.split(' ').first,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
@@ -102,10 +105,10 @@ class OnboardingPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
-                            'TRES AMIGOS',
+                          Text(
+                            whiteLabel.shortName.toUpperCase(),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 34,
                               fontWeight: FontWeight.w900,
                               color: Colors.white,
@@ -114,13 +117,13 @@ class OnboardingPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'CORTES, BARBA Y EXPERIENCIAS\nPREMIUM',
+                          Text(
+                            whiteLabel.tagline.toUpperCase(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFFD4A84F),
+                              color: whiteLabel.primaryGold,
                               letterSpacing: 2.4,
                               height: 1.45,
                             ),
@@ -142,7 +145,7 @@ class OnboardingPage extends StatelessWidget {
                               context,
                             ).pushReplacementNamed(AppRoutes.login),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFD4A84F),
+                              backgroundColor: whiteLabel.primaryGold,
                               foregroundColor: Colors.black,
                               elevation: 0,
                               shadowColor: Colors.transparent,
