@@ -173,21 +173,23 @@ class _HomeTabState extends State<HomeTab> {
                           height: 56,
                           child: TextField(
                             onChanged: (value) => q = value,
-                          onSubmitted: (_) {
+                            onSubmitted: (_) {
                               final query = q.trim();
                               if (query.isEmpty) return;
                               _openFilteredResults(
                                 filters: {'q': query},
-                              title: 'Resultados de servicios',
-                            );
-                          },
+                                title:
+                                    'Resultados de ${whiteLabel.servicesLabel}',
+                              );
+                            },
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                             ),
                             cursorColor: AppColors.primary,
                             decoration: InputDecoration(
-                              hintText: 'Buscar servicios, barberos...',
+                              hintText:
+                                  'Buscar ${whiteLabel.servicesLabel}, ${whiteLabel.staffPluralLabel}...',
                               hintStyle: TextStyle(
                                 color: Colors.white.withValues(alpha: .50),
                                 fontSize: 14,
@@ -228,7 +230,7 @@ class _HomeTabState extends State<HomeTab> {
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide(
-                              color: brand.primaryColor.withValues(
+                                  color: brand.primaryColor.withValues(
                                     alpha: .70,
                                   ),
                                 ),
@@ -265,9 +267,10 @@ class _HomeTabState extends State<HomeTab> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  const _BusinessInfoCards(),
+                  _BusinessInfoCards(whiteLabel: whiteLabel),
                   const SizedBox(height: 16),
                   _BusinessProfileTeaser(
+                    whiteLabel: whiteLabel,
                     onTap: () => Navigator.of(
                       context,
                     ).pushNamed(AppRoutes.businessProfile),
@@ -282,6 +285,7 @@ class _HomeTabState extends State<HomeTab> {
                   ],
                   const SizedBox(height: 10),
                   _ReviewsPromoCard(
+                    whiteLabel: whiteLabel,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ReviewsPage()),
                     ),
@@ -294,7 +298,7 @@ class _HomeTabState extends State<HomeTab> {
                         MaterialPageRoute(builder: (_) => const GalleryPage()),
                       ),
                       icon: const Icon(Icons.photo_library_outlined, size: 18),
-                      label: const Text('Ver galería'),
+                      label: Text('Ver ${whiteLabel.galleryLabel}'),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.secondary,
                         padding: const EdgeInsets.symmetric(
@@ -306,63 +310,71 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   const SizedBox(height: 16),
                   SectionHeader(
-                    title: 'Servicios destacados',
+                    title:
+                        '${_capitalize(whiteLabel.servicesLabel)} destacados',
                     actionLabel: 'Ver todos',
                     onTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title: 'Servicios destacados',
+                      title:
+                          '${_capitalize(whiteLabel.servicesLabel)} destacados',
                     ),
                   ),
                   const SizedBox(height: 12),
                   _ServiceCarousel(
                     isLoading: loadingPopular || loadingPremium,
                     items: featuredServices,
-                    emptyMessage: 'No hay servicios destacados disponibles.',
+                    emptyMessage:
+                        'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
                     onEmptyTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title: 'Servicios destacados',
+                      title:
+                          '${_capitalize(whiteLabel.servicesLabel)} destacados',
                     ),
                     itemBuilder: (index, data) =>
                         _ServiceCard(index: index, data: data),
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
-                    title: 'Servicios populares',
+                    title: '${_capitalize(whiteLabel.servicesLabel)} populares',
                     actionLabel: 'Ver todos',
                     onTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title: 'Servicios populares',
+                      title:
+                          '${_capitalize(whiteLabel.servicesLabel)} populares',
                     ),
                   ),
                   const SizedBox(height: 12),
                   _ServiceCarousel(
                     isLoading: loadingPopular,
                     items: popular,
-                    emptyMessage: 'No hay servicios populares disponibles.',
+                    emptyMessage:
+                        'No hay ${whiteLabel.servicesLabel} populares disponibles.',
                     onEmptyTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title: 'Servicios populares',
+                      title:
+                          '${_capitalize(whiteLabel.servicesLabel)} populares',
                     ),
                     itemBuilder: (index, data) =>
                         _ServiceCard(index: index, data: data),
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
-                    title: 'Experiencias premium',
+                    title: '${_capitalize(whiteLabel.servicesLabel)} premium',
                     actionLabel: 'Ver todos',
                     onTap: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
-                      title: 'Experiencias premium',
+                      title: '${_capitalize(whiteLabel.servicesLabel)} premium',
                     ),
                   ),
                   const SizedBox(height: 12),
                   _ServiceCarousel(
                     isLoading: loadingPremium,
                     items: premium,
-                    emptyMessage: 'No hay experiencias premium disponibles.',
+                    emptyMessage:
+                        'No hay ${whiteLabel.servicesLabel} premium disponibles.',
                     onEmptyTap: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
-                      title: 'Experiencias premium',
+                      title: '${_capitalize(whiteLabel.servicesLabel)} premium',
                     ),
                     itemBuilder: (index, data) =>
                         _ServiceCard(index: index, data: data),
@@ -433,9 +445,11 @@ class _HeroCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
               child: Column(
                 children: [
-                  const Align(
+                  Align(
                     alignment: Alignment.topCenter,
-                    child: PremiumBadge(label: 'EXPERIENCIA PREMIUM'),
+                    child: PremiumBadge(
+                      label: whiteLabel.shortName.toUpperCase(),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Expanded(
@@ -456,10 +470,10 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'BARBERÍA',
+                  Text(
+                    whiteLabel.displayName.split(' ').first.toUpperCase(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -468,10 +482,10 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    'TRES AMIGOS',
+                  Text(
+                    whiteLabel.shortName.toUpperCase(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 33,
                       fontWeight: FontWeight.w900,
@@ -491,28 +505,29 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _BusinessInfoCards extends StatelessWidget {
-  const _BusinessInfoCards();
+  final WhiteLabelConfig whiteLabel;
+
+  const _BusinessInfoCards({required this.whiteLabel});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Expanded(
           child: _InfoCard(
             icon: Icons.schedule_rounded,
-            title: 'Horario de atención',
-            body:
-                'Lun 10:00 AM - 7:00 PM\nMar - Jue 10:00 AM - 12:00 PM\n2:00 PM - 8:00 PM\nVie - Sáb 10:00 AM - 7:00 PM\nDomingo cerrado',
+            title: whiteLabel.hoursLabel,
+            body: whiteLabel.detailedHours.join('\n'),
           ),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
           child: _InfoCard(
             icon: Icons.location_on_rounded,
             title: 'Ubicación y contacto',
             body:
-                'Puntarenas, El Roble,\nCosta Rica\n\n+506 8888-3366\n\nhola@barberiatresamigos.com',
+                '${whiteLabel.locationFull}\n\n${whiteLabel.phone}\n\n${whiteLabel.email}',
           ),
         ),
       ],
@@ -521,9 +536,10 @@ class _BusinessInfoCards extends StatelessWidget {
 }
 
 class _BusinessProfileTeaser extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onTap;
 
-  const _BusinessProfileTeaser({required this.onTap});
+  const _BusinessProfileTeaser({required this.whiteLabel, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -566,12 +582,12 @@ class _BusinessProfileTeaser extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Conocé la barbería',
+                    'Conocé ${whiteLabel.businessProfileLabel}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -580,7 +596,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Entrá al perfil premium de Barbería Tres Amigos.',
+                    'Entrá al ${whiteLabel.businessProfileLabel} premium de ${whiteLabel.displayName}.',
                     style: TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],
@@ -671,9 +687,10 @@ class _AdminDashboardTeaser extends StatelessWidget {
 }
 
 class _ReviewsPromoCard extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onTap;
 
-  const _ReviewsPromoCard({required this.onTap});
+  const _ReviewsPromoCard({required this.whiteLabel, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -716,27 +733,27 @@ class _ReviewsPromoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Clientes felices',
-                    style: TextStyle(
+                    '${_capitalize(whiteLabel.reviewsLabel)} felices',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    '4.9 basado en 128 opiniones',
-                    style: TextStyle(color: Colors.white70, height: 1.35),
+                    '${whiteLabel.rating.toStringAsFixed(1)} basado en ${whiteLabel.reviewCount} ${whiteLabel.reviewsLabel}',
+                    style: const TextStyle(color: Colors.white70, height: 1.35),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'Ver opiniones',
-                    style: TextStyle(
+                    'Ver ${whiteLabel.reviewsLabel}',
+                    style: const TextStyle(
                       color: AppColors.secondary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -966,6 +983,11 @@ String _formatCrc(dynamic value) {
     symbol: '₡',
     decimalDigits: 0,
   ).format(number);
+}
+
+String _capitalize(String value) {
+  if (value.isEmpty) return value;
+  return value[0].toUpperCase() + value.substring(1);
 }
 
 String _durationLabel(dynamic durationHours, dynamic durationMinutes) {

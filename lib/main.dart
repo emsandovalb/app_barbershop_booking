@@ -16,6 +16,8 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   final whiteLabelConfig = WhiteLabelConfig.tresAmigos;
+  // To test another white-label brand locally:
+  // final whiteLabelConfig = WhiteLabelConfig.demoSalon;
   runApp(
     BarbershopBookingApp(
       config: AppConfig.barbershop,

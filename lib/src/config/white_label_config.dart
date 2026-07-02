@@ -162,6 +162,11 @@ class FeatureConfig {
   });
 }
 
+/// WhiteLabelConfig owns business-facing branding and copy.
+///
+/// Use this for the identity, visual language, assets, contact information,
+/// business hours, policies, terminology, and feature toggles that should vary
+/// per tenant or brand.
 class WhiteLabelConfig {
   final BusinessIdentity identity;
   final BrandAssets assets;
@@ -212,6 +217,9 @@ class WhiteLabelConfig {
   String get facebook => contact.facebook;
   String get website => contact.website;
   String get address => contact.address;
+  String get hoursLabel => hours.label;
+  String get hoursSummary => hours.weeklySummary;
+  List<String> get detailedHours => hours.detailedHours;
   String get cancellationPolicyText => policies.cancellationPolicyText;
   int get cancellationWindowHours => policies.cancellationWindowHours;
   String get serviceLabel => terminology.service;
@@ -244,7 +252,8 @@ class WhiteLabelConfig {
       appIcon: 'assets/branding/app_icon.png',
       heroBackground: 'assets/branding/barbershop_hero_bg.png',
       servicePlaceholder: 'assets/branding/service_placeholder.png',
-      premiumServicePlaceholder: 'assets/branding/service_placeholder_premium.png',
+      premiumServicePlaceholder:
+          'assets/branding/service_placeholder_premium.png',
       staffPlaceholder: 'assets/branding/barber_placeholder.png',
       profilePlaceholder: 'assets/branding/profile_placeholder.png',
     ),
@@ -270,7 +279,8 @@ class WhiteLabelConfig {
     ),
     hours: BusinessHours(
       label: 'Horario de atención',
-      weeklySummary: 'Lun - Vie 10:00 AM - 7:00 PM · Sáb 10:00 AM - 5:00 PM · Dom cerrado',
+      weeklySummary:
+          'Lun - Vie 10:00 AM - 7:00 PM · Sáb 10:00 AM - 5:00 PM · Dom cerrado',
       detailedHours: [
         'Lun 10:00 AM - 7:00 PM',
         'Mar - Jue 10:00 AM - 12:00 PM / 2:00 PM - 8:00 PM',
@@ -293,6 +303,89 @@ class WhiteLabelConfig {
       staffDisplayName: 'barbero',
       manager: 'administrador',
       businessProfile: 'perfil de la barbería',
+      gallery: 'galería',
+      reviews: 'opiniones',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const demoSalon = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'Salón Aurora',
+      displayName: 'SALÓN AURORA',
+      shortName: 'Aurora',
+      tagline: 'Belleza, estilo y cuidado personal',
+      subtitle: 'Tu momento, tu estilo',
+      locationShort: 'San José, Costa Rica',
+      locationFull: 'San José, Costa Rica',
+      rating: 4.8,
+      reviewCount: 96,
+    ),
+    assets: BrandAssets(
+      logoTransparent: 'assets/branding/logo_transparent.png',
+      appIcon: 'assets/branding/app_icon.png',
+      heroBackground: 'assets/branding/barbershop_hero_bg.png',
+      servicePlaceholder: 'assets/branding/service_placeholder.png',
+      premiumServicePlaceholder:
+          'assets/branding/service_placeholder_premium.png',
+      staffPlaceholder: 'assets/branding/barber_placeholder.png',
+      profilePlaceholder: 'assets/branding/profile_placeholder.png',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFFE6B7A9),
+      primaryGoldLight: Color(0xFFF3D4CC),
+      primaryGoldDark: Color(0xFFA66A5E),
+      background: Color(0xFF090909),
+      surface: Color(0xFF1A1512),
+      card: Color(0xFF120E0B),
+      border: Color(0x22FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFB9AFA5),
+    ),
+    contact: BusinessContact(
+      phone: '+506 7000-0000',
+      whatsapp: '+506 7000-0000',
+      email: 'hola@salonaurora.com',
+      instagram: '@salonaurora',
+      facebook: 'Salón Aurora',
+      website: 'https://salonaurora.com',
+      address: 'San José, Costa Rica',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atención',
+      weeklySummary:
+          'Lun - Vie 9:00 AM - 6:00 PM · Sáb 9:00 AM - 3:00 PM · Dom cerrado',
+      detailedHours: [
+        'Lun 9:00 AM - 6:00 PM',
+        'Mar - Jue 9:00 AM - 6:00 PM',
+        'Vie 9:00 AM - 6:00 PM',
+        'Sáb 9:00 AM - 3:00 PM',
+        'Domingo cerrado',
+      ],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Podés cancelar o reprogramar hasta 6 horas antes de tu cita.',
+      cancellationWindowHours: 6,
+    ),
+    terminology: Terminology(
+      service: 'tratamiento',
+      services: 'tratamientos',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'estilista',
+      staffPlural: 'estilistas',
+      staffDisplayName: 'estilista',
+      manager: 'administradora',
+      businessProfile: 'perfil del salón',
       gallery: 'galería',
       reviews: 'opiniones',
     ),

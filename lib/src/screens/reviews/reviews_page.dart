@@ -35,12 +35,9 @@ class _ReviewsPageState extends State<ReviewsPage> {
           onPressed: () => Navigator.of(context).maybePop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text(
-          'Opiniones',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            letterSpacing: .2,
-          ),
+        title: Text(
+          whiteLabel.reviewsLabel.toUpperCase(),
+          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: .2),
         ),
       ),
       body: BarbershopPremiumBackdrop(
@@ -51,7 +48,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 28),
             children: [
-              const _HeaderSection(),
+              _HeaderSection(whiteLabel: whiteLabel),
               const SizedBox(height: 18),
               _RatingSummaryCard(
                 rating: whiteLabel.rating,
@@ -72,7 +69,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
                     : 'Reseñas destacadas',
                 subtitle: visibleReviews.isEmpty
                     ? 'Probá otro filtro para ver más opiniones.'
-                    : '${visibleReviews.length} opiniones visibles',
+                    : '${visibleReviews.length} ${whiteLabel.reviewsLabel} visibles',
               ),
               const SizedBox(height: 12),
               if (visibleReviews.isEmpty)
@@ -96,15 +93,17 @@ class _ReviewsPageState extends State<ReviewsPage> {
 }
 
 class _HeaderSection extends StatelessWidget {
-  const _HeaderSection();
+  final WhiteLabelConfig whiteLabel;
+
+  const _HeaderSection({required this.whiteLabel});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
-          'OPINIONES',
+          whiteLabel.reviewsLabel.toUpperCase(),
           style: TextStyle(
             color: AppColors.primary,
             fontSize: 12,
@@ -114,7 +113,7 @@ class _HeaderSection extends StatelessWidget {
         ),
         SizedBox(height: 10),
         Text(
-          'Lo que dicen nuestros clientes',
+          'Lo que dicen nuestros ${whiteLabel.reviewsLabel}',
           style: TextStyle(
             color: Colors.white,
             fontSize: 28,
@@ -125,11 +124,7 @@ class _HeaderSection extends StatelessWidget {
         SizedBox(height: 10),
         Text(
           'Una experiencia más confiable, más premium y más comercial para elegir con seguridad.',
-          style: TextStyle(
-            color: Colors.white70,
-            height: 1.45,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: Colors.white70, height: 1.45, fontSize: 14),
         ),
       ],
     );
@@ -201,8 +196,8 @@ class _RatingSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Basado en 128 opiniones',
+                    Text(
+                      'Basado en $totalReviews ${Provider.of<WhiteLabelConfig>(context, listen: false).reviewsLabel}',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -386,9 +381,7 @@ class _FilterRow extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary
-                    : const Color(0xFF171311),
+                color: isSelected ? AppColors.primary : const Color(0xFF171311),
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: isSelected
@@ -425,10 +418,7 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _SectionTitle({
-    required this.title,
-    required this.subtitle,
-  });
+  const _SectionTitle({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -651,10 +641,7 @@ class _StarStrip extends StatelessWidget {
   final double rating;
   final double iconSize;
 
-  const _StarStrip({
-    this.rating = _summaryRating,
-    this.iconSize = 15,
-  });
+  const _StarStrip({this.rating = _summaryRating, this.iconSize = 15});
 
   @override
   Widget build(BuildContext context) {
@@ -665,8 +652,8 @@ class _StarStrip extends StatelessWidget {
         final icon = rating >= starValue
             ? Icons.star_rounded
             : rating >= starValue - .5
-                ? Icons.star_half_rounded
-                : Icons.star_border_rounded;
+            ? Icons.star_half_rounded
+            : Icons.star_border_rounded;
         return Padding(
           padding: EdgeInsets.only(right: index == 4 ? 0 : 2),
           child: Icon(icon, color: AppColors.primary, size: iconSize),
@@ -733,10 +720,7 @@ class _MetaChip extends StatelessWidget {
   final String label;
   final IconData icon;
 
-  const _MetaChip({
-    required this.label,
-    required this.icon,
-  });
+  const _MetaChip({required this.label, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -770,10 +754,7 @@ class _HighlightedMetaChip extends StatelessWidget {
   final String label;
   final IconData icon;
 
-  const _HighlightedMetaChip({
-    required this.label,
-    required this.icon,
-  });
+  const _HighlightedMetaChip({required this.label, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -857,11 +838,11 @@ class ReviewEntry {
   }
 
   String get initials {
-    final parts = customerName.trim().split(RegExp(r'\s+')).where((part) => part.isNotEmpty);
-    final letters = parts
-        .map((part) => part.substring(0, 1))
-        .take(2)
-        .join();
+    final parts = customerName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty);
+    final letters = parts.map((part) => part.substring(0, 1)).take(2).join();
     return letters.isEmpty ? 'R' : letters.toUpperCase();
   }
 
@@ -874,7 +855,8 @@ class ReviewEntry {
       case ReviewFilter.premium:
         return isPremium;
       case ReviewFilter.corte:
-        return _contains(serviceName, 'corte') || _contains(serviceName, 'experiencia premium');
+        return _contains(serviceName, 'corte') ||
+            _contains(serviceName, 'experiencia premium');
       case ReviewFilter.barba:
         return _contains(serviceName, 'barba');
     }
@@ -884,88 +866,65 @@ class ReviewEntry {
 const double _summaryRating = 4.9;
 const int _totalReviews = 128;
 
-const Map<int, int> _ratingDistribution = {
-  5: 98,
-  4: 18,
-  3: 7,
-  2: 3,
-  1: 2,
-};
+const Map<int, int> _ratingDistribution = {5: 98, 4: 18, 3: 7, 2: 3, 1: 2};
 
-final ReviewEntry _featuredReview = ReviewEntry.fromMap(
-  const {
+final ReviewEntry _featuredReview = ReviewEntry.fromMap(const {
+  'customerName': 'Andrés Mora',
+  'rating': 5.0,
+  'dateLabel': '14 jun 2026',
+  'text':
+      'La experiencia premium vale totalmente la pena. El ambiente, la atención y el acabado se sienten de primer nivel.',
+  'serviceName': 'Experiencia Premium Completa',
+  'barberName': 'Diego Morales',
+  'isPremium': true,
+});
+
+final List<ReviewEntry> _demoReviews = [
+  ReviewEntry.fromMap(const {
+    'customerName': 'Juan Carlos',
+    'rating': 5.0,
+    'dateLabel': '18 jun 2026',
+    'text': 'Excelente atención y muy buen ambiente. El corte quedó perfecto.',
+    'serviceName': 'Corte de cabello',
+    'barberName': 'Carlos Ramirez',
+    'isPremium': false,
+  }),
+  ReviewEntry.fromMap(const {
     'customerName': 'Andrés Mora',
     'rating': 5.0,
     'dateLabel': '14 jun 2026',
-    'text':
-        'La experiencia premium vale totalmente la pena. El ambiente, la atención y el acabado se sienten de primer nivel.',
+    'text': 'Muy recomendado. La experiencia premium vale totalmente la pena.',
     'serviceName': 'Experiencia Premium Completa',
     'barberName': 'Diego Morales',
     'isPremium': true,
-  },
-);
-
-final List<ReviewEntry> _demoReviews = [
-  ReviewEntry.fromMap(
-    const {
-      'customerName': 'Juan Carlos',
-      'rating': 5.0,
-      'dateLabel': '18 jun 2026',
-      'text':
-          'Excelente atención y muy buen ambiente. El corte quedó perfecto.',
-      'serviceName': 'Corte de cabello',
-      'barberName': 'Carlos Ramirez',
-      'isPremium': false,
-    },
-  ),
-  ReviewEntry.fromMap(
-    const {
-      'customerName': 'Andrés Mora',
-      'rating': 5.0,
-      'dateLabel': '14 jun 2026',
-      'text':
-          'Muy recomendado. La experiencia premium vale totalmente la pena.',
-      'serviceName': 'Experiencia Premium Completa',
-      'barberName': 'Diego Morales',
-      'isPremium': true,
-    },
-  ),
-  ReviewEntry.fromMap(
-    const {
-      'customerName': 'Felipe Solís',
-      'rating': 4.9,
-      'dateLabel': '11 jun 2026',
-      'text':
-          'El perfilado de barba quedó limpio y profesional.',
-      'serviceName': 'Recorte de barba',
-      'barberName': 'Andres Vega',
-      'isPremium': false,
-    },
-  ),
-  ReviewEntry.fromMap(
-    const {
-      'customerName': 'Daniel Rojas',
-      'rating': 5.0,
-      'dateLabel': '9 jun 2026',
-      'text':
-          'Buen trato, puntualidad y excelente acabado.',
-      'serviceName': 'Corte y Barba',
-      'barberName': 'Luis Fernandez',
-      'isPremium': false,
-    },
-  ),
-  ReviewEntry.fromMap(
-    const {
-      'customerName': 'Mauricio Vargas',
-      'rating': 4.8,
-      'dateLabel': '5 jun 2026',
-      'text':
-          'Ambiente cómodo, buena música y atención de primera.',
-      'serviceName': 'Corte a Tijera / Cabello Largo',
-      'barberName': 'Carlos Ramirez',
-      'isPremium': false,
-    },
-  ),
+  }),
+  ReviewEntry.fromMap(const {
+    'customerName': 'Felipe Solís',
+    'rating': 4.9,
+    'dateLabel': '11 jun 2026',
+    'text': 'El perfilado de barba quedó limpio y profesional.',
+    'serviceName': 'Recorte de barba',
+    'barberName': 'Andres Vega',
+    'isPremium': false,
+  }),
+  ReviewEntry.fromMap(const {
+    'customerName': 'Daniel Rojas',
+    'rating': 5.0,
+    'dateLabel': '9 jun 2026',
+    'text': 'Buen trato, puntualidad y excelente acabado.',
+    'serviceName': 'Corte y Barba',
+    'barberName': 'Luis Fernandez',
+    'isPremium': false,
+  }),
+  ReviewEntry.fromMap(const {
+    'customerName': 'Mauricio Vargas',
+    'rating': 4.8,
+    'dateLabel': '5 jun 2026',
+    'text': 'Ambiente cómodo, buena música y atención de primera.',
+    'serviceName': 'Corte a Tijera / Cabello Largo',
+    'barberName': 'Carlos Ramirez',
+    'isPremium': false,
+  }),
 ];
 
 bool _contains(String? value, String needle) {

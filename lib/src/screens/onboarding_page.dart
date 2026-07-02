@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../config/white_label_config.dart';
 import '../navigation/app_router.dart';
@@ -9,7 +10,7 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final whiteLabel = WhiteLabelConfig.tresAmigos;
+    final whiteLabel = context.watch<WhiteLabelConfig>();
 
     return Scaffold(
       body: Stack(

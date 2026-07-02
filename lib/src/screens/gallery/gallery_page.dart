@@ -187,6 +187,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: _GalleryTopBar(
+                    whiteLabel: whiteLabel,
                     onBack: () => Navigator.of(context).maybePop(),
                     onReserve: () =>
                         Navigator.of(context).pushNamed(AppRoutes.home),
@@ -197,6 +198,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                   child: _GalleryHero(
+                    whiteLabel: whiteLabel,
                     onReserve: () =>
                         Navigator.of(context).pushNamed(AppRoutes.home),
                     onInstagram: () => _showPlaceholder('Instagram'),
@@ -233,7 +235,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                   child: SectionHeader(
                     title: 'Featured Work',
-                    actionLabel: 'Ver toda la galería',
+                    actionLabel: 'Ver toda la ${whiteLabel.galleryLabel}',
                     onTap: () => setState(() => _selectedCategory = 'all'),
                   ),
                 ),
@@ -347,10 +349,15 @@ class _GalleryPageState extends State<GalleryPage> {
 }
 
 class _GalleryTopBar extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onBack;
   final VoidCallback onReserve;
 
-  const _GalleryTopBar({required this.onBack, required this.onReserve});
+  const _GalleryTopBar({
+    required this.whiteLabel,
+    required this.onBack,
+    required this.onReserve,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -358,9 +365,9 @@ class _GalleryTopBar extends StatelessWidget {
       children: [
         _IconBubble(icon: Icons.arrow_back_rounded, onTap: onBack),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Text(
-            'GALERÍA',
+            whiteLabel.galleryLabel.toUpperCase(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -386,11 +393,13 @@ class _GalleryTopBar extends StatelessWidget {
 }
 
 class _GalleryHero extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onReserve;
   final VoidCallback onInstagram;
   final VoidCallback onWhatsApp;
 
   const _GalleryHero({
+    required this.whiteLabel,
     required this.onReserve,
     required this.onInstagram,
     required this.onWhatsApp,
@@ -405,10 +414,7 @@ class _GalleryHero extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              'assets/branding/barbershop_hero_bg.png',
-              fit: BoxFit.cover,
-            ),
+            Image.asset(whiteLabel.heroBackground, fit: BoxFit.cover),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -443,7 +449,7 @@ class _GalleryHero extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const PremiumBadge(label: 'BARBERÍA TRES AMIGOS'),
+                      PremiumBadge(label: whiteLabel.displayName),
                       const Spacer(),
                       _IconBubble(
                         icon: Icons.favorite_border_rounded,

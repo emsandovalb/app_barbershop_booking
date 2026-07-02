@@ -126,9 +126,10 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       ),
                       const SizedBox(height: 220),
                     ] else ...[
-                      const _TopBar(),
+                      _TopBar(whiteLabel: whiteLabel),
                       const SizedBox(height: 14),
                       _HeroSection(
+                        whiteLabel: whiteLabel,
                         staffCount: staff.length,
                         serviceCount: resources.length,
                       ),
@@ -140,7 +141,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                         onInstagram: () => _showPlaceholderAction('Instagram'),
                       ),
                       const SizedBox(height: 14),
-                      const _BusinessInfoSection(),
+                      _BusinessInfoSection(whiteLabel: whiteLabel),
                       const SizedBox(height: 18),
                       SectionHeader(
                         title: 'Nuestro equipo',
@@ -160,7 +161,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 20),
                       SectionHeader(
                         title: whiteLabel.galleryLabel,
-                        actionLabel: 'Ver galería',
+                        actionLabel: 'Ver ${whiteLabel.galleryLabel}',
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const GalleryPage(),
@@ -175,6 +176,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const _ReviewsList(),
                       const SizedBox(height: 12),
                       _ReviewsCta(
+                        whiteLabel: whiteLabel,
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -247,7 +249,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar();
+  final WhiteLabelConfig whiteLabel;
+
+  const _TopBar({required this.whiteLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -259,8 +263,8 @@ class _TopBar extends StatelessWidget {
           color: Colors.white,
         ),
         const SizedBox(width: 2),
-        const Text(
-          'Perfil de la barbería',
+        Text(
+          whiteLabel.businessProfileLabel,
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -273,15 +277,20 @@ class _TopBar extends StatelessWidget {
 }
 
 class _HeroSection extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final int staffCount;
   final int serviceCount;
 
-  const _HeroSection({required this.staffCount, required this.serviceCount});
+  const _HeroSection({
+    required this.whiteLabel,
+    required this.staffCount,
+    required this.serviceCount,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BarbershopCinematicPanel(
-      backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+      backgroundAsset: whiteLabel.heroBackground,
       radius: 32,
       padding: const EdgeInsets.all(18),
       opacity: .58,
@@ -293,7 +302,9 @@ class _HeroSection extends StatelessWidget {
             Positioned(
               top: 0,
               right: 0,
-              child: const PremiumBadge(label: 'PERFIL DE LA BARBERÍA'),
+              child: PremiumBadge(
+                label: whiteLabel.businessProfileLabel.toUpperCase(),
+              ),
             ),
             Positioned(
               top: 40,
@@ -304,15 +315,15 @@ class _HeroSection extends StatelessWidget {
                 children: [
                   const SizedBox(height: 8),
                   BarbershopLogoMark(
-                    assetPath: 'assets/branding/logo_transparent.png',
+                    assetPath: whiteLabel.logoTransparent,
                     size: 126,
                     glowColor: AppColors.primary,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'BARBERÍA TRES AMIGOS',
+                  Text(
+                    whiteLabel.displayName,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 31,
                       fontWeight: FontWeight.w900,
@@ -321,8 +332,8 @@ class _HeroSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Cortes, barba y experiencias premium',
+                  Text(
+                    whiteLabel.tagline,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -336,12 +347,18 @@ class _HeroSection extends StatelessWidget {
                     alignment: WrapAlignment.center,
                     spacing: 8,
                     runSpacing: 8,
-                    children: const [
-                      _HeroInfoPill(icon: Icons.star_rounded, text: '4.9'),
-                      _HeroInfoPill(icon: Icons.cut_rounded, text: 'Premium'),
+                    children: [
+                      _HeroInfoPill(
+                        icon: Icons.star_rounded,
+                        text: whiteLabel.rating.toStringAsFixed(1),
+                      ),
+                      _HeroInfoPill(
+                        icon: Icons.cut_rounded,
+                        text: whiteLabel.subtitle,
+                      ),
                       _HeroInfoPill(
                         icon: Icons.location_on_rounded,
-                        text: 'El Roble',
+                        text: whiteLabel.locationShort,
                       ),
                     ],
                   ),
@@ -597,30 +614,32 @@ class _ActionButton extends StatelessWidget {
 }
 
 class _BusinessInfoSection extends StatelessWidget {
-  const _BusinessInfoSection();
+  final WhiteLabelConfig whiteLabel;
+
+  const _BusinessInfoSection({required this.whiteLabel});
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: const [
+      children: [
         _BusinessInfoCard(
           icon: Icons.schedule_rounded,
-          title: 'Horario de atención',
-          body:
-              'Lun 10:00 AM - 7:00 PM\nMar - Jue 10:00 AM - 12:00 PM / 2:00 PM - 8:00 PM\nVie - Sáb 10:00 AM - 7:00 PM\nDomingo cerrado',
+          title: whiteLabel.hoursLabel,
+          body: whiteLabel.hoursSummary,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         _BusinessInfoCard(
           icon: Icons.event_busy_rounded,
           title: 'Política de cancelación',
-          body: 'Podés cancelar o reprogramar hasta 4 horas antes de tu cita.',
+          body:
+              '${whiteLabel.cancellationPolicyText} (${whiteLabel.cancellationWindowHours} horas)',
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         _BusinessInfoCard(
           icon: Icons.location_on_rounded,
           title: 'Ubicación y contacto',
           body:
-              'Puntarenas, El Roble, Costa Rica\n\n+506 8888-3366\nhola@barberiatresamigos.com',
+              '${whiteLabel.locationFull}\n\n${whiteLabel.phone}\n${whiteLabel.email}',
         ),
       ],
     );
@@ -1130,9 +1149,10 @@ class _ReviewsList extends StatelessWidget {
 }
 
 class _ReviewsCta extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onTap;
 
-  const _ReviewsCta({required this.onTap});
+  const _ReviewsCta({required this.whiteLabel, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1161,12 +1181,12 @@ class _ReviewsCta extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ver todas las opiniones',
+                    'Ver todas las ${whiteLabel.reviewsLabel}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -1175,7 +1195,7 @@ class _ReviewsCta extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Abrí la experiencia premium de reseñas y testimonios.',
+                    'Abrí la experiencia premium de ${whiteLabel.reviewsLabel} y testimonios.',
                     style: TextStyle(color: Colors.white70, height: 1.3),
                   ),
                 ],

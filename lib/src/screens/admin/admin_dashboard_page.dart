@@ -127,10 +127,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     if (_quickActionBusy) return;
     setState(() => _quickActionBusy = true);
     try {
-      final result = await Navigator.of(context).pushNamed(
-        route,
-        arguments: arguments,
-      );
+      final result = await Navigator.of(
+        context,
+      ).pushNamed(route, arguments: arguments);
       if (!mounted) return;
       if (successMessage != null && result == true) {
         _showSuccess(successMessage);
@@ -225,6 +224,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _TopHero(
+                              whiteLabel: whiteLabel,
                               isLoading: isLoading,
                               onRefresh: _refresh,
                             ),
@@ -240,7 +240,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _SectionHeaderRow(
                               title: 'Citas de hoy',
                               actionLabel: 'Ver agenda',
-                              onTap: () => _openNamedRoute(AppRoutes.adminReservations),
+                              onTap: () =>
+                                  _openNamedRoute(AppRoutes.adminReservations),
                             ),
                             const SizedBox(height: 12),
                             _TodayAppointmentsList(
@@ -251,7 +252,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _SectionHeaderRow(
                               title: 'Rendimiento de barberos',
                               actionLabel: 'Centro administrativo',
-                              onTap: () => _openNamedRoute(AppRoutes.adminDashboard),
+                              onTap: () =>
+                                  _openNamedRoute(AppRoutes.adminDashboard),
                             ),
                             const SizedBox(height: 12),
                             _PerformanceList(items: performance),
@@ -259,7 +261,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _SectionHeaderRow(
                               title: 'Servicios más reservados',
                               actionLabel: 'Administrar servicios',
-                              onTap: () => _openNamedRoute(AppRoutes.adminServices),
+                              onTap: () =>
+                                  _openNamedRoute(AppRoutes.adminServices),
                             ),
                             const SizedBox(height: 12),
                             _TopServicesList(items: topServices),
@@ -275,7 +278,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               onTap: (module) {
                                 switch (module.id) {
                                   case 'reservations':
-                                    _openNamedRoute(AppRoutes.adminReservations);
+                                    _openNamedRoute(
+                                      AppRoutes.adminReservations,
+                                    );
                                     return;
                                   case 'staff':
                                     _openNamedRoute(AppRoutes.adminStaff);
@@ -395,7 +400,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final staff = data.staff;
     final resources = data.resources;
 
-    final activeBarbers = staff.where((item) => _isActive(item)).toList(growable: false);
+    final activeBarbers = staff
+        .where((item) => _isActive(item))
+        .toList(growable: false);
     final serviceCounts = _serviceCounts(reservations);
     final serviceRevenue = _estimatedRevenueByService(reservations, resources);
     final totalRevenue = _estimatedRevenue(reservations, resources);
@@ -410,7 +417,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         icon: Icons.event_available_rounded,
         label: 'Citas de hoy',
         value: '${reservations.length}',
-        footnote: pendingCount > 0 ? '$pendingCount pendientes' : 'Flujo estable',
+        footnote: pendingCount > 0
+            ? '$pendingCount pendientes'
+            : 'Flujo estable',
       ),
       _MetricData(
         icon: Icons.payments_rounded,
@@ -424,7 +433,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         icon: Icons.groups_rounded,
         label: 'Barberos activos',
         value: '${activeBarbers.length}',
-        footnote: activeBarbers.isNotEmpty ? 'Equipo disponible' : 'Sin actividad',
+        footnote: activeBarbers.isNotEmpty
+            ? 'Equipo disponible'
+            : 'Sin actividad',
       ),
       _MetricData(
         icon: Icons.content_cut_rounded,
@@ -448,7 +459,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       final name = _staffName(barber);
       appointmentsByStaff[name] = (appointmentsByStaff[name] ?? 0) + 1;
       revenueByStaff[name] =
-          (revenueByStaff[name] ?? 0) + _bookingRevenue(booking, data.resources);
+          (revenueByStaff[name] ?? 0) +
+          _bookingRevenue(booking, data.resources);
     }
 
     final items =
@@ -490,7 +502,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final reservations = data.reservations;
     final resources = data.resources;
     final counts = _serviceCounts(reservations);
-    final revenueByService = _estimatedRevenueByService(reservations, resources);
+    final revenueByService = _estimatedRevenueByService(
+      reservations,
+      resources,
+    );
     final resourceLookup = <String, Map<String, dynamic>>{};
 
     for (final resource in resources) {
@@ -509,7 +524,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   resourceLookup[key] ??
                   const <String, dynamic>{};
               final estimatedRevenue =
-                  revenueByService[key] ?? _servicePrice(resource) * entry.value;
+                  revenueByService[key] ??
+                  _servicePrice(resource) * entry.value;
               return _TopServiceData(
                 name: key,
                 reservations: entry.value,
@@ -543,10 +559,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 }
 
 class _TopHero extends StatelessWidget {
+  final WhiteLabelConfig whiteLabel;
   final bool isLoading;
   final VoidCallback onRefresh;
 
   const _TopHero({
+    required this.whiteLabel,
     required this.isLoading,
     required this.onRefresh,
   });
@@ -554,7 +572,7 @@ class _TopHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BarbershopCinematicPanel(
-      backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+      backgroundAsset: whiteLabel.heroBackground,
       radius: 30,
       padding: const EdgeInsets.all(18),
       opacity: .52,
@@ -579,15 +597,15 @@ class _TopHero extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         BarbershopLogoMark(
-                          assetPath: 'assets/branding/logo_transparent.png',
+                          assetPath: whiteLabel.logoTransparent,
                           size: 96,
                           glowColor: AppColors.primary,
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          'BARBERÍA TRES AMIGOS',
+                        Text(
+                          whiteLabel.displayName,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
@@ -622,7 +640,10 @@ class _TopHero extends StatelessWidget {
                         _HeroMetaChip(
                           icon: Icons.event_available_rounded,
                           label: 'Hoy',
-                          value: DateFormat('d MMM', 'es').format(DateTime.now()),
+                          value: DateFormat(
+                            'd MMM',
+                            'es',
+                          ).format(DateTime.now()),
                         ),
                         _HeroMetaChip(
                           icon: Icons.shield_rounded,
@@ -633,8 +654,9 @@ class _TopHero extends StatelessWidget {
                           onPressed: onRefresh,
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.primary,
-                            backgroundColor:
-                                AppColors.primary.withValues(alpha: .10),
+                            backgroundColor: AppColors.primary.withValues(
+                              alpha: .10,
+                            ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                               vertical: 12,
@@ -720,10 +742,7 @@ class _QuickActionsRail extends StatelessWidget {
   final void Function(_QuickActionData action) onAction;
   final bool isBusy;
 
-  const _QuickActionsRail({
-    required this.onAction,
-    required this.isBusy,
-  });
+  const _QuickActionsRail({required this.onAction, required this.isBusy});
 
   @override
   Widget build(BuildContext context) {
@@ -830,10 +849,7 @@ class _AdminModuleGrid extends StatelessWidget {
       ),
       itemBuilder: (_, index) {
         final module = modules[index];
-        return _AdminModuleCard(
-          module: module,
-          onTap: () => onTap(module),
-        );
+        return _AdminModuleCard(module: module, onTap: () => onTap(module));
       },
     );
   }
@@ -933,10 +949,7 @@ class _SectionIntro extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _SectionIntro({
-    required this.title,
-    required this.subtitle,
-  });
+  const _SectionIntro({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -965,9 +978,6 @@ class _SectionIntro extends StatelessWidget {
 }
 
 class _KpiGrid extends StatelessWidget {
-
-
-
   final List<_MetricData> metrics;
 
   const _KpiGrid({required this.metrics});

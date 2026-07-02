@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class BrandConfig {
   final String appName;
@@ -85,6 +85,11 @@ class TerminologyMap {
   String get manageStaff => text('manage_staff', fallback: 'Manage barbers');
 }
 
+/// AppConfig owns technical app behavior.
+///
+/// Use this for API base behavior, endpoint names, compatibility flags, and
+/// other operational settings that should not change when the business brand
+/// switches.
 class AppConfig {
   final BrandConfig brand;
   final FeatureFlags features;
@@ -196,4 +201,3 @@ class AppConfig {
     ),
   );
 }
-
