@@ -10,24 +10,35 @@ import 'providers/auth_provider.dart';
 import 'services/api.dart';
 import 'providers/ground_form_provider.dart';
 import 'services/localization_service.dart';
+import 'services/white_label_config_service.dart';
 import 'widgets/inactivity_listener.dart';
 import 'navigation/nav_key.dart';
+
+String resolveApiBaseUrl() {
+  const defaultBase = String.fromEnvironment('API_BASE');
+  final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+  return defaultBase.isNotEmpty
+      ? defaultBase
+      : (isAndroid
+            ? 'http://10.0.2.2:8000/api/v1'
+            : 'http://127.0.0.1:8000/api/v1');
+}
 
 class BarbershopBookingApp extends StatelessWidget {
   final AppConfig config;
   final WhiteLabelConfig whiteLabelConfig;
+  final WhiteLabelConfigService? whiteLabelConfigService;
 
   const BarbershopBookingApp({
     super.key,
     required this.config,
     required this.whiteLabelConfig,
+    this.whiteLabelConfigService,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final whiteLabel = whiteLabelConfig;
+  ThemeData _buildTheme(WhiteLabelConfig whiteLabel) {
     final colors = whiteLabel.colors;
-    final theme = ThemeData(
+    return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: colors.background,
@@ -75,7 +86,10 @@ class BarbershopBookingApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(color: colors.primaryGold),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -104,9 +118,7 @@ class BarbershopBookingApp extends StatelessWidget {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: colors.primaryGoldLight,
-        ),
+        style: TextButton.styleFrom(foregroundColor: colors.primaryGoldLight),
       ),
       datePickerTheme: DatePickerThemeData(
         backgroundColor: colors.background,
@@ -154,9 +166,7 @@ class BarbershopBookingApp extends StatelessWidget {
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
-        contentTextStyle: TextStyle(
-          color: Colors.white.withOpacity(.78),
-        ),
+        contentTextStyle: TextStyle(color: Colors.white.withOpacity(.78)),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: const Color(0xFF171311),
@@ -166,29 +176,32 @@ class BarbershopBookingApp extends StatelessWidget {
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
     );
+  }
 
-    // Use emulator-safe base URL on Android emulators
-    const defaultBase = String.fromEnvironment('API_BASE');
-    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-    final base = defaultBase.isNotEmpty
-        ? defaultBase
-        : (isAndroid
-              ? 'http://10.0.2.2:8000/api/v1'
-              : 'http://127.0.0.1:8000/api/v1');
+  @override
+  Widget build(BuildContext context) {
+    final base = resolveApiBaseUrl();
     final translationsBase = _translationsBase(base);
     // Simple debug log to verify runtime base URL
     // ignore: avoid_print
-    print('API base: ' + base);
+    print('API base: $base');
 
     return MultiProvider(
       providers: [
         Provider<AppConfig>.value(value: config),
-        Provider<WhiteLabelConfig>.value(value: whiteLabelConfig),
+        if (whiteLabelConfigService != null) ...[
+          ChangeNotifierProvider<WhiteLabelConfigService>.value(
+            value: whiteLabelConfigService!,
+          ),
+          ProxyProvider<WhiteLabelConfigService, WhiteLabelConfig>(
+            update: (_, service, __) => service.config,
+          ),
+        ] else ...[
+          Provider<WhiteLabelConfig>.value(value: whiteLabelConfig),
+        ],
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
             ApiClient(
@@ -214,6 +227,8 @@ class BarbershopBookingApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
+          final whiteLabel = context.watch<WhiteLabelConfig>();
+          final theme = _buildTheme(whiteLabel);
           final localization = context.watch<LocalizationService>();
           final app = InactivityListener(
             timeout: const Duration(minutes: 5),

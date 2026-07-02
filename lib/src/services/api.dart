@@ -172,7 +172,12 @@ class ApiClient {
     } else if (rawImages is String && rawImages.trim().isNotEmpty) {
       images.add(rawImages);
     }
-    for (final key in const ['image_url', 'image_path', 'service_image', 'image']) {
+    for (final key in const [
+      'image_url',
+      'image_path',
+      'service_image',
+      'image',
+    ]) {
       final value = payload.remove(key);
       if (value is String && value.trim().isNotEmpty) {
         images.add(value);
@@ -248,7 +253,11 @@ class ApiClient {
     bool reservation = false,
   }) async {
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.patch(uri, headers: headers, body: json.encode(body));
+    final res = await http.patch(
+      uri,
+      headers: headers,
+      body: json.encode(body),
+    );
     _ensureOk(res);
     return _normalizeResponse(
       json.decode(res.body) as Map<String, dynamic>,
@@ -299,6 +308,10 @@ class ApiClient {
     );
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getAppConfig() async {
+    return _getJson(_apiUri('app-config'));
   }
 
   Future<void> logout() async {
@@ -422,13 +435,10 @@ class ApiClient {
     int resourceId, {
     bool? isPrimary,
   }) async {
-    return _postJson(
-      _apiUri('staff/$staffId/services'),
-      {
-        'resource_id': resourceId,
-        if (isPrimary != null) 'is_primary': isPrimary,
-      },
-    );
+    return _postJson(_apiUri('staff/$staffId/services'), {
+      'resource_id': resourceId,
+      if (isPrimary != null) 'is_primary': isPrimary,
+    });
   }
 
   Future<Map<String, dynamic>> removeStaffFromResource(
@@ -459,11 +469,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> createResource(Map<String, dynamic> data) async {
     final payload = await _resourcePayload(data);
-    return _postJson(
-      _apiUri(resourceEndpoint),
-      payload,
-      expectCreated: true,
-    );
+    return _postJson(_apiUri(resourceEndpoint), payload, expectCreated: true);
   }
 
   Future<Map<String, dynamic>> updateResource(

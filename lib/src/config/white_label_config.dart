@@ -1,5 +1,74 @@
 import 'package:flutter/material.dart';
 
+Map<String, dynamic>? _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    return value.map((key, entry) => MapEntry(key.toString(), entry));
+  }
+  return null;
+}
+
+String _stringValue(dynamic value, String fallback) {
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return fallback;
+  return text;
+}
+
+String? _nullableString(dynamic value, {String? fallback}) {
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return fallback;
+  return text;
+}
+
+int _intValue(dynamic value, int fallback) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+double _doubleValue(dynamic value, double fallback) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+bool _boolValue(dynamic value, bool fallback) {
+  if (value is bool) return value;
+  final text = value?.toString().trim().toLowerCase();
+  if (text == null || text.isEmpty) return fallback;
+  if (text == 'true' || text == '1' || text == 'yes') return true;
+  if (text == 'false' || text == '0' || text == 'no') return false;
+  return fallback;
+}
+
+List<String> _stringListValue(dynamic value, List<String> fallback) {
+  if (value is List) {
+    final items = value
+        .map((entry) => entry?.toString().trim() ?? '')
+        .where((entry) => entry.isNotEmpty)
+        .toList(growable: false);
+    if (items.isNotEmpty) return items;
+  }
+  return fallback;
+}
+
+Color _colorValue(dynamic value, Color fallback) {
+  if (value is int) return Color(value);
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return fallback;
+  var hex = text.replaceAll('#', '').replaceAll('0x', '');
+  if (hex.length == 3) {
+    hex = hex.split('').map((part) => '$part$part').join();
+  } else if (hex.length == 4) {
+    hex = hex.split('').map((part) => '$part$part').join();
+  } else if (hex.length == 6) {
+    hex = 'FF$hex';
+  }
+  final parsed = int.tryParse(hex, radix: 16);
+  if (parsed == null) return fallback;
+  return Color(parsed);
+}
+
 class BusinessIdentity {
   final String appName;
   final String? legalName;
@@ -26,6 +95,41 @@ class BusinessIdentity {
     required this.reviewCount,
     this.foundedYear,
   });
+
+  factory BusinessIdentity.fromJson(
+    Map<String, dynamic>? json, {
+    BusinessIdentity? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BusinessIdentity(
+          appName: '',
+          displayName: '',
+          shortName: '',
+          tagline: '',
+          subtitle: '',
+          locationShort: '',
+          locationFull: '',
+          rating: 0,
+          reviewCount: 0,
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BusinessIdentity(
+      appName: _stringValue(data['app_name'], base.appName),
+      legalName: _nullableString(data['legal_name'], fallback: base.legalName),
+      displayName: _stringValue(data['display_name'], base.displayName),
+      shortName: _stringValue(data['short_name'], base.shortName),
+      tagline: _stringValue(data['tagline'], base.tagline),
+      subtitle: _stringValue(data['subtitle'], base.subtitle),
+      locationShort: _stringValue(data['location_short'], base.locationShort),
+      locationFull: _stringValue(data['location_full'], base.locationFull),
+      rating: _doubleValue(data['rating'], base.rating),
+      reviewCount: _intValue(data['review_count'], base.reviewCount),
+      foundedYear: data.containsKey('founded_year')
+          ? _intValue(data['founded_year'], base.foundedYear ?? 0)
+          : base.foundedYear,
+    );
+  }
 }
 
 class BrandAssets {
@@ -46,6 +150,51 @@ class BrandAssets {
     required this.staffPlaceholder,
     required this.profilePlaceholder,
   });
+
+  factory BrandAssets.fromJson(
+    Map<String, dynamic>? json, {
+    BrandAssets? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BrandAssets(
+          logoTransparent: '',
+          appIcon: '',
+          heroBackground: '',
+          servicePlaceholder: '',
+          premiumServicePlaceholder: '',
+          staffPlaceholder: '',
+          profilePlaceholder: '',
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BrandAssets(
+      logoTransparent: _stringValue(
+        data['logo_transparent'],
+        base.logoTransparent,
+      ),
+      appIcon: _stringValue(data['app_icon'], base.appIcon),
+      heroBackground: _stringValue(
+        data['hero_background'],
+        base.heroBackground,
+      ),
+      servicePlaceholder: _stringValue(
+        data['service_placeholder'],
+        base.servicePlaceholder,
+      ),
+      premiumServicePlaceholder: _stringValue(
+        data['premium_service_placeholder'],
+        base.premiumServicePlaceholder,
+      ),
+      staffPlaceholder: _stringValue(
+        data['staff_placeholder'],
+        base.staffPlaceholder,
+      ),
+      profilePlaceholder: _stringValue(
+        data['profile_placeholder'],
+        base.profilePlaceholder,
+      ),
+    );
+  }
 }
 
 class BrandColors {
@@ -70,6 +219,43 @@ class BrandColors {
     required this.textPrimary,
     required this.textSecondary,
   });
+
+  factory BrandColors.fromJson(
+    Map<String, dynamic>? json, {
+    BrandColors? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BrandColors(
+          primaryGold: Colors.white,
+          primaryGoldLight: Colors.white,
+          primaryGoldDark: Colors.white,
+          background: Colors.black,
+          surface: Colors.black,
+          card: Colors.black,
+          border: Colors.transparent,
+          textPrimary: Colors.white,
+          textSecondary: Colors.white,
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BrandColors(
+      primaryGold: _colorValue(data['primary_gold'], base.primaryGold),
+      primaryGoldLight: _colorValue(
+        data['primary_gold_light'],
+        base.primaryGoldLight,
+      ),
+      primaryGoldDark: _colorValue(
+        data['primary_gold_dark'],
+        base.primaryGoldDark,
+      ),
+      background: _colorValue(data['background'], base.background),
+      surface: _colorValue(data['surface'], base.surface),
+      card: _colorValue(data['card'], base.card),
+      border: _colorValue(data['border'], base.border),
+      textPrimary: _colorValue(data['text_primary'], base.textPrimary),
+      textSecondary: _colorValue(data['text_secondary'], base.textSecondary),
+    );
+  }
 }
 
 class BusinessContact {
@@ -90,6 +276,33 @@ class BusinessContact {
     required this.website,
     required this.address,
   });
+
+  factory BusinessContact.fromJson(
+    Map<String, dynamic>? json, {
+    BusinessContact? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BusinessContact(
+          phone: '',
+          whatsapp: '',
+          email: '',
+          instagram: '',
+          facebook: '',
+          website: '',
+          address: '',
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BusinessContact(
+      phone: _stringValue(data['phone'], base.phone),
+      whatsapp: _stringValue(data['whatsapp'], base.whatsapp),
+      email: _stringValue(data['email'], base.email),
+      instagram: _stringValue(data['instagram'], base.instagram),
+      facebook: _stringValue(data['facebook'], base.facebook),
+      website: _stringValue(data['website'], base.website),
+      address: _stringValue(data['address'], base.address),
+    );
+  }
 }
 
 class BusinessHours {
@@ -102,6 +315,28 @@ class BusinessHours {
     required this.weeklySummary,
     required this.detailedHours,
   });
+
+  factory BusinessHours.fromJson(
+    Map<String, dynamic>? json, {
+    BusinessHours? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BusinessHours(
+          label: '',
+          weeklySummary: '',
+          detailedHours: <String>[],
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BusinessHours(
+      label: _stringValue(data['label'], base.label),
+      weeklySummary: _stringValue(data['weekly_summary'], base.weeklySummary),
+      detailedHours: _stringListValue(
+        data['detailed_hours'],
+        base.detailedHours,
+      ),
+    );
+  }
 }
 
 class BusinessPolicies {
@@ -112,6 +347,29 @@ class BusinessPolicies {
     required this.cancellationPolicyText,
     required this.cancellationWindowHours,
   });
+
+  factory BusinessPolicies.fromJson(
+    Map<String, dynamic>? json, {
+    BusinessPolicies? fallback,
+  }) {
+    final base =
+        fallback ??
+        const BusinessPolicies(
+          cancellationPolicyText: '',
+          cancellationWindowHours: 0,
+        );
+    final data = json ?? const <String, dynamic>{};
+    return BusinessPolicies(
+      cancellationPolicyText: _stringValue(
+        data['cancellation_policy_text'],
+        base.cancellationPolicyText,
+      ),
+      cancellationWindowHours: _intValue(
+        data['cancellation_window_hours'],
+        base.cancellationWindowHours,
+      ),
+    );
+  }
 }
 
 class Terminology {
@@ -140,6 +398,47 @@ class Terminology {
     required this.gallery,
     required this.reviews,
   });
+
+  factory Terminology.fromJson(
+    Map<String, dynamic>? json, {
+    Terminology? fallback,
+  }) {
+    final base =
+        fallback ??
+        const Terminology(
+          service: '',
+          services: '',
+          appointment: '',
+          appointments: '',
+          staff: '',
+          staffPlural: '',
+          staffDisplayName: '',
+          manager: '',
+          businessProfile: '',
+          gallery: '',
+          reviews: '',
+        );
+    final data = json ?? const <String, dynamic>{};
+    return Terminology(
+      service: _stringValue(data['service'], base.service),
+      services: _stringValue(data['services'], base.services),
+      appointment: _stringValue(data['appointment'], base.appointment),
+      appointments: _stringValue(data['appointments'], base.appointments),
+      staff: _stringValue(data['staff'], base.staff),
+      staffPlural: _stringValue(data['staff_plural'], base.staffPlural),
+      staffDisplayName: _stringValue(
+        data['staff_display_name'],
+        base.staffDisplayName,
+      ),
+      manager: _stringValue(data['manager'], base.manager),
+      businessProfile: _stringValue(
+        data['business_profile'],
+        base.businessProfile,
+      ),
+      gallery: _stringValue(data['gallery'], base.gallery),
+      reviews: _stringValue(data['reviews'], base.reviews),
+    );
+  }
 }
 
 class FeatureConfig {
@@ -160,6 +459,45 @@ class FeatureConfig {
     required this.showBusinessProfile,
     required this.showAdminDashboard,
   });
+
+  factory FeatureConfig.fromJson(
+    Map<String, dynamic>? json, {
+    FeatureConfig? fallback,
+  }) {
+    final base =
+        fallback ??
+        const FeatureConfig(
+          showStaff: false,
+          reservationStaffSelection: false,
+          adminStaffManagement: false,
+          showGallery: false,
+          showReviews: false,
+          showBusinessProfile: false,
+          showAdminDashboard: false,
+        );
+    final data = json ?? const <String, dynamic>{};
+    return FeatureConfig(
+      showStaff: _boolValue(data['show_staff'], base.showStaff),
+      reservationStaffSelection: _boolValue(
+        data['reservation_staff_selection'],
+        base.reservationStaffSelection,
+      ),
+      adminStaffManagement: _boolValue(
+        data['admin_staff_management'],
+        base.adminStaffManagement,
+      ),
+      showGallery: _boolValue(data['show_gallery'], base.showGallery),
+      showReviews: _boolValue(data['show_reviews'], base.showReviews),
+      showBusinessProfile: _boolValue(
+        data['show_business_profile'],
+        base.showBusinessProfile,
+      ),
+      showAdminDashboard: _boolValue(
+        data['show_admin_dashboard'],
+        base.showAdminDashboard,
+      ),
+    );
+  }
 }
 
 /// WhiteLabelConfig owns business-facing branding and copy.
@@ -187,6 +525,44 @@ class WhiteLabelConfig {
     required this.terminology,
     required this.features,
   });
+
+  factory WhiteLabelConfig.fromJson(Map<String, dynamic> json) {
+    final fallback = WhiteLabelConfig.tresAmigos;
+    return WhiteLabelConfig(
+      identity: BusinessIdentity.fromJson(
+        _asMap(json['identity']),
+        fallback: fallback.identity,
+      ),
+      assets: BrandAssets.fromJson(
+        _asMap(json['assets']),
+        fallback: fallback.assets,
+      ),
+      colors: BrandColors.fromJson(
+        _asMap(json['colors']),
+        fallback: fallback.colors,
+      ),
+      contact: BusinessContact.fromJson(
+        _asMap(json['contact']),
+        fallback: fallback.contact,
+      ),
+      hours: BusinessHours.fromJson(
+        _asMap(json['hours']),
+        fallback: fallback.hours,
+      ),
+      policies: BusinessPolicies.fromJson(
+        _asMap(json['policies']),
+        fallback: fallback.policies,
+      ),
+      terminology: Terminology.fromJson(
+        _asMap(json['terminology']),
+        fallback: fallback.terminology,
+      ),
+      features: FeatureConfig.fromJson(
+        _asMap(json['features']),
+        fallback: fallback.features,
+      ),
+    );
+  }
 
   String get appName => identity.appName;
   String get legalName => identity.legalName ?? identity.displayName;
