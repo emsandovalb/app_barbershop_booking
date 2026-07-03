@@ -19,8 +19,11 @@ void main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   final apiBase = resolveApiBaseUrl();
+  // Smoke test the second tenant with: --dart-define=BUSINESS_SLUG=salon-aurora
+  const businessSlug = String.fromEnvironment('BUSINESS_SLUG');
   final whiteLabelConfigService = WhiteLabelConfigService(
     baseUrl: apiBase,
+    businessSlug: businessSlug.trim().isEmpty ? null : businessSlug.trim(),
     fallback: WhiteLabelConfig.tresAmigos,
   );
   unawaited(whiteLabelConfigService.initialize());

@@ -9,21 +9,28 @@ import '../config/white_label_config.dart';
 class WhiteLabelConfigService extends ChangeNotifier {
   WhiteLabelConfigService({
     required String baseUrl,
+    String? businessSlug,
     WhiteLabelConfig? fallback,
     http.Client? client,
   }) : _baseUrl = _cleanBase(baseUrl),
+       _businessSlug = _cleanBusinessSlug(businessSlug),
        _client = client ?? http.Client(),
        _fallback = fallback ?? WhiteLabelConfig.tresAmigos,
        _config = fallback ?? WhiteLabelConfig.tresAmigos;
 
-  static const String cacheKey = 'white_label_config_cache';
+  static const String defaultCacheKey = 'white_label_config_cache_default';
 
   final String _baseUrl;
+  final String? _businessSlug;
   final http.Client _client;
   final WhiteLabelConfig _fallback;
 
   WhiteLabelConfig _config;
   bool _isLoading = false;
+
+  String get _cacheKey => _businessSlug == null
+      ? defaultCacheKey
+      : 'white_label_config_cache_$_businessSlug';
 
   WhiteLabelConfig get config => _config;
   bool get isLoading => _isLoading;
@@ -46,7 +53,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
 
   Future<void> _loadCachedConfig() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(cacheKey);
+    final raw = prefs.getString(_cacheKey);
     if (raw == null || raw.trim().isEmpty) {
       return;
     }
@@ -64,7 +71,9 @@ class WhiteLabelConfigService extends ChangeNotifier {
 
   Future<void> _loadRemoteConfig() async {
     try {
-      final uri = Uri.parse('$_baseUrl/app-config');
+      final uri = _businessSlug == null
+          ? Uri.parse('$_baseUrl/app-config')
+          : Uri.parse('$_baseUrl/businesses/$_businessSlug/app-config');
       final response = await _client.get(
         uri,
         headers: const {'Accept': 'application/json'},
@@ -80,7 +89,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
       final parsed = WhiteLabelConfig.fromJson(normalized);
       _config = parsed;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(cacheKey, jsonEncode(normalized));
+      await prefs.setString(_cacheKey, jsonEncode(normalized));
       notifyListeners();
     } catch (_) {
       if (_config == _fallback) {
@@ -95,6 +104,14 @@ class WhiteLabelConfigService extends ChangeNotifier {
       result = result.substring(0, result.length - 1);
     }
     return result;
+  }
+
+  static String? _cleanBusinessSlug(String? slug) {
+    final trimmed = slug?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return trimmed;
   }
 
   Map<String, dynamic> _normalizeMap(Map decoded) {
