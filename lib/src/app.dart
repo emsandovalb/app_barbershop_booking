@@ -28,12 +28,14 @@ class BarbershopBookingApp extends StatelessWidget {
   final AppConfig config;
   final WhiteLabelConfig whiteLabelConfig;
   final WhiteLabelConfigService? whiteLabelConfigService;
+  final String? businessSlug;
 
   const BarbershopBookingApp({
     super.key,
     required this.config,
     required this.whiteLabelConfig,
     this.whiteLabelConfigService,
+    this.businessSlug,
   });
 
   ThemeData _buildTheme(WhiteLabelConfig whiteLabel) {
@@ -204,13 +206,14 @@ class BarbershopBookingApp extends StatelessWidget {
         ],
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
-            ApiClient(
-              baseUrl: base,
-              resourceEndpointValue: config.resourceEndpoint,
-              reservationEndpointValue: config.reservationEndpoint,
-              myResourcesEndpointValue: config.myResourcesEndpoint,
-            ),
+          ApiClient(
+            baseUrl: base,
+            resourceEndpointValue: config.resourceEndpoint,
+            reservationEndpointValue: config.reservationEndpoint,
+            myResourcesEndpointValue: config.myResourcesEndpoint,
+            businessSlug: businessSlug,
           ),
+        ),
         ),
         ChangeNotifierProvider(create: (_) => GroundFormProvider()),
         ChangeNotifierProvider(

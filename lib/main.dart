@@ -32,6 +32,7 @@ void main() async {
       config: AppConfig.barbershop,
       whiteLabelConfig: WhiteLabelConfig.tresAmigos,
       whiteLabelConfigService: whiteLabelConfigService,
+      businessSlug: businessSlug.trim().isEmpty ? null : businessSlug.trim(),
     ),
   );
 }

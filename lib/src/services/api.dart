@@ -10,6 +10,7 @@ class ApiClient {
   final String resourceEndpoint;
   final String reservationEndpoint;
   final String myResourcesEndpoint;
+  final String? businessSlug;
   String? _token;
 
   ApiClient({
@@ -17,15 +18,18 @@ class ApiClient {
     String resourceEndpointValue = 'resources',
     String reservationEndpointValue = 'reservations',
     String myResourcesEndpointValue = 'my/resources',
+    String? businessSlug,
   }) : baseUrl = _cleanBase(baseUrl),
        resourceEndpoint = resourceEndpointValue,
        reservationEndpoint = reservationEndpointValue,
-       myResourcesEndpoint = myResourcesEndpointValue;
+       myResourcesEndpoint = myResourcesEndpointValue,
+       businessSlug = _cleanBusinessSlug(businessSlug);
 
   set token(String? t) => _token = t;
 
   Map<String, String> get _headers => {
     'Accept': 'application/json',
+    if (businessSlug != null) 'X-Business-Slug': businessSlug!,
     if (_token != null) 'Authorization': 'Bearer $_token',
   };
 
@@ -918,6 +922,14 @@ class ApiClient {
       result = result.substring(0, result.length - 1);
     }
     return result;
+  }
+
+  static String? _cleanBusinessSlug(String? slug) {
+    final trimmed = slug?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return trimmed;
   }
 
   void _ensureOk(http.Response res, {bool expectCreated = false}) {
