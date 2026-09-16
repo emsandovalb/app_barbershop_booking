@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,11 +24,20 @@ class _LoginPageState extends State<LoginPage> {
   final passCtrl = TextEditingController();
   bool isBusy = false;
   bool _obscure = true;
+  late final TapGestureRecognizer _signupTapRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _signupTapRecognizer = TapGestureRecognizer()
+      ..onTap = () => Navigator.of(context).pushNamed(AppRoutes.signup);
+  }
 
   @override
   void dispose() {
     emailCtrl.dispose();
     passCtrl.dispose();
+    _signupTapRecognizer.dispose();
     super.dispose();
   }
 
@@ -394,7 +404,10 @@ class _LoginPageState extends State<LoginPage> {
                                   style: TextStyle(
                                     color: colors.primaryGoldLight,
                                     fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: colors.primaryGoldLight,
                                   ),
+                                  recognizer: _signupTapRecognizer,
                                 ),
                               ],
                             ),

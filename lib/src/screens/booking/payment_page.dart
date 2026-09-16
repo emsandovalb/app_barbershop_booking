@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/kapso_notifier.dart';
 import '../../services/localization_service.dart';
 import 'barber_picker_bottom_sheet.dart';
 
@@ -27,6 +27,10 @@ class _PaymentPageState extends State<PaymentPage> {
     final initial = widget.args['staff'];
     if (initial is Map) {
       selectedBarber = Map<String, dynamic>.from(initial);
+      final explicitStaffId = widget.args['staff_id'];
+      if (selectedBarber!['id'] == null && explicitStaffId != null) {
+        selectedBarber!['id'] = explicitStaffId;
+      }
     }
   }
 
@@ -34,6 +38,7 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     final config = context.watch<AppConfig>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     final service = Map<String, dynamic>.from(
       (widget.args['resource'] as Map<String, dynamic>?) ??
           (widget.args['court'] as Map<String, dynamic>?) ??
@@ -43,7 +48,9 @@ class _PaymentPageState extends State<PaymentPage> {
         config.features.reservationStaffSelection && service['id'] != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('payment_title', fallback: 'Confirmar cita'))),
+      appBar: AppBar(
+        title: Text(loc.t('payment_title', fallback: 'Confirmar cita')),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -59,16 +66,18 @@ class _PaymentPageState extends State<PaymentPage> {
               subtitle: selectedBarber == null
                   ? loc.t(
                       'booking_barber_optional',
-                      fallback: 'Sin barbero seleccionado',
+                      fallback:
+                          'Sin ${whiteLabel.staffDisplayName} seleccionado',
                     )
                   : (selectedBarber?['name']?.toString() ??
                         loc.t(
                           'booking_barber_selected',
-                          fallback: 'Barbero seleccionado',
+                          fallback:
+                              '${whiteLabel.staffDisplayName} seleccionado',
                         )),
               actionLabel: loc.t(
                 'booking_barber_choose',
-                fallback: 'Elegir barbero',
+                fallback: 'Elegir ${whiteLabel.staffDisplayName}',
               ),
               onTap: loading ? null : () => _pickBarber(service),
             ),
@@ -94,7 +103,7 @@ class _PaymentPageState extends State<PaymentPage> {
         child: ElevatedButton(
           onPressed: loading ? null : _confirm,
           child: Text(
-              loading
+            loading
                 ? loc.t('payment_processing', fallback: 'Procesando...')
                 : loc.t('btn_continue', fallback: 'Continuar'),
           ),
@@ -152,58 +161,69 @@ class _PaymentPageState extends State<PaymentPage> {
     }
 
     setState(() => loading = true);
-    final Map<String, dynamic> service = Map<String, dynamic>.from(
-      (widget.args['resource'] as Map<String, dynamic>?) ??
-          (widget.args['court'] as Map<String, dynamic>?) ??
-          const {},
-    );
-    final iso = widget.args['iso'] as String;
-    final slot = widget.args['slot'] as String;
-    final duration =
-        widget.args['duration'] as int? ??
-        widget.args['duration_hours'] as int? ??
-        1;
-
+    // Everything from here on runs inside try/finally: an early return
+    // (invalid staff selection) and an early throw (a malformed arg cast)
+    // both still hit `finally`, so `loading` can never get stuck true no
+    // matter which exit path this method takes.
     try {
-      final created = await auth.api.createReservation({
+      final Map<String, dynamic> service = Map<String, dynamic>.from(
+        (widget.args['resource'] as Map<String, dynamic>?) ??
+            (widget.args['court'] as Map<String, dynamic>?) ??
+            const {},
+      );
+      final iso = widget.args['iso'] as String;
+      final slot = widget.args['slot'] as String;
+      final duration =
+          widget.args['duration'] as int? ??
+          widget.args['duration_hours'] as int? ??
+          1;
+      final staffId = _selectedStaffId();
+
+      // A staff map without an id must never silently become an unassigned
+      // reservation after crossing the booking routes.
+      if (selectedBarber != null && staffId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                loc.t(
+                  'booking_barber_selection_invalid',
+                  fallback:
+                      'La selección de barbero no es válida. Elegí uno de nuevo.',
+                ),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final reservation = await auth.api.createReservation({
         'resource_id': service['id'],
         'date': iso,
         'time_slot': slot,
         'duration': duration,
-        if (selectedBarber != null) 'staff_id': selectedBarber?['id'],
+        if (staffId != null) 'staff_id': staffId,
       });
 
-      // Legacy notification hook stays in place while the generic backend contract is still in use.
-      try {
-        const admin = String.fromEnvironment('ADMIN_CONTACT');
-        final kapso = KapsoNotifier.fromEnv();
-        if (kapso != null && admin.isNotEmpty) {
-          final user = auth.user ?? const {};
-          kapso
-              .sendReservation(
-                adminRecipient: admin,
-                payload: {
-                  'court_id': service['id'],
-                  'resource_id': service['id'],
-                  'court_name': service['name'],
-                  'resource_name': service['name'],
-                  'date': iso,
-                  'time_slot': slot,
-                  'duration_hours': duration,
-                  if (selectedBarber != null) 'staff_id': selectedBarber?['id'],
-                  if (selectedBarber != null) 'staff': selectedBarber,
-                  'user_id': user['id'],
-                  'user_name': user['name'],
-                  'user_email': user['email'],
-                  'booking': created,
-                  'reservation': created,
-                },
-              )
-              .catchError((_) {});
-        }
-      } catch (_) {
-        // Ignore notification errors in the base app.
+      // ApiClient rejects malformed success responses, but retain this guard
+      // at the UI boundary so this route can never show a confirmation for a
+      // response that does not identify the persisted reservation.
+      final bookingId = _persistedReservationId(reservation);
+      if (bookingId == null) {
+        throw StateError('Reservation was not persisted by the server.');
       }
+
+      // Client-side WhatsApp/Kapso notification hook was removed: it read
+      // KAPSO_API_KEY via --dart-define, which compiles as a plain string
+      // into main.dart.js and is trivially recoverable via view-source on
+      // a deployed PWA. It was never actually configured for any business
+      // (nothing sets KAPSO_BASE/KAPSO_API_KEY) and the deployment
+      // checklist already warned never to set the key. If admin
+      // notifications on new bookings become a real requirement, add a
+      // backend endpoint that holds the Kapso secret server-side and have
+      // the client call that instead — never call a third-party
+      // notification API directly from client code with an embedded key.
 
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(
@@ -219,6 +239,7 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
           'buttonText': loc.t('btn_back_home', fallback: 'Back to home'),
           'backRoute': AppRoutes.home,
+          'reservationId': bookingId,
         },
       );
     } catch (e) {
@@ -234,6 +255,19 @@ class _PaymentPageState extends State<PaymentPage> {
     } finally {
       if (mounted) setState(() => loading = false);
     }
+  }
+
+  int? _persistedReservationId(Map<String, dynamic> reservation) {
+    for (final key in const ['id', 'reservation_id', 'booking_id']) {
+      final value = reservation[key];
+      final id = value is int
+          ? value
+          : value is num
+          ? value.toInt()
+          : int.tryParse(value?.toString() ?? '');
+      if (id != null && id > 0) return id;
+    }
+    return null;
   }
 
   Future<void> _pickBarber(Map<String, dynamic> service) async {
@@ -253,6 +287,13 @@ class _PaymentPageState extends State<PaymentPage> {
           ? null
           : Map<String, dynamic>.from(picked);
     });
+  }
+
+  int? _selectedStaffId() {
+    final value = selectedBarber?['id'];
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
   }
 }
 

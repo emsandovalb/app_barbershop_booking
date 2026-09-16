@@ -297,7 +297,13 @@ class BarbershopPremiumCard extends StatelessWidget {
               ),
             ],
       ),
-      child: child,
+      // MaterialType.transparency paints nothing of its own (the
+      // Container above already owns the background/border/shadow) but
+      // gives any ListTile/CheckboxListTile/InkWell etc. inside `child`
+      // a real Material ancestor to paint ink and backgrounds on —
+      // without it, Flutter's own debug assertion flags those effects
+      // as invisible whenever this card wraps a ListTile-family widget.
+      child: Material(type: MaterialType.transparency, child: child),
     );
   }
 }

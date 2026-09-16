@@ -278,29 +278,34 @@ class _ProfileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
+      // Material, not a decorated Container, wraps the ListTile: ListTile
+      // paints its background/ink splashes on the nearest Material
+      // ancestor, so a plain Container+BoxDecoration in between hides
+      // them (Flutter's own debug assertion now catches this).
+      child: Material(
         color: const Color(0xFF282828),
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xFF1F1F1F),
-            borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F1F1F),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white),
           ),
-          child: Icon(icon, color: Colors.white),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.white70),
+          onTap: onTap,
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.white70),
-        onTap: onTap,
       ),
     );
   }
