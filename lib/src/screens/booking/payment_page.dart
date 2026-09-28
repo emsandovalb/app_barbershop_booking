@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/app_config.dart';
 import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
-import 'barber_picker_bottom_sheet.dart';
 
 class PaymentPage extends StatefulWidget {
   final Map<String, dynamic> args;
@@ -17,7 +15,6 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  String method = 'card';
   bool loading = false;
   Map<String, dynamic>? selectedBarber;
 
@@ -37,15 +34,7 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
-    final config = context.watch<AppConfig>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
-    final service = Map<String, dynamic>.from(
-      (widget.args['resource'] as Map<String, dynamic>?) ??
-          (widget.args['court'] as Map<String, dynamic>?) ??
-          const {},
-    );
-    final showBarberSelection =
-        config.features.reservationStaffSelection && service['id'] != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,47 +43,34 @@ class _PaymentPageState extends State<PaymentPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _tile(loc.t('payment_method_card', fallback: 'Tarjeta'), 'card'),
-          const Divider(height: 1, color: Colors.white24),
-          _tile('PayPal', 'paypal'),
-          const Divider(height: 1, color: Colors.white24),
-          _tile(loc.t('payment_method_cash', fallback: 'Efectivo'), 'cash'),
-          if (showBarberSelection) ...[
-            const SizedBox(height: 16),
-            _BarberSection(
-              title: loc.t('booking_barber_title', fallback: 'Barber'),
-              subtitle: selectedBarber == null
-                  ? loc.t(
-                      'booking_barber_optional',
-                      fallback:
-                          'Sin ${whiteLabel.staffDisplayName} seleccionado',
-                    )
-                  : (selectedBarber?['name']?.toString() ??
-                        loc.t(
-                          'booking_barber_selected',
-                          fallback:
-                              '${whiteLabel.staffDisplayName} seleccionado',
-                        )),
-              actionLabel: loc.t(
-                'booking_barber_choose',
-                fallback: 'Elegir ${whiteLabel.staffDisplayName}',
-              ),
-              onTap: loading ? null : () => _pickBarber(service),
-            ),
-          ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(Icons.add, color: Colors.white),
-              const SizedBox(width: 8),
-              Text(
-                loc.t('payment_add_card', fallback: 'Add new card'),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+          _BarberSection(
+            title: whiteLabel.staffDisplayName,
+            subtitle:
+                selectedBarber?['name']?.toString() ??
+                loc.t(
+                  'booking_barber_required',
+                  fallback: 'Profesional pendiente',
                 ),
+            actionLabel: '',
+            onTap: null,
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            leading: const Icon(Icons.payments_outlined, color: Colors.white70),
+            title: Text(
+              loc.t('booking_payment_pending', fallback: 'Pago pendiente'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
               ),
-            ],
+            ),
+            subtitle: Text(
+              loc.t(
+                'booking_payment_pending_hint',
+                fallback: 'El negocio registrará el pago cuando corresponda.',
+              ),
+              style: const TextStyle(color: Colors.white70),
+            ),
           ),
         ],
       ),
@@ -109,34 +85,6 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _tile(String title, String value) {
-    final selected = method == value;
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: const Color(0xFF282828),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(Icons.payment),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      trailing: Icon(
-        selected ? Icons.radio_button_checked : Icons.radio_button_off,
-        color: selected ? Colors.white : Colors.white54,
-      ),
-      onTap: () => setState(() => method = value),
     );
   }
 
@@ -173,15 +121,11 @@ class _PaymentPageState extends State<PaymentPage> {
       );
       final iso = widget.args['iso'] as String;
       final slot = widget.args['slot'] as String;
-      final duration =
-          widget.args['duration'] as int? ??
-          widget.args['duration_hours'] as int? ??
-          1;
       final staffId = _selectedStaffId();
 
       // A staff map without an id must never silently become an unassigned
       // reservation after crossing the booking routes.
-      if (selectedBarber != null && staffId == null) {
+      if (staffId == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -202,8 +146,7 @@ class _PaymentPageState extends State<PaymentPage> {
         'resource_id': service['id'],
         'date': iso,
         'time_slot': slot,
-        'duration': duration,
-        if (staffId != null) 'staff_id': staffId,
+        'staff_id': staffId,
       });
 
       // ApiClient rejects malformed success responses, but retain this guard
@@ -270,25 +213,6 @@ class _PaymentPageState extends State<PaymentPage> {
     return null;
   }
 
-  Future<void> _pickBarber(Map<String, dynamic> service) async {
-    final serviceId = service['id'] as int?;
-    if (serviceId == null) return;
-
-    final picked = await showModalBottomSheet<Map<String, dynamic>?>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BarberPickerBottomSheet(serviceId: serviceId),
-    );
-
-    if (!mounted) return;
-    setState(() {
-      selectedBarber = picked == null
-          ? null
-          : Map<String, dynamic>.from(picked);
-    });
-  }
-
   int? _selectedStaffId() {
     final value = selectedBarber?['id'];
     if (value is int) return value;
@@ -330,11 +254,13 @@ class _BarberSection extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(subtitle, style: const TextStyle(color: Colors.white70)),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(onPressed: onTap, child: Text(actionLabel)),
-          ),
+          if (actionLabel.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(onPressed: onTap, child: Text(actionLabel)),
+            ),
+          ],
         ],
       ),
     );

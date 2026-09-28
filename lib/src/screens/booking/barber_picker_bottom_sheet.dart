@@ -81,7 +81,8 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                   Text(
                     loc.t(
                       'booking_barber_picker_hint',
-                      fallback: 'Choose a barber or continue without one.',
+                      fallback:
+                          'Elegí el profesional que realizará tu servicio.',
                     ),
                     style: const TextStyle(color: Colors.white70),
                   ),
@@ -113,33 +114,6 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                         return ListView(
                           controller: scrollController,
                           children: [
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(
-                                Icons.do_not_disturb_alt_outlined,
-                                color: Colors.white70,
-                              ),
-                              title: Text(
-                                loc.t(
-                                  'booking_barber_none',
-                                  fallback: 'No barber preference',
-                                ),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                loc.t(
-                                  'booking_barber_none_subtitle',
-                                  fallback:
-                                      'Continue without assigning a barber',
-                                ),
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                              onTap: () => Navigator.of(context).pop(null),
-                            ),
-                            const Divider(color: Colors.white12),
                             if (barbers.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.symmetric(

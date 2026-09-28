@@ -5,6 +5,7 @@ import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import '../../widgets/court_image.dart';
+import '../../widgets/loadable_collection_view.dart';
 
 class MyGroundsPage extends StatefulWidget {
   const MyGroundsPage({super.key});
@@ -14,141 +15,233 @@ class MyGroundsPage extends StatefulWidget {
 }
 
 class _MyGroundsPageState extends State<MyGroundsPage> {
-  Future<Map<String, dynamic>>? _future;
+  late final LoadableController<List<Map<String, dynamic>>> _controller;
   bool _actionInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LoadableController<List<Map<String, dynamic>>>(_loadItems);
+    _controller.load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadItems() async {
+    final auth = context.read<AuthProvider>();
+    final response = await auth.api.getMyResources();
+    final data = response['data'];
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList(growable: false);
+    }
+    return const [];
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final loc = context.watch<LocalizationService>();
-    final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
+    final isAdmin = auth.canManageBusiness;
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(leading: const BackButton(), title: Text(loc.t('grounds_my_title', fallback: 'My services'))),
-        body: Center(child: Text(loc.t('grounds_admin_only', fallback: 'Only administrators can access this section'))),
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: Text(loc.t('grounds_my_title', fallback: 'My services')),
+        ),
+        body: Center(
+          child: Text(
+            loc.t(
+              'grounds_admin_only',
+              fallback: 'Only administrators can access this section',
+            ),
+          ),
+        ),
       );
     }
-    _future ??= auth.api.getMyResources();
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
         title: Text(loc.t('grounds_my_title', fallback: 'My services')),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _future,
-        builder: (context, snap) {
-          if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final items = (snap.data?['data'] as List?) ?? [];
+      body: LoadableCollectionView<List<Map<String, dynamic>>>(
+        controller: _controller,
+        isEmpty: (items) => items.isEmpty,
+        loadingBuilder: (context, retry) {
+          return const Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, retry) {
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(32),
+            children: [
+              const SizedBox(height: 140),
+              Center(
+                child: Column(
+                  children: [
+                    const Text(
+                      'No fue posible cargar los servicios.',
+                      style: TextStyle(color: Colors.white70),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Revisa tu conexión e intenta nuevamente.',
+                      style: TextStyle(color: Colors.white54),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: retry,
+                      child: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+        emptyBuilder: (context, retry) {
           return RefreshIndicator(
             onRefresh: _refresh,
-            child: items.isEmpty
-                ? ListView(
-                    padding: const EdgeInsets.all(32),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(32),
+              children: [
+                const SizedBox(height: 120),
+                Center(child: Text('Todavía no hay servicios registrados.')),
+              ],
+            ),
+          );
+        },
+        dataBuilder: (context, items, retry, isLoading) {
+          return RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (_, i) {
+                final resource = items[i];
+                final status = (resource['status'] ?? 'active').toString();
+                final isInactive = status != 'active';
+                return Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF282828),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
                     children: [
-                      Center(child: Text(loc.t('grounds_empty', fallback: 'No services yet'))),
-                    ],
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) {
-                      final resource = items[i] as Map<String, dynamic>;
-                      final status = (resource['status'] ?? 'active').toString();
-                      final isInactive = status != 'active';
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF282828),
-                          borderRadius: BorderRadius.circular(16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          width: 72,
+                          height: 72,
+                          child: CourtImage(
+                            images: resource['images'],
+                            height: 72,
+                            width: 72,
+                            radius: BorderRadius.circular(12),
+                          ),
                         ),
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: SizedBox(
-                                width: 72,
-                                height: 72,
-                                child: CourtImage(
-                                  images: resource['images'],
-                                  height: 72,
-                                  width: 72,
-                                  radius: BorderRadius.circular(12),
-                                ),
+                            Text(
+                              resource['name']?.toString() ?? 'Service',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    resource['name']?.toString() ?? 'Service',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${resource['duration_hours'] ?? 1} ${loc.t('grounds_hour', fallback: 'Hour')}',
-                                        style: const TextStyle(color: Colors.white70),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: (isInactive ? Colors.red : Colors.green).withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Text(
-                                          status.toUpperCase(),
-                                          style: TextStyle(
-                                            color: isInactive ? Colors.redAccent : Colors.greenAccent,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert, color: Colors.white70),
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _openEdit(resource);
-                                } else if (value == 'toggle' && !_actionInProgress) {
-                                  final newStatus = isInactive ? 'active' : 'inactive';
-                                  _changeStatus(resource, newStatus);
-                                }
-                              },
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text(loc.t('grounds_edit', fallback: 'Edit')),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  '${resource['duration_hours'] ?? 1} ${loc.t('grounds_hour', fallback: 'Hour')}',
+                                  style: const TextStyle(color: Colors.white70),
                                 ),
-                                PopupMenuItem(
-                                  value: 'toggle',
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (isInactive ? Colors.red : Colors.green)
+                                            .withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   child: Text(
-                                    isInactive
-                                        ? loc.t('grounds_activate', fallback: 'Activate')
-                                        : loc.t('grounds_deactivate', fallback: 'Deactivate'),
+                                    status.toUpperCase(),
+                                    style: TextStyle(
+                                      color: isInactive
+                                          ? Colors.redAccent
+                                          : Colors.greenAccent,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                      PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.white70,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _openEdit(resource);
+                          } else if (value == 'toggle' && !_actionInProgress) {
+                            final newStatus = isInactive
+                                ? 'active'
+                                : 'inactive';
+                            _changeStatus(resource, newStatus);
+                          }
+                        },
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Text(
+                              loc.t('grounds_edit', fallback: 'Edit'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'toggle',
+                            child: Text(
+                              isInactive
+                                  ? loc.t(
+                                      'grounds_activate',
+                                      fallback: 'Activate',
+                                    )
+                                  : loc.t(
+                                      'grounds_deactivate',
+                                      fallback: 'Deactivate',
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -166,11 +259,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
   }
 
   Future<void> _refresh() async {
-    final auth = context.read<AuthProvider>();
-      setState(() {
-        _future = auth.api.getMyResources();
-      });
-    await _future;
+    await _controller.load();
   }
 
   Future<void> _openEdit(Map<String, dynamic> court) async {
@@ -184,7 +273,10 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
     }
   }
 
-  Future<void> _changeStatus(Map<String, dynamic> court, String newStatus) async {
+  Future<void> _changeStatus(
+    Map<String, dynamic> court,
+    String newStatus,
+  ) async {
     setState(() => _actionInProgress = true);
     final auth = context.read<AuthProvider>();
     final loc = context.read<LocalizationService>();
@@ -198,13 +290,21 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.t('grounds_status_updated', fallback: 'Status updated'))),
+        SnackBar(
+          content: Text(
+            loc.t('grounds_status_updated', fallback: 'Status updated'),
+          ),
+        ),
       );
       await _refresh();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${loc.t('grounds_update_failed', fallback: 'Failed to update')}: $e')),
+          SnackBar(
+            content: Text(
+              '${loc.t('grounds_update_failed', fallback: 'Failed to update')}: $e',
+            ),
+          ),
         );
       }
     } finally {
@@ -235,13 +335,26 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
   @override
   void initState() {
     super.initState();
-    nameCtrl = TextEditingController(text: widget.court['name']?.toString() ?? '');
-    emailCtrl = TextEditingController(text: widget.court['contact_email']?.toString() ?? '');
-    phoneCtrl = TextEditingController(text: widget.court['contact_phone']?.toString() ?? '');
-    addressCtrl = TextEditingController(text: widget.court['address']?.toString() ?? '');
-    openTime = _parseToTimeOfDay(widget.court['open_hour']?.toString()) ?? const TimeOfDay(hour: 8, minute: 0);
-    closeTime = _parseToTimeOfDay(widget.court['close_hour']?.toString()) ?? const TimeOfDay(hour: 22, minute: 0);
-    duration = int.tryParse(widget.court['duration_hours']?.toString() ?? '1') ?? 1;
+    nameCtrl = TextEditingController(
+      text: widget.court['name']?.toString() ?? '',
+    );
+    emailCtrl = TextEditingController(
+      text: widget.court['contact_email']?.toString() ?? '',
+    );
+    phoneCtrl = TextEditingController(
+      text: widget.court['contact_phone']?.toString() ?? '',
+    );
+    addressCtrl = TextEditingController(
+      text: widget.court['address']?.toString() ?? '',
+    );
+    openTime =
+        _parseToTimeOfDay(widget.court['open_hour']?.toString()) ??
+        const TimeOfDay(hour: 8, minute: 0);
+    closeTime =
+        _parseToTimeOfDay(widget.court['close_hour']?.toString()) ??
+        const TimeOfDay(hour: 22, minute: 0);
+    duration =
+        int.tryParse(widget.court['duration_hours']?.toString() ?? '1') ?? 1;
     status = (widget.court['status']?.toString() ?? 'active');
   }
 
@@ -269,7 +382,13 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(loc.t('grounds_edit_details', fallback: 'Edit resource'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(
+                  loc.t('grounds_edit_details', fallback: 'Edit resource'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(false),
@@ -277,13 +396,33 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
               ],
             ),
             const SizedBox(height: 12),
-            TextField(controller: nameCtrl, decoration: InputDecoration(hintText: loc.t('form_name', fallback: 'Name'))),
+            TextField(
+              controller: nameCtrl,
+              decoration: InputDecoration(
+                hintText: loc.t('form_name', fallback: 'Name'),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: emailCtrl, decoration: InputDecoration(hintText: loc.t('form_email', fallback: 'Email address'))),
+            TextField(
+              controller: emailCtrl,
+              decoration: InputDecoration(
+                hintText: loc.t('form_email', fallback: 'Email address'),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: phoneCtrl, decoration: InputDecoration(hintText: loc.t('form_phone', fallback: 'Phone'))),
+            TextField(
+              controller: phoneCtrl,
+              decoration: InputDecoration(
+                hintText: loc.t('form_phone', fallback: 'Phone'),
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: addressCtrl, decoration: InputDecoration(hintText: loc.t('form_address', fallback: 'Address'))),
+            TextField(
+              controller: addressCtrl,
+              decoration: InputDecoration(
+                hintText: loc.t('form_address', fallback: 'Address'),
+              ),
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -292,7 +431,10 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
                     label: loc.t('grounds_opens', fallback: 'Opens'),
                     value: _fmt(openTime),
                     onTap: () async {
-                      final picked = await showTimePicker(context: context, initialTime: openTime);
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: openTime,
+                      );
                       if (picked != null) setState(() => openTime = picked);
                     },
                   ),
@@ -303,7 +445,10 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
                     label: loc.t('grounds_closes', fallback: 'Closes'),
                     value: _fmt(closeTime),
                     onTap: () async {
-                      final picked = await showTimePicker(context: context, initialTime: closeTime);
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: closeTime,
+                      );
                       if (picked != null) setState(() => closeTime = picked);
                     },
                   ),
@@ -313,11 +458,31 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               initialValue: duration,
-              decoration: InputDecoration(labelText: loc.t('grounds_duration_label', fallback: 'Duration per reservation')),
+              decoration: InputDecoration(
+                labelText: loc.t(
+                  'grounds_duration_label',
+                  fallback: 'Duration per reservation',
+                ),
+              ),
               items: [
-                DropdownMenuItem(value: 1, child: Text(loc.t('grounds_duration_one', fallback: '1 Hour'))),
-                DropdownMenuItem(value: 2, child: Text(loc.t('grounds_duration_two', fallback: '2 Hours'))),
-                DropdownMenuItem(value: 3, child: Text(loc.t('grounds_duration_three', fallback: '3 Hours'))),
+                DropdownMenuItem(
+                  value: 1,
+                  child: Text(
+                    loc.t('grounds_duration_one', fallback: '1 Hour'),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 2,
+                  child: Text(
+                    loc.t('grounds_duration_two', fallback: '2 Hours'),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 3,
+                  child: Text(
+                    loc.t('grounds_duration_three', fallback: '3 Hours'),
+                  ),
+                ),
               ],
               onChanged: (val) {
                 if (val != null) setState(() => duration = val);
@@ -326,10 +491,18 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: status,
-              decoration: InputDecoration(labelText: loc.t('grounds_status', fallback: 'Status')),
+              decoration: InputDecoration(
+                labelText: loc.t('grounds_status', fallback: 'Status'),
+              ),
               items: [
-                DropdownMenuItem(value: 'active', child: Text(loc.t('grounds_active', fallback: 'Active'))),
-                DropdownMenuItem(value: 'inactive', child: Text(loc.t('grounds_inactive', fallback: 'Inactive'))),
+                DropdownMenuItem(
+                  value: 'active',
+                  child: Text(loc.t('grounds_active', fallback: 'Active')),
+                ),
+                DropdownMenuItem(
+                  value: 'inactive',
+                  child: Text(loc.t('grounds_inactive', fallback: 'Inactive')),
+                ),
               ],
               onChanged: (val) {
                 if (val != null) setState(() => status = val);
@@ -338,7 +511,11 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: saving ? null : _save,
-              child: Text(saving ? loc.t('btn_saving', fallback: 'Saving...') : loc.t('btn_save', fallback: 'Save')),
+              child: Text(
+                saving
+                    ? loc.t('btn_saving', fallback: 'Saving...')
+                    : loc.t('btn_save', fallback: 'Save'),
+              ),
             ),
           ],
         ),
@@ -349,7 +526,14 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
   Future<void> _save() async {
     if (nameCtrl.text.trim().isEmpty || addressCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.read<LocalizationService>().t('grounds_name_required', fallback: 'Name and Address are required'))),
+        SnackBar(
+          content: Text(
+            context.read<LocalizationService>().t(
+              'grounds_name_required',
+              fallback: 'Name and Address are required',
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -378,7 +562,11 @@ class _GroundEditSheetState extends State<_GroundEditSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${context.read<LocalizationService>().t('grounds_update_failed', fallback: 'Failed to update')}: $e')),
+          SnackBar(
+            content: Text(
+              '${context.read<LocalizationService>().t('grounds_update_failed', fallback: 'Failed to update')}: $e',
+            ),
+          ),
         );
       }
     } finally {
@@ -414,7 +602,11 @@ class _SheetTimeTile extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _SheetTimeTile({required this.label, required this.value, required this.onTap});
+  const _SheetTimeTile({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -429,9 +621,18 @@ class _SheetTimeTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
             const SizedBox(height: 6),
-            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       ),

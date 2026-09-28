@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -27,10 +28,18 @@ class _TeamFormPageState extends State<TeamFormPage> {
   @override
   void initState() {
     super.initState();
-    _nameCtrl = TextEditingController(text: widget.team?['name']?.toString() ?? '');
-    _descriptionCtrl = TextEditingController(text: widget.team?['description']?.toString() ?? '');
-    _cityCtrl = TextEditingController(text: widget.team?['city']?.toString() ?? '');
-    _logoPath = widget.team?['logo']?.toString() ?? widget.team?['logo_url']?.toString();
+    _nameCtrl = TextEditingController(
+      text: widget.team?['name']?.toString() ?? '',
+    );
+    _descriptionCtrl = TextEditingController(
+      text: widget.team?['description']?.toString() ?? '',
+    );
+    _cityCtrl = TextEditingController(
+      text: widget.team?['city']?.toString() ?? '',
+    );
+    _logoPath =
+        widget.team?['logo']?.toString() ??
+        widget.team?['logo_url']?.toString();
   }
 
   @override
@@ -46,13 +55,12 @@ class _TeamFormPageState extends State<TeamFormPage> {
     final loc = context.watch<LocalizationService>();
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     final preview = _logoPath;
-    final title = isEdit ? loc.t('teams_edit', fallback: 'Edit team') : loc.t('teams_create', fallback: 'Create team');
+    final title = isEdit
+        ? loc.t('teams_edit', fallback: 'Edit team')
+        : loc.t('teams_create', fallback: 'Create team');
 
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
-        title: Text(title),
-      ),
+      appBar: AppBar(leading: const BackButton(), title: Text(title)),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, bottom + 16),
         child: Column(
@@ -71,7 +79,10 @@ class _TeamFormPageState extends State<TeamFormPage> {
                 children: [
                   Text(
                     loc.t('teams_logo', fallback: 'Team logo'),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Center(
@@ -81,8 +92,18 @@ class _TeamFormPageState extends State<TeamFormPage> {
                         width: 140,
                         height: 140,
                         child: preview == null || preview.isEmpty
-                            ? const CourtImage(images: null, height: 140, width: 140, radius: BorderRadius.zero)
-                            : CourtImage(images: preview, height: 140, width: 140, radius: BorderRadius.zero),
+                            ? const CourtImage(
+                                images: null,
+                                height: 140,
+                                width: 140,
+                                radius: BorderRadius.zero,
+                              )
+                            : CourtImage(
+                                images: preview,
+                                height: 140,
+                                width: 140,
+                                radius: BorderRadius.zero,
+                              ),
                       ),
                     ),
                   ),
@@ -101,23 +122,33 @@ class _TeamFormPageState extends State<TeamFormPage> {
             TextField(
               controller: _nameCtrl,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(hintText: loc.t('teams_name', fallback: 'Team name')),
+              decoration: InputDecoration(
+                hintText: loc.t('teams_name', fallback: 'Team name'),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionCtrl,
               maxLines: 3,
-              decoration: InputDecoration(hintText: loc.t('teams_description', fallback: 'Description')),
+              decoration: InputDecoration(
+                hintText: loc.t('teams_description', fallback: 'Description'),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _cityCtrl,
-              decoration: InputDecoration(hintText: loc.t('teams_city', fallback: 'City')),
+              decoration: InputDecoration(
+                hintText: loc.t('teams_city', fallback: 'City'),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saving ? null : () async => _save(context),
-              child: Text(_saving ? loc.t('btn_saving', fallback: 'Saving...') : loc.t('teams_save', fallback: 'Save team')),
+              child: Text(
+                _saving
+                    ? loc.t('btn_saving', fallback: 'Saving...')
+                    : loc.t('teams_save', fallback: 'Save team'),
+              ),
             ),
           ],
         ),
@@ -126,18 +157,27 @@ class _TeamFormPageState extends State<TeamFormPage> {
   }
 
   Future<void> _pickLogo() async {
-    final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (image == null) return;
+    final bytes = await image.readAsBytes();
+    final mime = image.name.toLowerCase().endsWith('.png')
+        ? 'image/png'
+        : 'image/jpeg';
     setState(() {
-      _logoPath = image.path;
+      _logoPath = 'data:$mime;base64,${base64Encode(bytes)}';
     });
   }
 
   Future<void> _save(BuildContext context) async {
     final loc = context.read<LocalizationService>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(loc.t('teams_name', fallback: 'Team name'))),
       );
       return;
@@ -158,17 +198,19 @@ class _TeamFormPageState extends State<TeamFormPage> {
         await auth.api.updateTeam(
           id,
           payload,
-          logoPath: _logoPath != (widget.team?['logo']?.toString() ?? widget.team?['logo_url']?.toString()) ? _logoPath : null,
+          logoPath:
+              _logoPath !=
+                  (widget.team?['logo']?.toString() ??
+                      widget.team?['logo_url']?.toString())
+              ? _logoPath
+              : null,
         );
       } else {
-        await auth.api.createTeam(
-          payload,
-          logoPath: _logoPath,
-        );
+        await auth.api.createTeam(payload, logoPath: _logoPath);
       }
       await auth.refreshUser();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             isEdit
@@ -177,11 +219,15 @@ class _TeamFormPageState extends State<TeamFormPage> {
           ),
         ),
       );
-      Navigator.of(context).pop(true);
+      navigator.pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${loc.t('teams_update_failed', fallback: 'Could not save the team')}: $e')),
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${loc.t('teams_update_failed', fallback: 'Could not save the team')}: $e',
+            ),
+          ),
         );
       }
     } finally {

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,13 +10,21 @@ class CourtImage extends StatelessWidget {
   final double? height; // optional to allow fill by parent
   final double? width;
   final BorderRadius? radius;
-  const CourtImage({super.key, this.images, this.height, this.width, this.radius});
+  const CourtImage({
+    super.key,
+    this.images,
+    this.height,
+    this.width,
+    this.radius,
+  });
 
   @override
   Widget build(BuildContext context) {
     final raw = _firstPath(images);
     final resolved = raw == null ? null : _resolveSource(context, raw);
-    final child = resolved == null ? const _Placeholder() : _buildImage(resolved);
+    final child = resolved == null
+        ? const _Placeholder()
+        : _buildImage(resolved);
     return ClipRRect(
       borderRadius: radius ?? BorderRadius.circular(16),
       child: Container(
@@ -48,11 +55,11 @@ class CourtImage extends StatelessWidget {
         errorBuilder: (_, __, ___) => const _Placeholder(),
       );
     }
-    final file = File(src);
-    if (file.existsSync()) {
-      return Image.file(file, fit: BoxFit.cover);
-    }
-    return const _Placeholder();
+    return Image.network(
+      src,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const _Placeholder(),
+    );
   }
 
   String? _firstPath(dynamic images) {
@@ -104,11 +111,7 @@ class CourtImage extends StatelessWidget {
     if (trimmed.isEmpty) return null;
     if (trimmed.startsWith('asset:')) return trimmed;
     if (trimmed.startsWith('assets/')) return 'asset:$trimmed';
-    if (trimmed.startsWith('file://')) return trimmed.substring(7);
     if (trimmed.startsWith('http') || _looksLikeBase64(trimmed)) return trimmed;
-
-    final file = File(trimmed);
-    if (file.existsSync()) return trimmed;
 
     AuthProvider? auth;
     try {
@@ -116,28 +119,16 @@ class CourtImage extends StatelessWidget {
     } catch (_) {
       auth = null;
     }
-    final base = auth?.api.baseUrl;
-    if (base != null) {
-      final uri = Uri.tryParse(base);
-      if (uri != null) {
-        final origin = _originFromUri(uri);
-        if (origin != null) {
-          final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
-          return origin + path;
-        }
-      }
+    final api = auth?.api;
+    if (api != null) {
+      return api.resolveAssetUrl(trimmed);
     }
     return trimmed;
   }
 
   bool _looksLikeBase64(String value) {
-    return value.startsWith('data:image') || (value.length > 100 && RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(value));
-  }
-
-  String? _originFromUri(Uri uri) {
-    if (!uri.hasScheme || uri.host.isEmpty) return null;
-    final port = uri.hasPort ? ':${uri.port}' : '';
-    return '${uri.scheme}://${uri.host}$port';
+    return value.startsWith('data:image') ||
+        (value.length > 100 && RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(value));
   }
 }
 
@@ -147,7 +138,11 @@ class _Placeholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Icon(Icons.image_not_supported_outlined, color: Colors.white54, size: 36),
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.white54,
+        size: 36,
+      ),
     );
   }
 }

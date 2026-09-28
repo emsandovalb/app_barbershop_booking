@@ -1,0 +1,13 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/app_icon_jcstudio.png
+  adaptive_icon_background: "#C98F86"
+  remove_alpha_ios: true
+  background_color_ios: "#C98F86"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: assets/branding/app_icon_jcstudio.png
+    background_color: "#FBF7F3"
+    theme_color: "#C98F86"

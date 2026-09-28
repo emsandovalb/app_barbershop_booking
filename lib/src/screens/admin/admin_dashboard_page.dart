@@ -9,8 +9,9 @@ import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../bookings/appointment_helpers.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
+import 'admin_page_scaffold.dart';
 import '../bookings/booking_detail_page.dart';
 import '../gallery/gallery_page.dart';
 import '../reviews/reviews_page.dart';
@@ -33,21 +34,28 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Future<_AdminDashboardData> _loadData() async {
-    final api = context.read<AuthProvider>().api;
+    final auth = context.read<AuthProvider>();
+    await auth.ready;
+    final api = auth.api;
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    final reservationsResponse = await _safeFetch(
-      () => api.getReservationsForDay(today),
-      fallback: _fallbackReservationsResponse,
-    );
-    final staffResponse = await _safeFetch(
-      () => api.getStaff(perPage: 100),
-      fallback: _fallbackStaffResponse,
-    );
-    final resourcesResponse = await _safeFetch(
-      () => api.getResources(page: 1, perPage: 100, sort: 'rating'),
-      fallback: _fallbackResourcesResponse,
-    );
+    final responses = await Future.wait([
+      _safeFetch(
+        () => api.getReservationsForDay(today),
+        fallback: _fallbackReservationsResponse,
+      ),
+      _safeFetch(
+        () => api.getStaff(perPage: 100),
+        fallback: _fallbackStaffResponse,
+      ),
+      _safeFetch(
+        () => api.getResources(page: 1, perPage: 100, sort: 'rating'),
+        fallback: _fallbackResourcesResponse,
+      ),
+    ]);
+    final reservationsResponse = responses[0];
+    final staffResponse = responses[1];
+    final resourcesResponse = responses[2];
 
     final reservations = _extractItems(reservationsResponse);
     final staff = _extractItems(staffResponse);
@@ -156,7 +164,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return _openNamedRoute(
       AppRoutes.staffForm,
       arguments: const {'createMode': true},
-      successMessage: 'Barbero creado correctamente.',
+      successMessage: 'Perfil creado correctamente.',
     );
   }
 
@@ -174,11 +182,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final auth = context.watch<AuthProvider>();
-    final whiteLabel =
-        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
-        WhiteLabelConfig.tresAmigos;
-    if (!auth.isAdmin) {
+    final whiteLabel = context.watch<WhiteLabelConfig>();
+    if (!auth.canManageBusiness) {
       return const Scaffold(
         backgroundColor: Color(0xFF090909),
         body: Center(
@@ -191,14 +198,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
-      body: BarbershopPremiumBackdrop(
-        backgroundAsset: whiteLabel.heroBackground,
-        backgroundOpacity: .22,
-        blurSigma: 14,
+      appBar: buildAdminAppBar(
+        context,
+        title: 'Centro administrativo',
+        subtitle: whiteLabel.displayName,
+      ),
+      backgroundColor: theme.background,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF121212), Color(0xFF0D0D0D), Color(0xFF121212)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: SafeArea(
           child: RefreshIndicator(
-            color: AppColors.primary,
+            color: theme.primary,
             onRefresh: _refresh,
             child: FutureBuilder<_AdminDashboardData>(
               future: _future,
@@ -250,7 +266,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             ),
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
-                              title: 'Rendimiento de barberos',
+                              title: 'Rendimiento del equipo',
                               actionLabel: 'Centro administrativo',
                               onTap: () =>
                                   _openNamedRoute(AppRoutes.adminDashboard),
@@ -360,7 +376,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       _AdminModuleData(
         id: 'staff',
         icon: Icons.groups_rounded,
-        title: 'Barberos',
+        title: 'Equipo',
         subtitle: 'Equipo y perfiles',
         badge: config.features.adminStaffManagement ? 'Activo' : 'Demo',
       ),
@@ -431,7 +447,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       ),
       _MetricData(
         icon: Icons.groups_rounded,
-        label: 'Barberos activos',
+        label: 'Equipo activo',
         value: '${activeBarbers.length}',
         footnote: activeBarbers.isNotEmpty
             ? 'Equipo disponible'
@@ -439,7 +455,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       ),
       _MetricData(
         icon: Icons.content_cut_rounded,
-        label: 'Servicios reservados',
+        label: 'Servicios más reservados',
         value: '${serviceCounts.values.fold<int>(0, (a, b) => a + b)}',
         footnote: serviceRevenue.isNotEmpty
             ? 'Top: ${serviceRevenue.keys.first}'
@@ -571,14 +587,27 @@ class _TopHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BarbershopCinematicPanel(
-      backgroundAsset: whiteLabel.heroBackground,
-      radius: 30,
-      padding: const EdgeInsets.all(18),
-      opacity: .52,
-      blurSigma: 3,
+    final theme = context.watch<BrandTheme>();
+    return Container(
+      height: 288,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF17110E), Color(0xFF0E0D0C), Color(0xFF1A1410)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: theme.primary.withValues(alpha: .20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .24),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: SizedBox(
-        height: 254,
+        height: 288,
         child: Stack(
           children: [
             const Positioned(
@@ -599,7 +628,8 @@ class _TopHero extends StatelessWidget {
                         BarbershopLogoMark(
                           assetPath: whiteLabel.logoTransparent,
                           size: 96,
-                          glowColor: AppColors.primary,
+                          glowColor: theme.primary,
+                          showGlow: false,
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -614,17 +644,17 @@ class _TopHero extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Centro administrativo',
                           style: TextStyle(
-                            color: AppColors.secondary,
+                            color: theme.secondary,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Gestioná citas, servicios, barberos y la presencia digital de tu barbería.',
+                          'Gestioná citas, servicios y la presencia digital de tu negocio.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: .72),
@@ -634,8 +664,11 @@ class _TopHero extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 10,
+                      spacing: 10,
                       children: [
                         _HeroMetaChip(
                           icon: Icons.event_available_rounded,
@@ -653,8 +686,8 @@ class _TopHero extends StatelessWidget {
                         TextButton.icon(
                           onPressed: onRefresh,
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            backgroundColor: AppColors.primary.withValues(
+                            foregroundColor: theme.primary,
+                            backgroundColor: theme.primary.withValues(
                               alpha: .10,
                             ),
                             padding: const EdgeInsets.symmetric(
@@ -697,6 +730,7 @@ class _HeroMetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -707,7 +741,7 @@ class _HeroMetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppColors.primary, size: 17),
+          Icon(icon, color: theme.primary, size: 17),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -746,6 +780,7 @@ class _QuickActionsRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return AbsorbPointer(
       absorbing: isBusy,
       child: Opacity(
@@ -778,6 +813,7 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
@@ -788,7 +824,7 @@ class _QuickActionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF130F0C).withValues(alpha: .94),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+          border: Border.all(color: theme.primary.withValues(alpha: .18)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -798,10 +834,10 @@ class _QuickActionCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: .14),
+                color: theme.primary.withValues(alpha: .14),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(action.icon, color: AppColors.primary, size: 22),
+              child: Icon(action.icon, color: theme.primary, size: 22),
             ),
             const SizedBox(height: 4),
             Text(
@@ -837,6 +873,7 @@ class _AdminModuleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -863,6 +900,7 @@ class _AdminModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -882,10 +920,10 @@ class _AdminModuleCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: .14),
+                    color: theme.primary.withValues(alpha: .14),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(module.icon, color: AppColors.primary, size: 22),
+                  child: Icon(module.icon, color: theme.primary, size: 22),
                 ),
                 const Spacer(),
                 _ModuleBadge(label: module.badge),
@@ -926,17 +964,18 @@ class _ModuleBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: .12),
+        color: theme.primary.withValues(alpha: .12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .22)),
+        border: Border.all(color: theme.primary.withValues(alpha: .22)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppColors.secondary,
+        style:  TextStyle(
+          color: theme.secondary,
           fontSize: 10.5,
           fontWeight: FontWeight.w800,
         ),
@@ -953,6 +992,7 @@ class _SectionIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -984,6 +1024,7 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1009,11 +1050,12 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       padding: const EdgeInsets.all(14),
       radius: 22,
       backgroundColor: const Color(0xFF120E0B).withValues(alpha: .94),
-      borderColor: AppColors.primary.withValues(alpha: .18),
+      borderColor: theme.primary.withValues(alpha: .18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1023,10 +1065,10 @@ class _MetricCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: .14),
+                  color: theme.primary.withValues(alpha: .14),
                   borderRadius: BorderRadius.circular(13),
                 ),
-                child: Icon(metric.icon, color: AppColors.primary, size: 20),
+                child: Icon(metric.icon, color: theme.primary, size: 20),
               ),
               const Spacer(),
               const Icon(
@@ -1080,6 +1122,7 @@ class _TodayAppointmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackReservations;
     return Column(
       children: list
@@ -1106,6 +1149,7 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final resource = appointmentResource(booking);
     final barber = appointmentBarber(booking);
     final status = appointmentStatusBucket(booking);
@@ -1131,9 +1175,25 @@ class _AppointmentCard extends StatelessWidget {
               height: 60,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/branding/service_placeholder_premium.png',
-                  fit: BoxFit.cover,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF151C31),
+                        Color(0xFF10172A),
+                        Color(0xFF0B1020),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.event_available_rounded,
+                      color: Colors.white70,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1146,8 +1206,8 @@ class _AppointmentCard extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style:  TextStyle(
+                          color: theme.primary,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
                         ),
@@ -1189,8 +1249,8 @@ class _AppointmentCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       _bookingPriceLabel(booking, resource),
-                      style: const TextStyle(
-                        color: AppColors.secondary,
+                      style:  TextStyle(
+                        color: theme.secondary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
                       ),
@@ -1215,6 +1275,7 @@ class _PerformanceList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackPerformance;
     return Column(
       children: list
@@ -1237,6 +1298,7 @@ class _PerformanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1248,7 +1310,7 @@ class _PerformanceRow extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.primary.withValues(alpha: .16),
+            backgroundColor: theme.primary.withValues(alpha: .16),
             backgroundImage: item.avatar.isNotEmpty
                 ? AssetImage(item.avatar)
                 : null,
@@ -1292,8 +1354,8 @@ class _PerformanceRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _formatCrc(item.revenue),
-                  style: const TextStyle(
-                    color: AppColors.secondary,
+                  style:  TextStyle(
+                    color: theme.secondary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1314,6 +1376,7 @@ class _TopServicesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackTopServices;
     return Column(
       children: list
@@ -1336,6 +1399,7 @@ class _TopServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1373,8 +1437,8 @@ class _TopServiceCard extends StatelessWidget {
             children: [
               Text(
                 _formatCrc(item.revenue),
-                style: const TextStyle(
-                  color: AppColors.secondary,
+                style:  TextStyle(
+                  color: theme.secondary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1395,7 +1459,7 @@ class _TopServiceCard extends StatelessWidget {
               value: item.progress,
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: .06),
-              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+              valueColor:  AlwaysStoppedAnimation(theme.primary),
             ),
           ),
         ],
@@ -1417,6 +1481,7 @@ class _SectionHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1434,8 +1499,8 @@ class _SectionHeaderRow extends StatelessWidget {
           onPressed: onTap,
           child: Text(
             actionLabel,
-            style: const TextStyle(
-              color: AppColors.secondary,
+            style:  TextStyle(
+              color: theme.secondary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1453,10 +1518,11 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final (text, fg, bg) = switch (status) {
       AppointmentStatusBucket.upcoming => (
         label ?? 'Pendiente',
-        AppColors.primary,
+        theme.primary,
         const Color(0xFF2E2315),
       ),
       AppointmentStatusBucket.completed => (
@@ -1592,8 +1658,8 @@ const List<_QuickActionData> _quickActions = [
   _QuickActionData(
     id: 'new_barber',
     icon: Icons.person_add_alt_1_rounded,
-    label: 'Nuevo barbero',
-    description: 'Sumá un perfil al equipo de la barbería.',
+    label: 'Nuevo perfil',
+    description: 'Sumá un perfil al equipo.',
   ),
   _QuickActionData(
     id: 'new_service',
@@ -1622,7 +1688,7 @@ const List<Map<String, dynamic>> _fallbackReservations = [
       'id': 11,
       'name': 'Corte y Barba',
       'price_per_hour': 12000,
-      'images': ['assets/branding/service_placeholder_premium.png'],
+      'images': [''],
     },
     'staff': {'id': 3, 'name': 'Luis Herrera', 'is_active': true},
   },
@@ -1638,7 +1704,7 @@ const List<Map<String, dynamic>> _fallbackReservations = [
       'id': 12,
       'name': 'Fade Signature',
       'price_per_hour': 9000,
-      'images': ['assets/branding/service_placeholder_premium.png'],
+      'images': [''],
     },
     'staff': {'id': 2, 'name': 'Marcos Solís', 'is_active': true},
   },
@@ -1654,7 +1720,7 @@ const List<Map<String, dynamic>> _fallbackReservations = [
       'id': 13,
       'name': 'Experiencia Completa',
       'price_per_hour': 15000,
-      'images': ['assets/branding/service_placeholder_premium.png'],
+      'images': [''],
     },
     'staff': {'id': 4, 'name': 'José Vargas', 'is_active': true},
   },
@@ -1670,7 +1736,7 @@ const List<Map<String, dynamic>> _fallbackReservations = [
       'id': 14,
       'name': 'Perfilado Premium',
       'price_per_hour': 7000,
-      'images': ['assets/branding/service_placeholder_premium.png'],
+      'images': [''],
     },
     'staff': {'id': 1, 'name': 'Daniel Mora', 'is_active': true},
   },
@@ -1681,7 +1747,7 @@ const List<Map<String, dynamic>> _fallbackStaff = [
     'id': 1,
     'name': 'Daniel Mora',
     'is_active': true,
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
     'services': [
       {
         'resource': {'name': 'Corte y Barba'},
@@ -1695,7 +1761,7 @@ const List<Map<String, dynamic>> _fallbackStaff = [
     'id': 2,
     'name': 'Marcos Solís',
     'is_active': true,
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
     'services': [
       {
         'resource': {'name': 'Perfilado Premium'},
@@ -1706,7 +1772,7 @@ const List<Map<String, dynamic>> _fallbackStaff = [
     'id': 3,
     'name': 'Luis Herrera',
     'is_active': true,
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
     'services': [
       {
         'resource': {'name': 'Corte Clásico'},
@@ -1720,7 +1786,7 @@ const List<Map<String, dynamic>> _fallbackStaff = [
     'id': 4,
     'name': 'José Vargas',
     'is_active': false,
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
     'services': [
       {
         'resource': {'name': 'Experiencia Completa'},
@@ -1758,28 +1824,28 @@ const List<Map<String, dynamic>> _fallbackResources = [
 
 const List<_PerformanceData> _fallbackPerformance = [
   _PerformanceData(
-    avatar: 'assets/branding/barber_placeholder.png',
+    avatar: '',
     name: 'Daniel Mora',
     appointments: 4,
     revenue: 42000,
     active: true,
   ),
   _PerformanceData(
-    avatar: 'assets/branding/barber_placeholder.png',
+    avatar: '',
     name: 'Marcos Solís',
     appointments: 3,
     revenue: 33000,
     active: true,
   ),
   _PerformanceData(
-    avatar: 'assets/branding/barber_placeholder.png',
+    avatar: '',
     name: 'Luis Herrera',
     appointments: 2,
     revenue: 21000,
     active: true,
   ),
   _PerformanceData(
-    avatar: 'assets/branding/barber_placeholder.png',
+    avatar: '',
     name: 'José Vargas',
     appointments: 1,
     revenue: 12000,
@@ -1905,7 +1971,7 @@ String _staffName(Map<String, dynamic> staff) {
   final first = staff['first_name']?.toString().trim() ?? '';
   final last = staff['last_name']?.toString().trim() ?? '';
   final combined = '$first $last'.trim();
-  return combined.isNotEmpty ? combined : 'Barbero';
+  return combined.isNotEmpty ? combined : 'Perfil';
 }
 
 String _staffAvatar(Map<String, dynamic> staff) {

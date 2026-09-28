@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
+import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
-import 'service_management_utils.dart';
+import '../../widgets/loadable_collection_view.dart';
 import 'admin_page_scaffold.dart';
+import 'service_management_utils.dart';
 
 class AdminServicesPage extends StatefulWidget {
   const AdminServicesPage({super.key});
@@ -17,34 +19,31 @@ class AdminServicesPage extends StatefulWidget {
 }
 
 class _AdminServicesPageState extends State<AdminServicesPage> {
-  Future<Map<String, dynamic>>? _future;
+  late final LoadableController<List<Map<String, dynamic>>> _controller;
   bool _actionInProgress = false;
 
   @override
   void initState() {
     super.initState();
-    _future = _loadServices();
+    _controller = LoadableController<List<Map<String, dynamic>>>(_loadServices);
+    _controller.load();
   }
 
-  Future<Map<String, dynamic>> _loadServices() {
-    return context.read<AuthProvider>().api.getMyResources(perPage: 100);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadServices() async {
+    final response = await context.read<AuthProvider>().api.getMyResources(
+      perPage: 100,
+    );
+    return _extractItems(response);
   }
 
   Future<void> _refresh() async {
-    final next = await _loadServices();
-    if (!mounted) return;
-    setState(() {
-      _future = Future.value(next);
-    });
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF132018),
-      ),
-    );
+    await _controller.load();
   }
 
   List<Map<String, dynamic>> _extractItems(Map<String, dynamic> response) {
@@ -61,17 +60,15 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
   Future<void> _openForm({Map<String, dynamic>? service}) async {
     final result = await Navigator.of(context).pushNamed<bool>(
       AppRoutes.adminServiceForm,
-      arguments: {
-        'service': service,
-        'createMode': service == null,
-      },
+      arguments: {'service': service, 'createMode': service == null},
     );
     if (result == true && mounted) {
       await _refresh();
-      _showSuccess(
+      _showSnack(
         service == null
             ? 'Servicio creado correctamente.'
             : 'Servicio actualizado correctamente.',
+        success: true,
       );
     }
   }
@@ -95,24 +92,16 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
     try {
       await api.updateResource(id, {'status': nextStatus});
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            nextStatus == 'active'
-                ? 'Servicio activado'
-                : 'Servicio desactivado',
-          ),
-          backgroundColor: const Color(0xFF1A1512),
-        ),
+      _showSnack(
+        nextStatus == 'active' ? 'Servicio activado.' : 'Servicio desactivado.',
+        success: true,
       );
       await _refresh();
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('No se pudo cambiar el estado: $e'),
-            backgroundColor: const Color(0xFF1A1512),
-          ),
+        _showSnack(
+          'No pudimos cambiar el estado del servicio.',
+          success: false,
         );
       }
     } finally {
@@ -122,12 +111,25 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
     }
   }
 
+  void _showSnack(String message, {required bool success}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success
+            ? const Color(0xFF132018)
+            : const Color(0xFF1A1512),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final auth = context.watch<AuthProvider>();
-    if (!auth.isAdmin) {
-      return const Scaffold(
-        backgroundColor: AppColors.primaryBackground,
+    final whiteLabel = context.watch<WhiteLabelConfig>();
+    if (!auth.canManageBusiness) {
+      return  Scaffold(
+        backgroundColor: theme.background,
         body: Center(
           child: Text(
             'Solo los administradores pueden acceder a esta sección',
@@ -138,10 +140,10 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
+      backgroundColor: theme.background,
       appBar: buildAdminAppBar(
         context,
-        title: 'Administrar servicios',
+        title: 'Administrar ${whiteLabel.servicesLabel}',
         subtitle: 'Catálogo, precios y asignaciones',
         actions: [
           IconButton(
@@ -152,146 +154,84 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _actionInProgress ? null : () => _openForm(),
-        backgroundColor: AppColors.primary,
+        backgroundColor: theme.primary,
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Nuevo servicio',
+        label: Text(
+          'Nuevo ${whiteLabel.serviceLabel}',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
       ),
       body: BarbershopCinematicPanel(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: '',
         opacity: .22,
         blurSigma: 14,
         child: SafeArea(
-          child: RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: _refresh,
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: _future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done &&
-                    !snapshot.hasData &&
-                    !snapshot.hasError) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError || snapshot.data == null) {
-                  return ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 180),
-                      Center(
-                        child: Text(
-                          'No se pudieron cargar los servicios',
+          child: LoadableCollectionView<List<Map<String, dynamic>>>(
+            controller: _controller,
+            isEmpty: (services) => services.isEmpty,
+            loadingBuilder: (context, retry) {
+              return const Center(child: CircularProgressIndicator());
+            },
+            errorBuilder: (context, error, retry) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 180),
+                  Center(
+                    child: Column(
+                      children: [
+                        const Text(
+                          'No fue posible cargar los servicios.',
                           style: TextStyle(color: Colors.white70),
                         ),
-                      ),
-                    ],
-                  );
-                }
-
-                final services = _extractItems(snapshot.data!);
-                final activeCount = services.where(serviceIsActive).length;
-                final totalBarbers = services.fold<int>(
-                  0,
-                  (sum, service) => sum + serviceStaffCount(service),
-                );
-
-                return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-                  children: [
-                    BarbershopPremiumCard(
-                      radius: 30,
-                      padding: const EdgeInsets.all(16),
-                      backgroundColor:
-                          const Color(0xFF140F0C).withValues(alpha: .96),
-                      borderColor: AppColors.primary.withValues(alpha: .18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const PremiumBadge(
-                                label: 'ADMINISTRAR SERVICIOS',
-                                compact: true,
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${services.length} servicios',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: .72),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          const Text(
-                            'Barbería Tres Amigos',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Gestiona el catálogo premium, activa promociones y asigna barberos por servicio.',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: .72),
-                              height: 1.35,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _StatChip(
-                                  label: 'Activos',
-                                  value: '$activeCount',
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _StatChip(
-                                  label: 'Barberos asignados',
-                                  value: '$totalBarbers',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _SectionTitle(
-                      title: 'Servicios',
-                      subtitle:
-                          'Edita, activa o asigna barberos desde cada tarjeta.',
-                      actionLabel: 'Nuevo servicio',
-                      onAction: () => _openForm(),
-                    ),
-                    const SizedBox(height: 12),
-                    if (services.isEmpty)
-                      const _EmptyState()
-                    else
-                      ...services.map(
-                        (service) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _ServiceCard(
-                            service: service,
-                            onEdit: () => _openForm(service: service),
-                            onAssignBarbers: () => _openAssignment(service),
-                            onToggleStatus: () => _toggleStatus(service),
-                          ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Revisa tu conexión e intenta nuevamente.',
+                          style: TextStyle(color: Colors.white54),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                  ],
-                );
-              },
-            ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: _actionInProgress ? null : retry,
+                          child: const Text('Reintentar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+            emptyBuilder: (context, retry) {
+              return RefreshIndicator(
+                color: theme.primary,
+                onRefresh: _refresh,
+                child: _ServicesBody(
+                  services: const [],
+                  whiteLabel: whiteLabel,
+                  onNewService: _openForm,
+                  onEdit: _openForm,
+                  onAssignBarbers: _openAssignment,
+                  onToggleStatus: _toggleStatus,
+                  showEmptyState: true,
+                ),
+              );
+            },
+            dataBuilder: (context, services, retry, isLoading) {
+              return RefreshIndicator(
+                color: theme.primary,
+                onRefresh: _refresh,
+                child: _ServicesBody(
+                  services: services,
+                  whiteLabel: whiteLabel,
+                  onNewService: _openForm,
+                  onEdit: _openForm,
+                  onAssignBarbers: _openAssignment,
+                  onToggleStatus: _toggleStatus,
+                  showEmptyState: false,
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -299,14 +239,136 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
   }
 }
 
+class _ServicesBody extends StatelessWidget {
+  final List<Map<String, dynamic>> services;
+  final WhiteLabelConfig whiteLabel;
+  final Future<void> Function({Map<String, dynamic>? service}) onNewService;
+  final Future<void> Function({Map<String, dynamic>? service}) onEdit;
+  final Future<void> Function(Map<String, dynamic> service) onAssignBarbers;
+  final Future<void> Function(Map<String, dynamic> service) onToggleStatus;
+  final bool showEmptyState;
+
+  const _ServicesBody({
+    required this.services,
+    required this.whiteLabel,
+    required this.onNewService,
+    required this.onEdit,
+    required this.onAssignBarbers,
+    required this.onToggleStatus,
+    required this.showEmptyState,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final activeCount = services.where(serviceIsActive).length;
+    final totalBarbers = services.fold<int>(
+      0,
+      (sum, service) => sum + serviceStaffCount(service),
+    );
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+      children: [
+        BarbershopPremiumCard(
+          radius: 30,
+          padding: const EdgeInsets.all(16),
+          backgroundColor: const Color(0xFF140F0C).withValues(alpha: .96),
+          borderColor: theme.primary.withValues(alpha: .18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const PremiumBadge(
+                    label: 'ADMINISTRAR SERVICIOS',
+                    compact: true,
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${services.length} servicios',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .72),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Catálogo del negocio',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Gestiona el catálogo, activa o desactiva ${whiteLabel.servicesLabel} y asigna ${whiteLabel.staffPluralLabel} cuando corresponda.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: .72),
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatChip(label: 'Activos', value: '$activeCount'),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _StatChip(
+                      label: whiteLabel.staffPluralLabel,
+                      value: '$totalBarbers',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _SectionTitle(
+          title: 'Servicios',
+          subtitle:
+              'Edita, activa, desactiva o asigna ${whiteLabel.staffPluralLabel} desde cada tarjeta.',
+          actionLabel: 'Nuevo servicio',
+          onAction: () => onNewService(),
+        ),
+        const SizedBox(height: 12),
+        if (showEmptyState)
+          _EmptyState(whiteLabel: whiteLabel)
+        else
+          ...services.map(
+            (service) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ServiceCard(
+                service: service,
+                whiteLabel: whiteLabel,
+                onEdit: () => onEdit(service: service),
+                onAssignBarbers: () => onAssignBarbers(service),
+                onToggleStatus: () => onToggleStatus(service),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _ServiceCard extends StatelessWidget {
   final Map<String, dynamic> service;
+  final WhiteLabelConfig whiteLabel;
   final VoidCallback onEdit;
   final VoidCallback onAssignBarbers;
   final VoidCallback onToggleStatus;
 
   const _ServiceCard({
     required this.service,
+    required this.whiteLabel,
     required this.onEdit,
     required this.onAssignBarbers,
     required this.onToggleStatus,
@@ -314,6 +376,7 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final active = serviceIsActive(service);
     final image = serviceImage(service);
 
@@ -322,7 +385,7 @@ class _ServiceCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       backgroundColor: const Color(0xFF120E0B).withValues(alpha: .96),
       borderColor: active
-          ? AppColors.primary.withValues(alpha: .18)
+          ? theme.primary.withValues(alpha: .18)
           : Colors.white.withValues(alpha: .08),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,9 +407,9 @@ class _ServiceCard extends StatelessWidget {
                         )
                       : Container(
                           color: Colors.white.withValues(alpha: .04),
-                          child: const Icon(
+                          child:  Icon(
                             Icons.content_cut_rounded,
-                            color: AppColors.primary,
+                            color: theme.primary,
                             size: 30,
                           ),
                         ),
@@ -363,11 +426,11 @@ class _ServiceCard extends StatelessWidget {
                       children: [
                         _Badge(
                           label: active ? 'Activo' : 'Inactivo',
-                          color: active ? AppColors.success : Colors.redAccent,
+                          color: active ? theme.success : Colors.redAccent,
                         ),
                         _Badge(
                           label: serviceCategory(service),
-                          color: AppColors.primary,
+                          color: theme.primary,
                         ),
                       ],
                     ),
@@ -382,7 +445,8 @@ class _ServiceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      service['description']?.toString().trim().isNotEmpty == true
+                      service['description']?.toString().trim().isNotEmpty ==
+                              true
                           ? service['description'].toString()
                           : 'Sin descripción',
                       maxLines: 2,
@@ -407,7 +471,8 @@ class _ServiceCard extends StatelessWidget {
                         ),
                         _MetaChip(
                           icon: Icons.people_alt_rounded,
-                          label: '${serviceStaffCount(service)} barberos',
+                          label:
+                              '${serviceStaffCount(service)} ${whiteLabel.staffPluralLabel}',
                         ),
                       ],
                     ),
@@ -421,15 +486,21 @@ class _ServiceCard extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _ActionPill(label: 'Editar', icon: Icons.edit_rounded, onTap: onEdit),
               _ActionPill(
-                label: 'Barberos',
+                label: 'Editar',
+                icon: Icons.edit_rounded,
+                onTap: onEdit,
+              ),
+              _ActionPill(
+                label: whiteLabel.staffPluralLabel,
                 icon: Icons.group_rounded,
                 onTap: onAssignBarbers,
               ),
               _ActionPill(
                 label: active ? 'Desactivar' : 'Activar',
-                icon: active ? Icons.toggle_off_rounded : Icons.toggle_on_rounded,
+                icon: active
+                    ? Icons.toggle_off_rounded
+                    : Icons.toggle_on_rounded,
                 onTap: onToggleStatus,
                 highlighted: true,
               ),
@@ -456,23 +527,19 @@ class _ActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return TextButton.icon(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        foregroundColor: highlighted ? Colors.black : AppColors.primary,
+        foregroundColor: highlighted ? Colors.black : theme.primary,
         backgroundColor: highlighted
-            ? AppColors.primary
-            : AppColors.primary.withValues(alpha: .10),
+            ? theme.primary
+            : theme.primary.withValues(alpha: .10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       icon: Icon(icon, size: 18),
-      label: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w900),
-      ),
+      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
     );
   }
 }
@@ -481,13 +548,11 @@ class _Badge extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _Badge({
-    required this.label,
-    required this.color,
-  });
+  const _Badge({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -511,13 +576,11 @@ class _MetaChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _MetaChip({
-    required this.icon,
-    required this.label,
-  });
+  const _MetaChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -528,7 +591,7 @@ class _MetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppColors.primary, size: 16),
+          Icon(icon, color: theme.primary, size: 16),
           const SizedBox(width: 6),
           Text(
             label,
@@ -547,19 +610,17 @@ class _StatChip extends StatelessWidget {
   final String label;
   final String value;
 
-  const _StatChip({
-    required this.label,
-    required this.value,
-  });
+  const _StatChip({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: .08),
+        color: theme.primary.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+        border: Border.all(color: theme.primary.withValues(alpha: .18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,6 +662,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -631,8 +693,8 @@ class _SectionTitle extends StatelessWidget {
           onPressed: onAction,
           child: Text(
             actionLabel,
-            style: const TextStyle(
-              color: AppColors.secondary,
+            style:  TextStyle(
+              color: theme.secondary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -643,10 +705,13 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final WhiteLabelConfig whiteLabel;
+
+  const _EmptyState({required this.whiteLabel});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       padding: const EdgeInsets.all(20),
@@ -655,9 +720,9 @@ class _EmptyState extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            const Icon(
+             Icon(
               Icons.content_cut_rounded,
-              color: AppColors.primary,
+              color: theme.primary,
               size: 40,
             ),
             const SizedBox(height: 10),
@@ -671,7 +736,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Crea el primer servicio premium para empezar a asignar barberos.',
+              'Crea el primer servicio para empezar a asignar ${whiteLabel.staffPluralLabel}.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: .64),

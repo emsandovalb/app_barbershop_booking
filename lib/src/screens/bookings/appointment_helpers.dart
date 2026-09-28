@@ -57,8 +57,11 @@ String appointmentTimeLabel(Map<String, dynamic> booking) {
 
 String appointmentPriceLabel(Map<String, dynamic> booking) {
   final resource = appointmentResource(booking);
-  final value = booking['total_price'] ?? booking['price'] ?? resource['price_per_hour'];
-  final number = value is num ? value.toDouble() : double.tryParse(value?.toString() ?? '') ?? 0;
+  final value =
+      booking['total_price'] ?? booking['price'] ?? resource['price_per_hour'];
+  final number = value is num
+      ? value.toDouble()
+      : double.tryParse(value?.toString() ?? '') ?? 0;
   return NumberFormat.currency(
     locale: 'es_CR',
     symbol: 'CRC ',
@@ -81,7 +84,9 @@ dynamic appointmentImageSource(Map<String, dynamic> booking) {
 
 AppointmentStatusBucket appointmentStatusBucket(Map<String, dynamic> booking) {
   final rawStatus = (booking['status'] ?? '').toString().trim().toLowerCase();
-  if (rawStatus.contains('cancel') || rawStatus.contains('anul')) {
+  if (rawStatus.contains('cancel') ||
+      rawStatus.contains('anul') ||
+      rawStatus.contains('reject')) {
     return AppointmentStatusBucket.cancelled;
   }
   if (rawStatus.contains('complete') ||
@@ -118,6 +123,28 @@ String appointmentStatusLabel(AppointmentStatusBucket bucket) {
       return 'Cancelada';
   }
 }
+
+String appointmentStatusLabelForBooking(Map<String, dynamic> booking) {
+  switch ((booking['status'] ?? '').toString().trim().toLowerCase()) {
+    case 'pending':
+      return 'Pendiente';
+    case 'confirmed':
+      return 'Confirmada';
+    case 'completed':
+      return 'Completada';
+    case 'rejected':
+      return 'Rechazada';
+    case 'cancelled':
+      return 'Cancelada';
+    default:
+      return appointmentStatusLabel(appointmentStatusBucket(booking));
+  }
+}
+
+String appointmentPaymentLabel(Map<String, dynamic> booking) =>
+    (booking['payment_status'] ?? '').toString().toLowerCase() == 'paid'
+    ? 'Pagado'
+    : 'Pendiente de pago';
 
 String appointmentTabLabel(AppointmentStatusBucket bucket) {
   switch (bucket) {
@@ -161,9 +188,7 @@ bool canCancelAppointment(Map<String, dynamic> booking) {
 }
 
 bool canRebookAppointment(Map<String, dynamic> booking) {
-  return appointmentStatusBucket(booking) != AppointmentStatusBucket.upcoming
-      ? true
-      : true;
+  return (booking['status'] ?? '').toString().toLowerCase() == 'pending';
 }
 
 List<Map<String, dynamic>> filterAppointments(

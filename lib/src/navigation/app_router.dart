@@ -13,7 +13,6 @@ import '../screens/bookings/booking_detail_page.dart';
 import '../screens/bookings/ground_booking_detail_page.dart';
 import '../screens/booking/payment_page.dart';
 import '../screens/booking/order_placed_page.dart';
-import '../screens/grounds/my_grounds_page.dart';
 import '../screens/grounds/add_ground_page.dart';
 import '../screens/grounds/add_photos_page.dart';
 import '../screens/common/coming_soon_page.dart';
@@ -84,9 +83,7 @@ class AppRouter {
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
         return _material(
           settings,
-          HomeShell(
-            initialTab: args['tab'] as String?,
-          ),
+          HomeShell(initialTab: args['tab'] as String?),
         );
       case AppRoutes.businessProfile:
         return _material(settings, const BusinessProfilePage());
@@ -116,7 +113,7 @@ class AppRouter {
           BookingDetailPage(booking: args['booking'] as Map<String, dynamic>),
         );
       case AppRoutes.myGrounds:
-        return _material(settings, const MyGroundsPage());
+        return _material(settings, const AdminServicesPage());
       case AppRoutes.addGround:
         return _material(settings, const AddGroundPage());
       case AppRoutes.categoryGround:
@@ -172,7 +169,7 @@ class AppRouter {
         return _material(settings, const AdminServicesPage());
       case AppRoutes.adminServiceForm:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(
+        return _material<bool?>(
           settings,
           ServiceFormPage(
             service: args['service'] as Map<String, dynamic>?,
@@ -195,7 +192,7 @@ class AppRouter {
         );
       case AppRoutes.staffForm:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};
-        return _material(
+        return _material<bool?>(
           settings,
           StaffFormPage(
             staff: args['staff'] as Map<String, dynamic>?,
@@ -227,6 +224,8 @@ class AppRouter {
     }
   }
 
-  static MaterialPageRoute _material(RouteSettings settings, Widget child) =>
-      MaterialPageRoute(settings: settings, builder: (_) => child);
+  static MaterialPageRoute<T> _material<T>(
+    RouteSettings settings,
+    Widget child,
+  ) => MaterialPageRoute<T>(settings: settings, builder: (_) => child);
 }

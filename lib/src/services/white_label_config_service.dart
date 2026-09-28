@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/white_label_config.dart';
+import '../theme/brand_theme.dart';
 
 class WhiteLabelConfigService extends ChangeNotifier {
   WhiteLabelConfigService({
@@ -15,10 +16,13 @@ class WhiteLabelConfigService extends ChangeNotifier {
   }) : _baseUrl = _cleanBase(baseUrl),
        _businessSlug = _cleanBusinessSlug(businessSlug),
        _client = client ?? http.Client(),
-       _fallback = fallback ?? WhiteLabelConfig.tresAmigos,
-       _config = fallback ?? WhiteLabelConfig.tresAmigos;
+       _fallback = fallback ?? WhiteLabelConfig.generic,
+       _config = fallback ?? WhiteLabelConfig.generic,
+       _brandTheme = BrandTheme.generic();
 
-  static const String defaultCacheKey = 'white_label_config_cache_default';
+  static const int _cacheSchemaVersion = 3;
+  static String get defaultCacheKey =>
+      'white_label_config_cache_v${_cacheSchemaVersion}_default';
 
   final String _baseUrl;
   final String? _businessSlug;
@@ -26,21 +30,27 @@ class WhiteLabelConfigService extends ChangeNotifier {
   final WhiteLabelConfig _fallback;
 
   WhiteLabelConfig _config;
+  BrandTheme _brandTheme;
   bool _isLoading = false;
 
   String get _cacheKey => _businessSlug == null
       ? defaultCacheKey
-      : 'white_label_config_cache_$_businessSlug';
+      : 'white_label_config_cache_v${_cacheSchemaVersion}_${_businessSlug}';
 
   WhiteLabelConfig get config => _config;
+  BrandTheme get brandTheme => _brandTheme;
   bool get isLoading => _isLoading;
 
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
     try {
-      await _loadCachedConfig();
-      await _loadRemoteConfig();
+      if (_businessSlug != null) {
+        final loadedRemote = await _loadRemoteConfig();
+        if (!loadedRemote) {
+          await _loadCachedConfig();
+        }
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -48,20 +58,24 @@ class WhiteLabelConfigService extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    if (_businessSlug == null) {
+      return;
+    }
     await _loadRemoteConfig();
   }
 
   Future<void> _loadCachedConfig() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_cacheKey);
-    if (raw == null || raw.trim().isEmpty) {
-      return;
-    }
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_cacheKey);
+      if (raw == null || raw.trim().isEmpty) {
+        return;
+      }
       final decoded = jsonDecode(raw);
       if (decoded is Map) {
         final normalized = _normalizeMap(decoded);
         _config = WhiteLabelConfig.fromJson(normalized);
+        _brandTheme = BrandTheme.fromJson(normalized, fallback: _brandTheme);
         notifyListeners();
       }
     } catch (_) {
@@ -69,11 +83,11 @@ class WhiteLabelConfigService extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadRemoteConfig() async {
+  Future<bool> _loadRemoteConfig() async {
     try {
       final uri = _businessSlug == null
           ? Uri.parse('$_baseUrl/app-config')
-          : Uri.parse('$_baseUrl/businesses/$_businessSlug/app-config');
+          : Uri.parse('$_baseUrl/public/businesses/$_businessSlug/config');
       final response = await _client.get(
         uri,
         headers: const {'Accept': 'application/json'},
@@ -88,13 +102,16 @@ class WhiteLabelConfigService extends ChangeNotifier {
       final normalized = _normalizeMap(decoded);
       final parsed = WhiteLabelConfig.fromJson(normalized);
       _config = parsed;
+      _brandTheme = BrandTheme.fromJson(normalized, fallback: _brandTheme);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_cacheKey, jsonEncode(normalized));
       notifyListeners();
+      return true;
     } catch (_) {
       if (_config == _fallback) {
         // Leave the fallback config in place.
       }
+      return false;
     }
   }
 

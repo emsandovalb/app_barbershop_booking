@@ -1,9 +1,15 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
-import 'package:path/path.dart' as p;
+
+/// Removes only whitespace and invisible separators around an address. It
+/// deliberately does not alter the address itself: malformed email remains a
+/// validation error rather than being silently rewritten.
+String normalizeEmailInput(String value) => value
+    .replaceAll(RegExp(r'^[\s\u200B\u200C\u200D\uFEFF]+'), '')
+    .replaceAll(RegExp(r'[\s\u200B\u200C\u200D\uFEFF]+$'), '');
 
 class ApiClient {
   final String baseUrl;
@@ -165,7 +171,7 @@ class ApiClient {
       } else if (payload['category']?.toString().trim().isNotEmpty == true) {
         payload['address'] = payload['category'];
       } else {
-        payload['address'] = 'Barbería Tres Amigos';
+        payload['address'] = 'Business location';
       }
     }
 
@@ -216,10 +222,8 @@ class ApiClient {
   }) async {
     final res = await http.get(uri, headers: _headers);
     _ensureOk(res);
-    return _normalizeResponse(
-      json.decode(res.body) as Map<String, dynamic>,
-      reservation: reservation,
-    );
+    final decoded = json.decode(res.body) as Map<String, dynamic>;
+    return _normalizeResponse(decoded, reservation: reservation);
   }
 
   Future<Map<String, dynamic>> _postJson(
@@ -296,10 +300,15 @@ class ApiClient {
     String email,
     String password,
   ) async {
+    final normalizedEmail = normalizeEmailInput(email);
     final res = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: _headers,
-      body: {'name': name, 'email': email, 'password': password},
+      body: {
+        'name': name.trim(),
+        'email': normalizedEmail,
+        'password': password,
+      },
     );
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -389,12 +398,13 @@ class ApiClient {
 
   Future<Map<String, dynamic>> getResourceAvailability({
     required int id,
+    required int staffId,
     required String date,
   }) async {
     return _getJson(
       _apiUri(
         '$resourceEndpoint/$id/availability',
-        queryParameters: {'date': date},
+        queryParameters: {'date': date, 'staff_id': '$staffId'},
       ),
     );
   }
@@ -471,15 +481,36 @@ class ApiClient {
     );
   }
 
-  Future<Map<String, dynamic>> createResource(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createResource(
+    Map<String, dynamic> data, {
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
+    if (imageBytes != null) {
+      return _createResourceMultipart(
+        data,
+        imageBytes: imageBytes,
+        imageName: imageName,
+      );
+    }
     final payload = await _resourcePayload(data);
     return _postJson(_apiUri(resourceEndpoint), payload, expectCreated: true);
   }
 
   Future<Map<String, dynamic>> updateResource(
     int id,
-    Map<String, dynamic> data,
-  ) async {
+    Map<String, dynamic> data, {
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
+    if (imageBytes != null) {
+      return _updateResourceMultipart(
+        id,
+        data,
+        imageBytes: imageBytes,
+        imageName: imageName,
+      );
+    }
     final payload = await _resourcePayload(data);
     return _putJson(_apiUri('$resourceEndpoint/$id'), payload);
   }
@@ -509,12 +540,26 @@ class ApiClient {
   Future<Map<String, dynamic>> createReservation(
     Map<String, dynamic> data,
   ) async {
-    return _postJson(
+    final reservation = await _postJson(
       _apiUri(reservationEndpoint),
       _reservationPayload(data),
       expectCreated: true,
       reservation: true,
     );
+
+    // A 201 without a server-generated primary key is not evidence that the
+    // reservation was persisted.  Keep the success path closed until the
+    // booking contract has supplied that identifier.
+    final id =
+        _positiveInt(reservation['id']) ??
+        _positiveInt(reservation['reservation_id']) ??
+        _positiveInt(reservation['booking_id']);
+    if (id == null) {
+      throw ApiException(
+        'The reservation response did not include a valid persisted ID.',
+      );
+    }
+    return reservation;
   }
 
   Future<Map<String, dynamic>> getReservation(int id) async {
@@ -524,6 +569,38 @@ class ApiClient {
   Future<Map<String, dynamic>> cancelReservation(int id) async {
     return _postJson(
       _apiUri('$reservationEndpoint/$id/cancel'),
+      const {},
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> confirmReservation(int id) async {
+    return _postJson(
+      _apiUri('$reservationEndpoint/$id/confirm'),
+      const {},
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> rejectReservation(int id) async {
+    return _postJson(
+      _apiUri('$reservationEndpoint/$id/reject'),
+      const {},
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> completeReservation(int id) async {
+    return _postJson(
+      _apiUri('$reservationEndpoint/$id/complete'),
+      const {},
+      reservation: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> markReservationPaid(int id) async {
+    return _patchJson(
+      _apiUri('$reservationEndpoint/$id/payment-status'),
       const {},
       reservation: true,
     );
@@ -721,6 +798,56 @@ class ApiClient {
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> _createResourceMultipart(
+    Map<String, dynamic> data, {
+    required Uint8List imageBytes,
+    String? imageName,
+  }) async {
+    final req = http.MultipartRequest('POST', _apiUri(resourceEndpoint));
+    req.headers.addAll(_headers);
+    final payload = await _resourcePayload(data);
+    payload.remove('images');
+    _appendFields(req.fields, payload);
+    final imageFile = await _optimizeImageBytes(
+      imageBytes,
+      fieldName: 'image',
+      filename: imageName ?? 'service.jpg',
+    );
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res, expectCreated: true);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _updateResourceMultipart(
+    int id,
+    Map<String, dynamic> data, {
+    required Uint8List imageBytes,
+    String? imageName,
+  }) async {
+    final req = http.MultipartRequest('POST', _apiUri('$resourceEndpoint/$id'));
+    req.headers.addAll(_headers);
+    req.fields['_method'] = 'PUT';
+    final payload = await _resourcePayload(data);
+    payload.remove('images');
+    _appendFields(req.fields, payload);
+    final imageFile = await _optimizeImageBytes(
+      imageBytes,
+      fieldName: 'image',
+      filename: imageName ?? 'service.jpg',
+    );
+    if (imageFile != null) {
+      req.files.add(imageFile);
+    }
+    final streamed = await req.send();
+    final res = await http.Response.fromStream(streamed);
+    _ensureOk(res);
+    return json.decode(res.body) as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> _updateTournamentMultipart(
     int id,
     Map<String, dynamic> data, {
@@ -802,13 +929,13 @@ class ApiClient {
     required int courtId,
     required String date,
     required String timeSlot,
-    int? staffId,
+    required int staffId,
   }) async {
     return createReservation({
       'court_id': courtId,
       'date': date,
       'time_slot': timeSlot,
-      if (staffId != null) 'staff_id': staffId,
+      'staff_id': staffId,
     });
   }
 
@@ -817,22 +944,23 @@ class ApiClient {
     required String date,
     required String timeSlot,
     required int durationHours,
-    int? staffId,
+    required int staffId,
   }) async {
     return createReservation({
       'court_id': courtId,
       'date': date,
       'time_slot': timeSlot,
       'duration_hours': durationHours,
-      if (staffId != null) 'staff_id': staffId,
+      'staff_id': staffId,
     });
   }
 
   Future<Map<String, dynamic>> getCourtAvailability({
     required int courtId,
     required String day,
+    required int staffId,
   }) async {
-    return getResourceAvailability(id: courtId, date: day);
+    return getResourceAvailability(id: courtId, staffId: staffId, date: day);
   }
 
   Future<Map<String, dynamic>> rebook(
@@ -937,8 +1065,43 @@ class ApiClient {
         ? res.statusCode == 201
         : (res.statusCode >= 200 && res.statusCode < 300);
     if (!ok) {
-      throw ApiException('HTTP ${res.statusCode}: ${res.body}');
+      Map<String, List<String>> fieldErrors = const {};
+      var message = 'HTTP ${res.statusCode}';
+      try {
+        final decoded = json.decode(res.body);
+        if (decoded is Map) {
+          final rawMessage = decoded['message']?.toString().trim();
+          if (rawMessage != null && rawMessage.isNotEmpty) {
+            message = rawMessage;
+          }
+          final rawErrors = decoded['errors'];
+          if (rawErrors is Map) {
+            fieldErrors = rawErrors.map((key, value) {
+              final messages = value is List
+                  ? value.map((entry) => entry.toString()).toList()
+                  : [value.toString()];
+              return MapEntry(key.toString(), messages);
+            });
+          }
+        }
+      } catch (_) {
+        // Preserve the status-only error for non-JSON responses.
+      }
+      throw ApiException(
+        message,
+        statusCode: res.statusCode,
+        errors: fieldErrors,
+      );
     }
+  }
+
+  int? _positiveInt(dynamic value) {
+    final parsed = value is int
+        ? value
+        : value is num
+        ? value.toInt()
+        : int.tryParse(value?.toString() ?? '');
+    return parsed != null && parsed > 0 ? parsed : null;
   }
 
   void _appendFields(Map<String, String> fields, Map<String, dynamic> data) {
@@ -955,9 +1118,8 @@ class ApiClient {
     required String fieldName,
   }) async {
     try {
-      final file = File(path);
-      if (!await file.exists()) return null;
-      final data = await file.readAsBytes();
+      final data = await _readEncodedImageBytes(path);
+      if (data == null || data.isEmpty) return null;
       final decoded = img.decodeImage(data);
       if (decoded == null) return null;
       const maxSide = 600;
@@ -976,11 +1138,44 @@ class ApiClient {
         );
       }
       final encoded = img.encodeJpg(result, quality: 80);
-      final filename = '${p.basenameWithoutExtension(path)}.jpg';
       return http.MultipartFile.fromBytes(
         fieldName,
         encoded,
-        filename: filename,
+        filename: '$fieldName.jpg',
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<http.MultipartFile?> _optimizeImageBytes(
+    Uint8List bytes, {
+    required String fieldName,
+    String? filename,
+  }) async {
+    try {
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return null;
+      const maxSide = 1200;
+      img.Image result = decoded;
+      if (decoded.width > maxSide || decoded.height > maxSide) {
+        final longest = decoded.width > decoded.height
+            ? decoded.width
+            : decoded.height;
+        final scale = longest / maxSide;
+        final targetWidth = (decoded.width / scale).round();
+        final targetHeight = (decoded.height / scale).round();
+        result = img.copyResize(
+          decoded,
+          width: targetWidth,
+          height: targetHeight,
+        );
+      }
+      final encoded = img.encodeJpg(result, quality: 82);
+      return http.MultipartFile.fromBytes(
+        fieldName,
+        encoded,
+        filename: filename ?? '$fieldName.jpg',
       );
     } catch (_) {
       return null;
@@ -1036,11 +1231,21 @@ class ApiClient {
       final mime = _guessImageMime(value);
       return 'data:$mime;base64,${base64Encode(data.buffer.asUint8List())}';
     }
-    final file = File(value);
-    if (await file.exists()) {
-      final bytes = await file.readAsBytes();
-      final mime = _guessImageMime(value);
-      return 'data:$mime;base64,${base64Encode(bytes)}';
+    return null;
+  }
+
+  Future<Uint8List?> _readEncodedImageBytes(String value) async {
+    if (value.startsWith('data:image')) {
+      final raw = value.split(',').last;
+      return base64Decode(raw);
+    }
+    if (RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(value) && value.length > 120) {
+      return base64Decode(value);
+    }
+    if (value.startsWith('asset:') || value.startsWith('assets/')) {
+      final key = value.startsWith('asset:') ? value.substring(6) : value;
+      final data = await rootBundle.load(key);
+      return data.buffer.asUint8List();
     }
     return null;
   }
@@ -1064,16 +1269,27 @@ class ApiClient {
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;
     }
+    final normalized = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+    if (normalized.startsWith('/storage/')) {
+      return Uri.parse(
+        '$baseUrl/media',
+      ).replace(queryParameters: {'path': normalized}).toString();
+    }
     final baseUri = Uri.parse(baseUrl);
     final origin = baseUri.replace(path: '', query: null, fragment: null);
-    final normalized = trimmed.startsWith('/') ? trimmed : '/$trimmed';
     return origin.resolve(normalized).toString();
   }
 }
 
 class ApiException implements Exception {
   final String message;
-  ApiException(this.message);
+  final int? statusCode;
+  final Map<String, List<String>> errors;
+
+  ApiException(this.message, {this.statusCode, this.errors = const {}});
+
+  String? firstErrorFor(String field) => errors[field]?.first;
+
   @override
   String toString() => message;
 }

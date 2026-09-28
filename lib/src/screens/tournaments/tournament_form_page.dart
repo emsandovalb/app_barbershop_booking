@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
@@ -46,12 +47,16 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       _prizePoolCtrl.text = _decimalToText(tournament['prize_pool']);
       _maxTeamsCtrl.text = tournament['max_teams']?.toString() ?? '';
       _rulesCtrl.text = tournament['rules']?.toString() ?? '';
-      _registrationDeadlineCtrl.text = _dateToText(tournament['registration_deadline']);
+      _registrationDeadlineCtrl.text = _dateToText(
+        tournament['registration_deadline'],
+      );
       _startsAtCtrl.text = _dateToText(tournament['starts_at']);
       _endsAtCtrl.text = _dateToText(tournament['ends_at']);
       _selectedCourtId = tournament['court_id'] as int?;
       _format = tournament['format']?.toString() ?? _format;
-      _existingCoverImage = tournament['cover_image_url']?.toString() ?? tournament['cover_image']?.toString();
+      _existingCoverImage =
+          tournament['cover_image_url']?.toString() ??
+          tournament['cover_image']?.toString();
     }
     _loadCourts();
   }
@@ -72,11 +77,15 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
 
   Future<void> _loadCourts() async {
     try {
-      final res = await context.read<AuthProvider>().api.getCourts(perPage: 100);
+      final res = await context.read<AuthProvider>().api.getCourts(
+        perPage: 100,
+      );
       final data = (res['data'] as List?) ?? [];
       if (!mounted) return;
       setState(() {
-        _courts = data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+        _courts = data
+            .map((item) => Map<String, dynamic>.from(item as Map))
+            .toList();
         if (_selectedCourtId == null && _courts.isNotEmpty) {
           _selectedCourtId = _courts.first['id'] as int?;
         }
@@ -101,7 +110,11 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
-          title: Text(isEdit ? loc.t('tournaments_edit', fallback: 'Edit tournament') : loc.t('tournaments_create', fallback: 'Create tournament')),
+          title: Text(
+            isEdit
+                ? loc.t('tournaments_edit', fallback: 'Edit tournament')
+                : loc.t('tournaments_create', fallback: 'Create tournament'),
+          ),
         ),
         body: Center(
           child: Padding(
@@ -110,12 +123,16 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  loc.t('tournaments_login_required', fallback: 'Please log in to create or edit tournaments.'),
+                  loc.t(
+                    'tournaments_login_required',
+                    fallback: 'Please log in to create or edit tournaments.',
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton(
-                  onPressed: () => Navigator.of(context).pushNamed(AppRoutes.login),
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(AppRoutes.login),
                   child: Text(loc.t('login_button', fallback: 'Log in')),
                 ),
               ],
@@ -129,7 +146,11 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
-          title: Text(isEdit ? loc.t('tournaments_edit', fallback: 'Edit tournament') : loc.t('tournaments_create', fallback: 'Create tournament')),
+          title: Text(
+            isEdit
+                ? loc.t('tournaments_edit', fallback: 'Edit tournament')
+                : loc.t('tournaments_create', fallback: 'Create tournament'),
+          ),
         ),
         body: Center(
           child: Padding(
@@ -137,12 +158,23 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.admin_panel_settings_outlined, size: 48, color: Colors.white70),
+                const Icon(
+                  Icons.admin_panel_settings_outlined,
+                  size: 48,
+                  color: Colors.white70,
+                ),
                 const SizedBox(height: 12),
                 Text(
-                  loc.t('tournaments_admin_only', fallback: 'Only administrators can create or edit tournaments.'),
+                  loc.t(
+                    'tournaments_admin_only',
+                    fallback:
+                        'Only administrators can create or edit tournaments.',
+                  ),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -159,9 +191,11 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(isEdit
-            ? loc.t('tournaments_edit', fallback: 'Edit tournament')
-            : loc.t('tournaments_create', fallback: 'Create tournament')),
+        title: Text(
+          isEdit
+              ? loc.t('tournaments_edit', fallback: 'Edit tournament')
+              : loc.t('tournaments_create', fallback: 'Create tournament'),
+        ),
       ),
       body: AbsorbPointer(
         absorbing: _saving,
@@ -170,13 +204,23 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
           children: [
             TextField(
               controller: _nameCtrl,
-              decoration: InputDecoration(hintText: loc.t('tournaments_name_hint', fallback: 'Tournament name')),
+              decoration: InputDecoration(
+                hintText: loc.t(
+                  'tournaments_name_hint',
+                  fallback: 'Tournament name',
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionCtrl,
               maxLines: 3,
-              decoration: InputDecoration(hintText: loc.t('tournaments_description', fallback: 'Description')),
+              decoration: InputDecoration(
+                hintText: loc.t(
+                  'tournaments_description',
+                  fallback: 'Description',
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             _CoverImagePicker(
@@ -194,11 +238,37 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _format,
-              decoration: InputDecoration(labelText: loc.t('tournaments_format', fallback: 'Format')),
+              decoration: InputDecoration(
+                labelText: loc.t('tournaments_format', fallback: 'Format'),
+              ),
               items: [
-                DropdownMenuItem(value: 'single_elimination', child: Text(loc.t('tournaments_format_single_elimination', fallback: 'Single elimination'))),
-                DropdownMenuItem(value: 'double_elimination', child: Text(loc.t('tournaments_format_double_elimination', fallback: 'Double elimination'))),
-                DropdownMenuItem(value: 'round_robin', child: Text(loc.t('tournaments_format_round_robin', fallback: 'Round robin'))),
+                DropdownMenuItem(
+                  value: 'single_elimination',
+                  child: Text(
+                    loc.t(
+                      'tournaments_format_single_elimination',
+                      fallback: 'Single elimination',
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'double_elimination',
+                  child: Text(
+                    loc.t(
+                      'tournaments_format_double_elimination',
+                      fallback: 'Double elimination',
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'round_robin',
+                  child: Text(
+                    loc.t(
+                      'tournaments_format_round_robin',
+                      fallback: 'Round robin',
+                    ),
+                  ),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) setState(() => _format = value);
@@ -211,7 +281,12 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
                   child: TextField(
                     controller: _entryFeeCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(hintText: loc.t('tournaments_fee', fallback: 'Registration fee')),
+                    decoration: InputDecoration(
+                      hintText: loc.t(
+                        'tournaments_fee',
+                        fallback: 'Registration fee',
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -219,7 +294,12 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
                   child: TextField(
                     controller: _prizePoolCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(hintText: loc.t('tournaments_prize_pool', fallback: 'Prize pool')),
+                    decoration: InputDecoration(
+                      hintText: loc.t(
+                        'tournaments_prize_pool',
+                        fallback: 'Prize pool',
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -228,12 +308,17 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
             TextField(
               controller: _maxTeamsCtrl,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(hintText: loc.t('tournaments_max_teams', fallback: 'Max teams')),
+              decoration: InputDecoration(
+                hintText: loc.t('tournaments_max_teams', fallback: 'Max teams'),
+              ),
             ),
             const SizedBox(height: 12),
             _DateField(
               controller: _registrationDeadlineCtrl,
-              label: loc.t('tournaments_registration_deadline', fallback: 'Registration deadline'),
+              label: loc.t(
+                'tournaments_registration_deadline',
+                fallback: 'Registration deadline',
+              ),
               onPick: () => _pickDate(_registrationDeadlineCtrl),
             ),
             const SizedBox(height: 12),
@@ -252,7 +337,9 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
             TextField(
               controller: _rulesCtrl,
               maxLines: 4,
-              decoration: InputDecoration(hintText: loc.t('tournaments_rules', fallback: 'Rules')),
+              decoration: InputDecoration(
+                hintText: loc.t('tournaments_rules', fallback: 'Rules'),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -297,25 +384,47 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       initialTime: TimeOfDay.fromDateTime(initial),
     );
     if (time == null) return;
-    controller.text = DateTime(date.year, date.month, date.day, time.hour, time.minute).toIso8601String();
+    controller.text = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    ).toIso8601String();
     setState(() {});
   }
 
   Future<void> _pickCoverImage() async {
-    final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (image == null) return;
+    final bytes = await image.readAsBytes();
+    final mime = image.name.toLowerCase().endsWith('.png')
+        ? 'image/png'
+        : 'image/jpeg';
     setState(() {
-      _coverImagePath = image.path;
+      _coverImagePath = 'data:$mime;base64,${base64Encode(bytes)}';
       _existingCoverImage = null;
     });
   }
 
   Future<void> _submit() async {
     final loc = context.read<LocalizationService>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.t('tournaments_name_required', fallback: 'Tournament name is required'))),
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            loc.t(
+              'tournaments_name_required',
+              fallback: 'Tournament name is required',
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -324,15 +433,23 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
 
     final payload = <String, dynamic>{
       'name': name,
-      'description': _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
+      'description': _descriptionCtrl.text.trim().isEmpty
+          ? null
+          : _descriptionCtrl.text.trim(),
       'format': _format,
       'court_id': _selectedCourtId,
       'entry_fee': _numOrNull(_entryFeeCtrl.text),
       'prize_pool': _numOrNull(_prizePoolCtrl.text),
       'max_teams': _intOrNull(_maxTeamsCtrl.text),
-      'registration_deadline': _registrationDeadlineCtrl.text.trim().isEmpty ? null : _registrationDeadlineCtrl.text.trim(),
-      'starts_at': _startsAtCtrl.text.trim().isEmpty ? null : _startsAtCtrl.text.trim(),
-      'ends_at': _endsAtCtrl.text.trim().isEmpty ? null : _endsAtCtrl.text.trim(),
+      'registration_deadline': _registrationDeadlineCtrl.text.trim().isEmpty
+          ? null
+          : _registrationDeadlineCtrl.text.trim(),
+      'starts_at': _startsAtCtrl.text.trim().isEmpty
+          ? null
+          : _startsAtCtrl.text.trim(),
+      'ends_at': _endsAtCtrl.text.trim().isEmpty
+          ? null
+          : _endsAtCtrl.text.trim(),
       'rules': _rulesCtrl.text.trim().isEmpty ? null : _rulesCtrl.text.trim(),
     }..removeWhere((key, value) => value == null);
 
@@ -340,13 +457,21 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       final api = context.read<AuthProvider>().api;
       final saved = widget.tournament == null
           ? await api.createTournament(payload, coverImagePath: _coverImagePath)
-          : await api.updateTournament(widget.tournament!['id'] as int, payload, coverImagePath: _coverImagePath);
+          : await api.updateTournament(
+              widget.tournament!['id'] as int,
+              payload,
+              coverImagePath: _coverImagePath,
+            );
       if (!mounted) return;
-      Navigator.of(context).pop(saved);
+      navigator.pop(saved);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${loc.t('tournaments_save_failed', fallback: 'Failed to save tournament')}: $e')),
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              '${loc.t('tournaments_save_failed', fallback: 'Failed to save tournament')}: $e',
+            ),
+          ),
         );
       }
     } finally {
@@ -373,7 +498,9 @@ class _CourtDropdown extends StatelessWidget {
     final loc = context.watch<LocalizationService>();
     return DropdownButtonFormField<int?>(
       value: selectedCourtId,
-      decoration: InputDecoration(labelText: loc.t('tournaments_court', fallback: 'Court')),
+      decoration: InputDecoration(
+        labelText: loc.t('tournaments_court', fallback: 'Court'),
+      ),
       items: [
         DropdownMenuItem<int?>(
           value: null,
@@ -450,7 +577,10 @@ class _CoverImagePicker extends StatelessWidget {
               Expanded(
                 child: Text(
                   loc.t('tournaments_cover_image', fallback: 'Banner image'),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               TextButton.icon(
@@ -482,9 +612,13 @@ class _CoverImagePicker extends StatelessWidget {
           Text(
             loc.t(
               'tournaments_cover_helper',
-              fallback: 'This image is used as the tournament banner in the list, detail, and home preview.',
+              fallback:
+                  'This image is used as the tournament banner in the list, detail, and home preview.',
             ),
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.68), fontSize: 12),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.68),
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -493,7 +627,9 @@ class _CoverImagePicker extends StatelessWidget {
 }
 
 String _decimalToText(dynamic value) {
-  final num? parsed = value is num ? value : num.tryParse(value?.toString() ?? '');
+  final num? parsed = value is num
+      ? value
+      : num.tryParse(value?.toString() ?? '');
   if (parsed == null) return '';
   return parsed.toString();
 }

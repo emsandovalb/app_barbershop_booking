@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 import 'appointment_helpers.dart';
@@ -28,8 +28,10 @@ class _BookingsTabState extends State<BookingsTab> {
     _future = _loadReservations();
   }
 
-  Future<Map<String, dynamic>> _loadReservations() {
-    return context.read<AuthProvider>().api.getReservations();
+  Future<Map<String, dynamic>> _loadReservations() async {
+    final auth = context.read<AuthProvider>();
+    await auth.ready;
+    return auth.api.getReservations();
   }
 
   Future<void> _refresh() async {
@@ -40,12 +42,14 @@ class _BookingsTabState extends State<BookingsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final loc = context.watch<LocalizationService>();
     return DefaultTabController(
       length: 3,
       initialIndex: _currentIndex,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Mis citas'),
+          title: Text(loc.t('bookings_title', fallback: 'Mis citas')),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(70),
             child: Padding(
@@ -54,7 +58,9 @@ class _BookingsTabState extends State<BookingsTab> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF141110),
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: .22)),
+                  border: Border.all(
+                    color: theme.primary.withValues(alpha: .22),
+                  ),
                 ),
                 child: TabBar(
                   onTap: (index) => _currentIndex = index,
@@ -79,10 +85,25 @@ class _BookingsTabState extends State<BookingsTab> {
                     fontWeight: FontWeight.w800,
                     letterSpacing: .1,
                   ),
-                  tabs: const [
-                    Tab(text: 'Próximas'),
-                    Tab(text: 'Completadas'),
-                    Tab(text: 'Canceladas'),
+                  tabs: [
+                    Tab(
+                      text: loc.t(
+                        'bookings_tab_upcoming',
+                        fallback: 'Próximas',
+                      ),
+                    ),
+                    Tab(
+                      text: loc.t(
+                        'bookings_tab_completed',
+                        fallback: 'Completadas',
+                      ),
+                    ),
+                    Tab(
+                      text: loc.t(
+                        'bookings_tab_cancelled',
+                        fallback: 'Canceladas',
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -106,9 +127,18 @@ class _BookingsTabState extends State<BookingsTab> {
             }
 
             final rawItems = (snap.data?['data'] as List?) ?? const [];
-            final upcoming = filterAppointments(rawItems, AppointmentStatusBucket.upcoming);
-            final completed = filterAppointments(rawItems, AppointmentStatusBucket.completed);
-            final cancelled = filterAppointments(rawItems, AppointmentStatusBucket.cancelled);
+            final upcoming = filterAppointments(
+              rawItems,
+              AppointmentStatusBucket.upcoming,
+            );
+            final completed = filterAppointments(
+              rawItems,
+              AppointmentStatusBucket.completed,
+            );
+            final cancelled = filterAppointments(
+              rawItems,
+              AppointmentStatusBucket.cancelled,
+            );
 
             return TabBarView(
               children: [
@@ -149,6 +179,7 @@ class _AppointmentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final auth = context.watch<AuthProvider>();
     final loc = context.watch<LocalizationService>();
 
@@ -159,7 +190,11 @@ class _AppointmentList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline, color: AppColors.primary, size: 44),
+               Icon(
+                Icons.lock_outline,
+                color: theme.primary,
+                size: 44,
+              ),
               const SizedBox(height: 14),
               const Text(
                 'Iniciá sesión para ver tus citas',
@@ -194,7 +229,7 @@ class _AppointmentList extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      color: AppColors.primary,
+      color: theme.primary,
       backgroundColor: const Color(0xFF141110),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -203,10 +238,7 @@ class _AppointmentList extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           final booking = items[index];
-          return _AppointmentCard(
-            booking: booking,
-            onRefresh: onRefresh,
-          );
+          return _AppointmentCard(booking: booking, onRefresh: onRefresh);
         },
       ),
     );
@@ -217,13 +249,11 @@ class _AppointmentCard extends StatelessWidget {
   final Map<String, dynamic> booking;
   final Future<void> Function() onRefresh;
 
-  const _AppointmentCard({
-    required this.booking,
-    required this.onRefresh,
-  });
+  const _AppointmentCard({required this.booking, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final status = appointmentStatusBucket(booking);
     final canCancel = canCancelAppointment(booking);
     final canRebook = canRebookAppointment(booking);
@@ -232,7 +262,7 @@ class _AppointmentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF151110),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+        border: Border.all(color: theme.primary.withValues(alpha: .18)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x40000000),
@@ -254,7 +284,9 @@ class _AppointmentCard extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: .08),
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x40000000),
@@ -274,7 +306,7 @@ class _AppointmentCard extends StatelessWidget {
                       left: 10,
                       top: 10,
                       child: _Badge(
-                        label: appointmentStatusLabel(status),
+                        label: appointmentStatusLabelForBooking(booking),
                         foreground: appointmentStatusForeground(status),
                         background: appointmentStatusBackground(status),
                       ),
@@ -300,7 +332,11 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.content_cut_outlined, size: 16, color: AppColors.secondary),
+                           Icon(
+                            Icons.content_cut_outlined,
+                            size: 16,
+                            color: theme.secondary,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
@@ -328,7 +364,9 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: _PriceChip(label: appointmentPriceLabel(booking)),
+                        child: _PriceChip(
+                          label: appointmentPriceLabel(booking),
+                        ),
                       ),
                     ],
                   ),
@@ -388,7 +426,8 @@ class _AppointmentCard extends StatelessWidget {
           content: Text(
             loc.t(
               'booking_cancel_limit',
-              fallback: 'No se puede cancelar dentro de las 4 horas previas al inicio.',
+              fallback:
+                  'No se puede cancelar dentro de las 4 horas previas al inicio.',
             ),
           ),
         ),
@@ -425,9 +464,7 @@ class _AppointmentCard extends StatelessWidget {
     try {
       await auth.api.cancelReservation(_bookingId());
       if (!messenger.mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Cita cancelada')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('Cita cancelada')));
       await onRefresh();
     } catch (e) {
       if (!messenger.mounted) return;
@@ -444,19 +481,20 @@ class _AppointmentCard extends StatelessWidget {
     final navigator = Navigator.of(context);
     final result = await navigator.push<Map<String, dynamic>>(
       MaterialPageRoute(
-        builder: (_) => SelectDateTimePage(court: resource),
+        builder: (_) => SelectDateTimePage(
+          court: resource,
+          preferredStaff: appointmentBarber(booking),
+        ),
       ),
     );
     if (result == null || !navigator.mounted) return;
 
     try {
-      await auth.api.rebookReservation(
-        _bookingId(),
-        {
-          'date': result['iso'] as String,
-          'time_slot': result['slot'] as String,
-        },
-      );
+      await auth.api.rebookReservation(_bookingId(), {
+        'date': result['iso'] as String,
+        'time_slot': result['slot'] as String,
+        'staff_id': result['staff_id'],
+      });
       if (!messenger.mounted) return;
       messenger.showSnackBar(
         const SnackBar(content: Text('Cita reprogramada')),
@@ -490,6 +528,7 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -514,13 +553,11 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-  });
+  const _DetailRow({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Icon(icon, size: 16, color: Colors.white54),
@@ -548,17 +585,18 @@ class _PriceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFF221A12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .24)),
+        border: Border.all(color: theme.primary.withValues(alpha: .24)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppColors.primary,
+        style:  TextStyle(
+          color: theme.primary,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -583,16 +621,17 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final borderColor = danger
         ? const Color(0xFF7B3C3C)
         : highlight
-            ? AppColors.primary
-            : Colors.white24;
+        ? theme.primary
+        : Colors.white24;
     final textColor = danger
         ? const Color(0xFFFF9D9D)
         : highlight
-            ? AppColors.primary
-            : Colors.white;
+        ? theme.primary
+        : Colors.white;
 
     return OutlinedButton.icon(
       onPressed: onPressed,
@@ -606,8 +645,8 @@ class _ActionButton extends StatelessWidget {
         backgroundColor: danger
             ? const Color(0xFF231315)
             : highlight
-                ? const Color(0xFF20180F)
-                : const Color(0xFF191514),
+            ? const Color(0xFF20180F)
+            : const Color(0xFF191514),
       ),
     );
   }
@@ -630,18 +669,19 @@ class _StatePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: const Color(0xFF151110),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .16)),
+        border: Border.all(color: theme.primary.withValues(alpha: .16)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 42, color: AppColors.primary),
+          Icon(icon, size: 42, color: theme.primary),
           const SizedBox(height: 14),
           Text(
             title,

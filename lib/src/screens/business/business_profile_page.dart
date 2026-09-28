@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../config/white_label_config.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
@@ -35,24 +35,20 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   }
 
   Future<_BusinessProfileData> _loadData() async {
-    try {
-      final api = context.read<AuthProvider>().api;
-      final responses = await Future.wait([
-        api.getStaff(perPage: 6),
-        api.getResources(
-          page: 1,
-          perPage: 6,
-          category: 'premium',
-          sort: 'rating',
-        ),
-      ]);
-      return _BusinessProfileData(
-        staff: _extractItems(responses[0]),
-        resources: _extractItems(responses[1]),
-      );
-    } catch (_) {
-      return const _BusinessProfileData(staff: [], resources: []);
-    }
+    final api = context.read<AuthProvider>().api;
+    final responses = await Future.wait([
+      api.getStaff(perPage: 6),
+      api.getResources(
+        page: 1,
+        perPage: 6,
+        category: 'premium',
+        sort: 'rating',
+      ),
+    ]);
+    return _BusinessProfileData(
+      staff: _extractItems(responses[0]),
+      resources: _extractItems(responses[1]),
+    );
   }
 
   List<Map<String, dynamic>> _extractItems(Map<String, dynamic> res) {
@@ -86,6 +82,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     return Scaffold(
       backgroundColor: const Color(0xFF090909),
@@ -96,22 +93,51 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: _refresh,
-            color: AppColors.primary,
+            color: theme.primary,
             child: FutureBuilder<_BusinessProfileData>(
               future: _future,
               builder: (context, snapshot) {
-                final data =
-                    snapshot.data ??
-                    const _BusinessProfileData(staff: [], resources: []);
-                final staff = data.staff.isNotEmpty
-                    ? data.staff
-                    : _fallbackStaff;
-                final resources = data.resources.isNotEmpty
-                    ? data.resources
-                    : _fallbackResources;
                 final isLoading =
                     snapshot.connectionState == ConnectionState.waiting &&
                     !snapshot.hasData;
+
+                if (snapshot.hasError) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                    children: [
+                      const SizedBox(height: 140),
+                      Center(
+                        child: Column(
+                          children: [
+                            const Text(
+                              'No fue posible cargar los servicios.',
+                              style: TextStyle(color: Colors.white70),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Revisa tu conexión e intenta nuevamente.',
+                              style: TextStyle(color: Colors.white54),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: _refresh,
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                final data =
+                    snapshot.data ??
+                    const _BusinessProfileData(staff: [], resources: []);
+                final staff = data.staff;
+                final resources = data.resources;
 
                 return ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -119,9 +145,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                   children: [
                     if (isLoading) ...[
                       const SizedBox(height: 220),
-                      const Center(
+                      Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primary,
+                          color: theme.primary,
                         ),
                       ),
                       const SizedBox(height: 220),
@@ -149,7 +175,12 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
-                      _StaffScroller(staff: staff),
+                      staff.isEmpty
+                          ? const _EmptySectionCard(
+                              title: 'Nuestro equipo',
+                              body: 'No quedan profesionales disponibles.',
+                            )
+                          : _StaffScroller(staff: staff),
                       const SizedBox(height: 20),
                       SectionHeader(
                         title: 'Servicios destacados',
@@ -157,7 +188,13 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
-                      _ServiceGrid(resources: resources),
+                      resources.isEmpty
+                          ? const _EmptySectionCard(
+                              title: 'Servicios destacados',
+                              body:
+                                  'No hay servicios disponibles por el momento.',
+                            )
+                          : _ServiceGrid(resources: resources),
                       const SizedBox(height: 20),
                       SectionHeader(
                         title: whiteLabel.galleryLabel,
@@ -218,7 +255,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                                 icon: const Icon(Icons.calendar_month_rounded),
                                 label: const Text('Reservar cita'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: theme.primary,
                                   foregroundColor: const Color(0xFF090909),
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 15,
@@ -255,6 +292,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         IconButton(
@@ -289,6 +327,7 @@ class _HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopCinematicPanel(
       backgroundAsset: whiteLabel.heroBackground,
       radius: 32,
@@ -316,8 +355,9 @@ class _HeroSection extends StatelessWidget {
                   const SizedBox(height: 8),
                   BarbershopLogoMark(
                     assetPath: whiteLabel.logoTransparent,
+                    fallbackLabel: whiteLabel.shortName,
                     size: 126,
-                    glowColor: AppColors.primary,
+                    glowColor: theme.primary,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -404,6 +444,7 @@ class _HeroInfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
@@ -414,7 +455,7 @@ class _HeroInfoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppColors.primary),
+          Icon(icon, size: 14, color: theme.primary),
           const SizedBox(width: 5),
           Text(
             text,
@@ -443,6 +484,7 @@ class _CounterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -456,10 +498,10 @@ class _CounterTile extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .16),
+              color: theme.primary.withValues(alpha: .16),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 18),
+            child: Icon(icon, color: theme.primary, size: 18),
           ),
           const SizedBox(width: 10),
           Column(
@@ -504,6 +546,7 @@ class _QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Expanded(
@@ -555,6 +598,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -563,10 +607,10 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF14100E),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .22)),
+          border: Border.all(color: theme.primary.withValues(alpha: .22)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: .06),
+              color: theme.primary.withValues(alpha: .06),
               blurRadius: 22,
               offset: const Offset(0, 8),
             ),
@@ -582,17 +626,17 @@ class _ActionButton extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: .20),
-                    AppColors.primary.withValues(alpha: .06),
+                    theme.primary.withValues(alpha: .20),
+                    theme.primary.withValues(alpha: .06),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: .30),
+                  color: theme.primary.withValues(alpha: .30),
                 ),
               ),
-              child: Icon(icon, color: AppColors.primary, size: 22),
+              child: Icon(icon, color: theme.primary, size: 22),
             ),
             const SizedBox(height: 8),
             Text(
@@ -620,6 +664,7 @@ class _BusinessInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       children: [
         _BusinessInfoCard(
@@ -659,6 +704,7 @@ class _BusinessInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -668,10 +714,10 @@ class _BusinessInfoCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .16),
+              color: theme.primary.withValues(alpha: .16),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: theme.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -703,6 +749,42 @@ class _BusinessInfoCard extends StatelessWidget {
   }
 }
 
+class _EmptySectionCard extends StatelessWidget {
+  final String title;
+  final String body;
+
+  const _EmptySectionCard({required this.title, required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    return BarbershopPremiumCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            body,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: .76),
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StaffScroller extends StatelessWidget {
   final List<Map<String, dynamic>> staff;
 
@@ -710,6 +792,7 @@ class _StaffScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return SizedBox(
       height: 214,
       child: ListView.separated(
@@ -731,6 +814,7 @@ class _StaffCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final api = context.read<AuthProvider>().api;
     final rawAvatar = _stringValue(staff, [
       'avatar_url',
@@ -743,7 +827,7 @@ class _StaffCard extends StatelessWidget {
     final name = _stringValue(staff, [
       'name',
       'full_name',
-    ], fallback: 'Barbero premium');
+    ], fallback: 'Profesional premium');
     final title = _stringValue(staff, [
       'title',
       'role_name',
@@ -778,14 +862,27 @@ class _StaffCard extends StatelessWidget {
                     ? Image.network(
                         avatar,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Image.asset(
-                          'assets/branding/barber_placeholder.png',
-                          fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(
+                            Icons.person_rounded,
+                            color: Colors.white70,
+                          ),
                         ),
                       )
-                    : Image.asset(
-                        'assets/branding/barber_placeholder.png',
-                        fit: BoxFit.cover,
+                    : const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF151C31), Color(0xFF10172A)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.person_rounded,
+                            color: Colors.white70,
+                          ),
+                        ),
                       ),
               ),
             ),
@@ -814,9 +911,9 @@ class _StaffCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(
+                 Icon(
                   Icons.star_rounded,
-                  color: AppColors.primary,
+                  color: theme.primary,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
@@ -860,6 +957,7 @@ class _MiniChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
@@ -886,6 +984,7 @@ class _ServiceGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final items = resources.take(4).toList(growable: false);
     return GridView.builder(
       shrinkWrap: true,
@@ -911,6 +1010,7 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final name = _stringValue(resource, [
       'name',
       'title',
@@ -1000,8 +1100,8 @@ class _ServiceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   price,
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style:  TextStyle(
+                    color: theme.primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -1028,6 +1128,7 @@ class _GalleryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final tiles = _galleryTiles;
     return GridView.builder(
       shrinkWrap: true,
@@ -1046,7 +1147,22 @@ class _GalleryGrid extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(tile.asset, fit: BoxFit.cover),
+              if (tile.asset.isNotEmpty)
+                Image.asset(tile.asset, fit: BoxFit.cover)
+              else
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF151C31),
+                        Color(0xFF10172A),
+                        Color(0xFF0B1020),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -1085,6 +1201,7 @@ class _ReviewsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       children: _reviews
           .map(
@@ -1114,11 +1231,11 @@ class _ReviewsList extends StatelessWidget {
                               Row(
                                 children: List.generate(
                                   5,
-                                  (index) => const Padding(
-                                    padding: EdgeInsets.only(right: 2),
+                                  (index) => Padding(
+                                    padding: const EdgeInsets.only(right: 2),
                                     child: Icon(
                                       Icons.star_rounded,
-                                      color: AppColors.primary,
+                                      color: theme.primary,
                                       size: 14,
                                     ),
                                   ),
@@ -1156,6 +1273,7 @@ class _ReviewsCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
@@ -1164,7 +1282,7 @@ class _ReviewsCta extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF14100E),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+          border: Border.all(color: theme.primary.withValues(alpha: .18)),
         ),
         child: Row(
           children: [
@@ -1173,11 +1291,11 @@ class _ReviewsCta extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: .12),
+                color: theme.primary.withValues(alpha: .12),
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.rate_review_rounded,
-                color: AppColors.primary,
+                color: theme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -1202,7 +1320,7 @@ class _ReviewsCta extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+             Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -1215,6 +1333,7 @@ class _AvatarMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       width: 42,
       height: 42,
@@ -1222,11 +1341,11 @@ class _AvatarMark extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primary.withValues(alpha: .26),
-            AppColors.primary.withValues(alpha: .10),
+            theme.primary.withValues(alpha: .26),
+            theme.primary.withValues(alpha: .10),
           ],
         ),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+        border: Border.all(color: theme.primary.withValues(alpha: .18)),
       ),
       child: const Icon(Icons.person_rounded, color: Colors.white, size: 21),
     );
@@ -1256,25 +1375,25 @@ class _ReviewData {
 
 const List<Map<String, dynamic>> _fallbackStaff = [
   {
-    'name': 'Barbero Senior',
+    'name': 'Profesional Senior',
     'title': 'Cortes premium',
     'rating': 4.9,
     'specialties': 'Fade, barba, detalle fino',
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
   },
   {
     'name': 'Especialista en barba',
     'title': 'Afeitado clásico',
     'rating': 4.8,
     'specialties': 'Barba, perfilado, navaja',
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
   },
   {
     'name': 'Estilista creativo',
     'title': 'Look contemporáneo',
     'rating': 5.0,
     'specialties': 'Corte moderno, diseño, acabado',
-    'avatar': 'assets/branding/barber_placeholder.png',
+    'avatar': '',
   },
 ];
 
@@ -1284,48 +1403,36 @@ const List<Map<String, dynamic>> _fallbackResources = [
     'price_per_hour': 6000,
     'duration_hours': 1,
     'category': 'premium',
-    'images': ['assets/branding/service_placeholder_premium.png'],
+    'images': [''],
   },
   {
     'name': 'Barba y perfilado',
     'price_per_hour': 4500,
     'duration_hours': 1,
     'category': 'clásico',
-    'images': ['assets/branding/service_placeholder_premium.png'],
+    'images': [''],
   },
   {
     'name': 'Fade signature',
     'price_per_hour': 7000,
     'duration_hours': 1,
     'category': 'premium',
-    'images': ['assets/branding/service_placeholder_premium.png'],
+    'images': [''],
   },
   {
     'name': 'Experiencia completa',
     'price_per_hour': 9500,
     'duration_hours': 2,
     'category': 'premium',
-    'images': ['assets/branding/service_placeholder_premium.png'],
+    'images': [''],
   },
 ];
 
 const List<_GalleryTileData> _galleryTiles = [
-  _GalleryTileData(
-    'assets/branding/barbershop_hero_bg.png',
-    'Ambiente premium',
-  ),
-  _GalleryTileData(
-    'assets/branding/logo_transparent.png',
-    'Identidad Tres Amigos',
-  ),
-  _GalleryTileData(
-    'assets/branding/barber_placeholder.png',
-    'Barberos expertos',
-  ),
-  _GalleryTileData(
-    'assets/branding/service_placeholder_premium.png',
-    'Detalles de precisión',
-  ),
+  _GalleryTileData('', 'Ambiente premium'),
+  _GalleryTileData('', 'Identidad del negocio'),
+  _GalleryTileData('', 'Profesionales expertos'),
+  _GalleryTileData('', 'Detalles de precisión'),
 ];
 
 const List<_ReviewData> _reviews = [

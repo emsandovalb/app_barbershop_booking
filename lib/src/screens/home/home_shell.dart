@@ -12,10 +12,7 @@ import 'home_tab.dart';
 class HomeShell extends StatefulWidget {
   final String? initialTab;
 
-  const HomeShell({
-    super.key,
-    this.initialTab,
-  });
+  const HomeShell({super.key, this.initialTab});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -37,6 +34,8 @@ class _TabConfig {
 
 class _HomeShellState extends State<HomeShell> {
   int index = 0;
+  int _bookingsRefreshVersion = 0;
+  int _adminReservationsRefreshVersion = 0;
 
   @override
   void initState() {
@@ -49,8 +48,13 @@ class _HomeShellState extends State<HomeShell> {
     final config = context.watch<AppConfig>();
     final auth = context.watch<AuthProvider>();
     final isLoggedIn = auth.isLoggedIn;
-    final isAdmin = auth.isAdmin;
-    final tabs = _buildTabs(isAdmin: isAdmin, config: config);
+    final canManageBusiness = auth.canManageBusiness;
+    final tabs = _buildTabs(
+      canManageBusiness: canManageBusiness,
+      config: config,
+      bookingsRefreshVersion: _bookingsRefreshVersion,
+      adminReservationsRefreshVersion: _adminReservationsRefreshVersion,
+    );
 
     if (index >= tabs.length) {
       index = tabs.length - 1;
@@ -66,7 +70,12 @@ class _HomeShellState extends State<HomeShell> {
     }
 
     return Scaffold(
-      body: SafeArea(child: tabs[index].page),
+      body: SafeArea(
+        child: IndexedStack(
+          index: index,
+          children: tabs.map((t) => t.page).toList(growable: false),
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         onTap: (i) {
@@ -74,11 +83,30 @@ class _HomeShellState extends State<HomeShell> {
             Navigator.of(context).pushNamed('/login');
             return;
           }
-          setState(() => index = i);
+          setState(() {
+            // IndexedStack keeps every tab alive. Refresh the two views that
+            // present server-side reservations whenever the user enters them,
+            // otherwise they can retain the request made before a new booking
+            // was submitted.
+            if (tabs[i].type == _TabType.bookings) {
+              _bookingsRefreshVersion++;
+            }
+            if (tabs[i].type == _TabType.reservations) {
+              _adminReservationsRefreshVersion++;
+            }
+            index = i;
+          });
         },
         backgroundColor: config.brand.backgroundColor,
         selectedItemColor: config.brand.primaryColor,
-        unselectedItemColor: Colors.white.withValues(alpha: .58),
+        // Businesses can be light- or dark-themed, so a hardcoded white
+        // disappears against a light background — pick the unselected
+        // icon color from the background's own brightness instead.
+        unselectedItemColor:
+            ThemeData.estimateBrightnessForColor(config.brand.backgroundColor) ==
+                Brightness.light
+            ? Colors.black.withValues(alpha: .45)
+            : Colors.white.withValues(alpha: .58),
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
         showSelectedLabels: true,
@@ -107,8 +135,10 @@ int _initialIndexFromTab(String? tab) {
 }
 
 List<_TabConfig> _buildTabs({
-  required bool isAdmin,
+  required bool canManageBusiness,
   required AppConfig config,
+  required int bookingsRefreshVersion,
+  required int adminReservationsRefreshVersion,
 }) {
   final tabs = <_TabConfig>[
     _TabConfig(
@@ -131,7 +161,7 @@ List<_TabConfig> _buildTabs({
     ),
     if (config.features.showReservations)
       _TabConfig(
-        page: const BookingsTab(),
+        page: BookingsTab(key: ValueKey('bookings-$bookingsRefreshVersion')),
         item: const BottomNavigationBarItem(
           icon: Icon(Icons.calendar_month_outlined),
           activeIcon: Icon(Icons.calendar_month),
@@ -139,9 +169,11 @@ List<_TabConfig> _buildTabs({
         ),
         type: _TabType.bookings,
       ),
-    if (config.features.showAdminReservations && isAdmin)
+    if (config.features.showAdminReservations && canManageBusiness)
       _TabConfig(
-        page: const AdminReservationsPage(),
+        page: AdminReservationsPage(
+          key: ValueKey('admin-reservations-$adminReservationsRefreshVersion'),
+        ),
         item: const BottomNavigationBarItem(
           icon: Icon(Icons.event_note_outlined),
           activeIcon: Icon(Icons.event_note),

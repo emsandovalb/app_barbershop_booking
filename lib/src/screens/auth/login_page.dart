@@ -11,6 +11,7 @@ import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import '../../widgets/barbershop_branding.dart';
+import '../../widgets/keyboard_aware_list_view.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -118,8 +119,7 @@ class _LoginPageState extends State<LoginPage> {
             child: _GlowOrb(color: Colors.white.withOpacity(.05), size: 260),
           ),
           SafeArea(
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
+            child: KeyboardAwareListView(
               padding: const EdgeInsets.fromLTRB(18, 2, 18, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,18 +165,31 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: Column(
                                 children: [
-                                  Text(
-                                    whiteLabel.displayName.split(' ').first,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w800,
-                                      color: colors.primaryGold,
-                                      height: 1.0,
-                                      letterSpacing: .7,
+                                  // Skip the small overline entirely when it
+                                  // would just repeat the short name below
+                                  // (e.g. a business whose display name's
+                                  // first word already IS its short name,
+                                  // like "JC" for "JC Studio") — showing it
+                                  // anyway reads as a duplicated word, not
+                                  // a two-line brand lockup.
+                                  if (whiteLabel.displayName
+                                          .split(' ')
+                                          .first
+                                          .toUpperCase() !=
+                                      whiteLabel.shortName.toUpperCase()) ...[
+                                    Text(
+                                      whiteLabel.displayName.split(' ').first,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                        color: colors.primaryGold,
+                                        height: 1.0,
+                                        letterSpacing: .7,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 1),
+                                    const SizedBox(height: 1),
+                                  ],
                                   Text(
                                     whiteLabel.shortName.toUpperCase(),
                                     textAlign: TextAlign.center,

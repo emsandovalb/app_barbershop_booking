@@ -15,7 +15,8 @@ class CategoryIcon extends StatelessWidget {
         width: size * .8,
         height: size * .8,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => const Icon(Icons.sports_soccer, color: Colors.white),
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.sports_soccer, color: Colors.white),
       ),
     );
   }

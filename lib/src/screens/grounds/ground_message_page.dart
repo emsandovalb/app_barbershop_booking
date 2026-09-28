@@ -20,7 +20,11 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('grounds_created_appbar', fallback: 'Services created'))),
+      appBar: AppBar(
+        title: Text(
+          loc.t('grounds_created_appbar', fallback: 'Services created'),
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -31,15 +35,23 @@ class OrderPlacedPage extends StatelessWidget {
               child: Icon(Icons.check, size: 42, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            Text(title.isNotEmpty ? title : loc.t('grounds_created_title', fallback: 'Service created'),
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+            Text(
+              title.isNotEmpty
+                  ? title
+                  : loc.t('grounds_created_title', fallback: 'Service created'),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t('grounds_created_subtitle', fallback: 'Your service has been created successfully and is now listed under My services.'),
+                    : loc.t(
+                        'grounds_created_subtitle',
+                        fallback:
+                            'Your service has been created successfully and is now listed under My services.',
+                      ),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),
@@ -53,7 +65,11 @@ class OrderPlacedPage extends StatelessWidget {
           onPressed: () => Navigator.of(
             context,
           ).pushNamedAndRemoveUntil(backRoute, (r) => false),
-          child: Text(buttonText.isNotEmpty ? buttonText : loc.t('btn_back_home', fallback: 'Back to home')),
+          child: Text(
+            buttonText.isNotEmpty
+                ? buttonText
+                : loc.t('btn_back_home', fallback: 'Back to home'),
+          ),
         ),
       ),
     );

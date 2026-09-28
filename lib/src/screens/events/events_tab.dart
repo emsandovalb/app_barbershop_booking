@@ -22,7 +22,10 @@ class EventsTab extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Text(
-                loc.t('events_error_generic', fallback: 'Could not load events. Please try again later.'),
+                loc.t(
+                  'events_error_generic',
+                  fallback: 'Could not load events. Please try again later.',
+                ),
                 textAlign: TextAlign.center,
               ),
             ),

@@ -6,7 +6,8 @@ import '../../config/app_config.dart';
 import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
+import '../../widgets/loadable_collection_view.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
@@ -25,62 +26,43 @@ class _HomeTabState extends State<HomeTab> {
   static const int _homePageSize = 5;
 
   String q = '';
-  List<dynamic> popular = [];
-  List<dynamic> premium = [];
-  bool loadingPopular = false;
-  bool loadingPremium = false;
+  late final LoadableController<List<Map<String, dynamic>>> _popularController;
+  late final LoadableController<List<Map<String, dynamic>>> _premiumController;
 
   @override
   void initState() {
     super.initState();
+    _popularController = LoadableController<List<Map<String, dynamic>>>(
+      () async => _extractItems(
+        await context.read<AuthProvider>().api.getResources(
+          sort: 'rating',
+          page: 1,
+          perPage: _homePageSize,
+        ),
+      ),
+    );
+    _premiumController = LoadableController<List<Map<String, dynamic>>>(
+      () async => _extractItems(
+        await context.read<AuthProvider>().api.getResources(
+          page: 1,
+          perPage: _homePageSize,
+          category: 'premium',
+          sort: 'rating',
+        ),
+      ),
+    );
     _refreshAll();
   }
 
+  @override
+  void dispose() {
+    _popularController.dispose();
+    _premiumController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refreshAll() async {
-    await Future.wait([_loadPopular(page: 1), _loadPremium(page: 1)]);
-  }
-
-  Future<void> _loadPopular({required int page}) async {
-    if (loadingPopular) return;
-    setState(() => loadingPopular = true);
-    try {
-      final api = context.read<AuthProvider>().api;
-      final res = await api.getResources(
-        sort: 'rating',
-        page: page,
-        perPage: _homePageSize,
-      );
-      if (!mounted) return;
-      final data = (res['data'] as List?) ?? [];
-      setState(() => popular = data);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => popular = []);
-    } finally {
-      if (mounted) setState(() => loadingPopular = false);
-    }
-  }
-
-  Future<void> _loadPremium({required int page}) async {
-    if (loadingPremium) return;
-    setState(() => loadingPremium = true);
-    try {
-      final api = context.read<AuthProvider>().api;
-      final res = await api.getResources(
-        page: page,
-        perPage: _homePageSize,
-        category: 'premium',
-        sort: 'rating',
-      );
-      if (!mounted) return;
-      final data = (res['data'] as List?) ?? [];
-      setState(() => premium = data);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => premium = []);
-    } finally {
-      if (mounted) setState(() => loadingPremium = false);
-    }
+    await Future.wait([_popularController.load(), _premiumController.load()]);
   }
 
   void _openFilteredResults({Map<String, dynamic>? filters, String? title}) {
@@ -94,16 +76,19 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final config = context.watch<AppConfig>();
     final brand = config.brand;
-    final whiteLabel =
-        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
-        WhiteLabelConfig.tresAmigos;
+    final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final auth = context.watch<AuthProvider>();
     final name =
         (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Admin Demo')
             .toString();
 
+    final popular =
+        _popularController.state.data ?? const <Map<String, dynamic>>[];
+    final premium =
+        _premiumController.state.data ?? const <Map<String, dynamic>>[];
     final featuredServices = _mergeFeaturedServices(popular, premium);
 
     return RefreshIndicator(
@@ -123,9 +108,9 @@ class _HomeTabState extends State<HomeTab> {
               children: [
                 Text(
                   'Hola, $name',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 13,
-                    color: AppColors.primary,
+                    color: theme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -186,7 +171,7 @@ class _HomeTabState extends State<HomeTab> {
                               color: Colors.white,
                               fontSize: 14,
                             ),
-                            cursorColor: AppColors.primary,
+                            cursorColor: theme.primary,
                             decoration: InputDecoration(
                               hintText:
                                   'Buscar ${whiteLabel.servicesLabel}, ${whiteLabel.staffPluralLabel}...',
@@ -275,7 +260,7 @@ class _HomeTabState extends State<HomeTab> {
                       context,
                     ).pushNamed(AppRoutes.businessProfile),
                   ),
-                  if (auth.isAdmin) ...[
+                  if (auth.canManageBusiness) ...[
                     const SizedBox(height: 10),
                     _AdminDashboardTeaser(
                       onTap: () => Navigator.of(
@@ -300,7 +285,7 @@ class _HomeTabState extends State<HomeTab> {
                       icon: const Icon(Icons.photo_library_outlined, size: 18),
                       label: Text('Ver ${whiteLabel.galleryLabel}'),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.secondary,
+                        foregroundColor: theme.secondary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 10,
@@ -320,19 +305,70 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _ServiceCarousel(
-                    isLoading: loadingPopular || loadingPremium,
-                    items: featuredServices,
-                    emptyMessage:
-                        'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
-                    onEmptyTap: () => _openFilteredResults(
-                      filters: const {'sort': 'rating'},
+                  if (_popularController.state.hasError ||
+                      _premiumController.state.hasError)
+                    if (featuredServices.isEmpty)
+                      _StateCard(
+                        title:
+                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                        body:
+                            'No fue posible cargar los ${whiteLabel.servicesLabel}.',
+                        actionLabel: 'Reintentar',
+                        onAction: _refreshAll,
+                        leading: const Icon(
+                          Icons.error_outline,
+                          color: Colors.white70,
+                        ),
+                      )
+                    else
+                      _ServiceCarousel(
+                        isLoading:
+                            _popularController.state.isLoading ||
+                            _premiumController.state.isLoading,
+                        items: featuredServices,
+                        emptyMessage:
+                            'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
+                        onEmptyTap: () => _openFilteredResults(
+                          filters: const {'sort': 'rating'},
+                          title:
+                              '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                        ),
+                        itemBuilder: (index, data) =>
+                            _ServiceCard(index: index, data: data),
+                      )
+                  else if (featuredServices.isEmpty)
+                    _StateCard(
                       title:
                           '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                      body:
+                          'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
+                      actionLabel: 'Ver todos',
+                      onAction: () => _openFilteredResults(
+                        filters: const {'sort': 'rating'},
+                        title:
+                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                      ),
+                      leading: const Icon(
+                        Icons.inbox_outlined,
+                        color: Colors.white70,
+                      ),
+                    )
+                  else
+                    _ServiceCarousel(
+                      isLoading:
+                          _popularController.state.isLoading ||
+                          _premiumController.state.isLoading,
+                      items: featuredServices,
+                      emptyMessage:
+                          'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
+                      onEmptyTap: () => _openFilteredResults(
+                        filters: const {'sort': 'rating'},
+                        title:
+                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                      ),
+                      itemBuilder: (index, data) =>
+                          _ServiceCard(index: index, data: data),
                     ),
-                    itemBuilder: (index, data) =>
-                        _ServiceCard(index: index, data: data),
-                  ),
                   const SizedBox(height: 20),
                   SectionHeader(
                     title: '${_capitalize(whiteLabel.servicesLabel)} populares',
@@ -344,18 +380,24 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _ServiceCarousel(
-                    isLoading: loadingPopular,
-                    items: popular,
+                  _ServiceListSection(
+                    controller: _popularController,
+                    title: '${_capitalize(whiteLabel.servicesLabel)} populares',
                     emptyMessage:
                         'No hay ${whiteLabel.servicesLabel} populares disponibles.',
-                    onEmptyTap: () => _openFilteredResults(
+                    loadingMessage: 'Cargando ${whiteLabel.servicesLabel}...',
+                    errorMessage:
+                        'No fue posible cargar los ${whiteLabel.servicesLabel}.',
+                    retryLabel: 'Reintentar',
+                    onViewAll: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
                       title:
                           '${_capitalize(whiteLabel.servicesLabel)} populares',
                     ),
+                    items: popular,
                     itemBuilder: (index, data) =>
                         _ServiceCard(index: index, data: data),
+                    onRetry: _refreshAll,
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
@@ -367,20 +409,167 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _ServiceCarousel(
-                    isLoading: loadingPremium,
-                    items: premium,
+                  _ServiceListSection(
+                    controller: _premiumController,
+                    title: '${_capitalize(whiteLabel.servicesLabel)} premium',
                     emptyMessage:
                         'No hay ${whiteLabel.servicesLabel} premium disponibles.',
-                    onEmptyTap: () => _openFilteredResults(
+                    loadingMessage: 'Cargando ${whiteLabel.servicesLabel}...',
+                    errorMessage:
+                        'No fue posible cargar los ${whiteLabel.servicesLabel}.',
+                    retryLabel: 'Reintentar',
+                    onViewAll: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
                       title: '${_capitalize(whiteLabel.servicesLabel)} premium',
                     ),
+                    items: premium,
                     itemBuilder: (index, data) =>
                         _ServiceCard(index: index, data: data),
+                    onRetry: _refreshAll,
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _extractItems(Map<String, dynamic> response) {
+    final data = response['data'];
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList(growable: false);
+    }
+    return const [];
+  }
+}
+
+class _ServiceListSection extends StatelessWidget {
+  final LoadableController<List<Map<String, dynamic>>> controller;
+  final String title;
+  final String emptyMessage;
+  final String loadingMessage;
+  final String errorMessage;
+  final String retryLabel;
+  final VoidCallback onViewAll;
+  final Future<void> Function() onRetry;
+  final List<Map<String, dynamic>> items;
+  final Widget Function(int index, dynamic data) itemBuilder;
+
+  const _ServiceListSection({
+    required this.controller,
+    required this.title,
+    required this.emptyMessage,
+    required this.loadingMessage,
+    required this.errorMessage,
+    required this.retryLabel,
+    required this.onViewAll,
+    required this.onRetry,
+    required this.items,
+    required this.itemBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final state = controller.state;
+
+    if (state.isLoading && !state.hasData) {
+      return _StateCard(
+        title: title,
+        body: loadingMessage,
+        leading: const CircularProgressIndicator(),
+      );
+    }
+
+    if (state.hasError && !state.hasData) {
+      return _StateCard(
+        title: title,
+        body: errorMessage,
+        actionLabel: retryLabel,
+        onAction: onRetry,
+        leading: const Icon(Icons.error_outline, color: Colors.white70),
+      );
+    }
+
+    if (items.isEmpty) {
+      return _StateCard(
+        title: title,
+        body: emptyMessage,
+        actionLabel: 'Ver todos',
+        onAction: onViewAll,
+        leading: const Icon(Icons.inbox_outlined, color: Colors.white70),
+      );
+    }
+
+    return _ServiceCarousel(
+      isLoading: state.isLoading,
+      items: items,
+      emptyMessage: emptyMessage,
+      onEmptyTap: onViewAll,
+      itemBuilder: itemBuilder,
+    );
+  }
+}
+
+class _StateCard extends StatelessWidget {
+  final String title;
+  final String body;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final Widget? leading;
+
+  const _StateCard({
+    required this.title,
+    required this.body,
+    this.actionLabel,
+    this.onAction,
+    this.leading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    return BarbershopPremiumCard(
+      radius: 26,
+      padding: const EdgeInsets.all(18),
+      backgroundColor: const Color(0xFF130F0C).withValues(alpha: .94),
+      borderColor: Colors.white.withValues(alpha: .08),
+      child: Row(
+        children: [
+          if (leading != null) ...[leading!, const SizedBox(width: 14)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: .74),
+                    height: 1.3,
+                  ),
+                ),
+                if (actionLabel != null && onAction != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton(
+                    onPressed: onAction,
+                    child: Text(actionLabel!),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
@@ -402,6 +591,7 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: SizedBox(
@@ -409,11 +599,26 @@ class _HeroCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              whiteLabel.heroBackground,
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-            ),
+            if (whiteLabel.heroBackground.trim().isNotEmpty)
+              Image.asset(
+                whiteLabel.heroBackground,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+            if (whiteLabel.heroBackground.trim().isEmpty)
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF10172A),
+                      Color(0xFF0B1020),
+                      Color(0xFF151C31),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -470,18 +675,21 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    whiteLabel.displayName.split(' ').first.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.6,
-                      height: 1,
+                  if (whiteLabel.displayName.split(' ').first.toUpperCase() !=
+                      whiteLabel.shortName.toUpperCase()) ...[
+                    Text(
+                      whiteLabel.displayName.split(' ').first.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style:  TextStyle(
+                        color: theme.primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.6,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
+                    const SizedBox(height: 2),
+                  ],
                   Text(
                     whiteLabel.shortName.toUpperCase(),
                     textAlign: TextAlign.center,
@@ -511,6 +719,7 @@ class _BusinessInfoCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -543,6 +752,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -558,7 +768,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .20)),
+          border: Border.all(color: theme.primary.withValues(alpha: .20)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: .24),
@@ -574,11 +784,11 @@ class _BusinessProfileTeaser extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: .14),
+                color: theme.primary.withValues(alpha: .14),
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.storefront_rounded,
-                color: AppColors.primary,
+                color: theme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -603,7 +813,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+             Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -618,6 +828,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -633,7 +844,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .24)),
+          border: Border.all(color: theme.primary.withValues(alpha: .24)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: .24),
@@ -649,11 +860,11 @@ class _AdminDashboardTeaser extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: .14),
+                color: theme.primary.withValues(alpha: .14),
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.dashboard_rounded,
-                color: AppColors.primary,
+                color: theme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -671,14 +882,14 @@ class _AdminDashboardTeaser extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Gestioná tu barbería desde un solo lugar.',
+                    'Gestioná tu salón desde un solo lugar.',
                     style: TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+             Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -694,6 +905,7 @@ class _ReviewsPromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
@@ -709,7 +921,7 @@ class _ReviewsPromoCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+          border: Border.all(color: theme.primary.withValues(alpha: .18)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: .24),
@@ -725,11 +937,11 @@ class _ReviewsPromoCard extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: .14),
+                color: theme.primary.withValues(alpha: .14),
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.favorite_rounded,
-                color: AppColors.primary,
+                color: theme.primary,
               ),
             ),
             const SizedBox(width: 12),
@@ -753,8 +965,8 @@ class _ReviewsPromoCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     'Ver ${whiteLabel.reviewsLabel}',
-                    style: const TextStyle(
-                      color: AppColors.secondary,
+                    style:  TextStyle(
+                      color: theme.secondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -762,7 +974,7 @@ class _ReviewsPromoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+             Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -783,6 +995,7 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -804,10 +1017,10 @@ class _InfoCard extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .15),
+              color: theme.primary.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 18),
+            child: Icon(icon, color: theme.primary, size: 18),
           ),
           const SizedBox(height: 10),
           Text(
@@ -842,6 +1055,7 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final isPremium = _isPremium(data);
     final price = _formatCrc(data?['price_per_hour']);
     final duration = _durationLabel(
@@ -957,8 +1171,8 @@ class _ServiceCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       price,
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style:  TextStyle(
+                        color: theme.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                       ),
@@ -1057,6 +1271,7 @@ class _ServiceCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     if (isLoading && items.isEmpty) {
       return const SizedBox(
         height: 224,

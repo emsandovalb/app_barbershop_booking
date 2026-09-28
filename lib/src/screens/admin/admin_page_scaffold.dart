@@ -2,13 +2,27 @@ import 'package:flutter/material.dart';
 
 import '../../navigation/app_router.dart';
 
-void navigateToAdminDashboard(BuildContext context) {
+void navigateBackFromAdmin(BuildContext context) {
   final navigator = Navigator.of(context);
   if (navigator.canPop()) {
     navigator.pop();
     return;
   }
-  navigator.pushNamedAndRemoveUntil(AppRoutes.adminDashboard, (route) => false);
+  navigator.pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+}
+
+void navigateToAdminDashboard(BuildContext context) {
+  final navigator = Navigator.of(context);
+  navigator.popUntil(
+    (route) => route.settings.name == AppRoutes.adminDashboard || route.isFirst,
+  );
+  if (navigator.canPop()) {
+    return;
+  }
+  if (Navigator.of(context).canPop()) {
+    return;
+  }
+  navigator.pushReplacementNamed(AppRoutes.adminDashboard);
 }
 
 PreferredSizeWidget buildAdminAppBar(
@@ -24,7 +38,7 @@ PreferredSizeWidget buildAdminAppBar(
     titleSpacing: 0,
     leading: IconButton(
       tooltip: 'Volver',
-      onPressed: () => navigateToAdminDashboard(context),
+      onPressed: () => navigateBackFromAdmin(context),
       icon: const Icon(Icons.arrow_back_rounded),
     ),
     title: subtitle == null
@@ -59,7 +73,7 @@ PreferredSizeWidget buildAdminAppBar(
     actions: [
       IconButton(
         tooltip: 'Centro administrativo',
-        onPressed: () => Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
+        onPressed: () => navigateToAdminDashboard(context),
         icon: const Icon(Icons.dashboard_outlined),
       ),
       if (actions != null) ...actions,

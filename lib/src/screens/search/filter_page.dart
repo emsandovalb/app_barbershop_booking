@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/localization_service.dart';
+import '../../widgets/keyboard_aware_list_view.dart';
 
 class FilterPage extends StatefulWidget {
   const FilterPage({super.key});
@@ -43,113 +44,143 @@ class _FilterPageState extends State<FilterPage> {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: Text(loc.t('filter_title', fallback: 'Filter'))),
-      body: Padding(
+      body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(loc.t('filter_ground_name', fallback: 'Service name')),
-            const SizedBox(height: 6),
-            TextField(
-              controller: nameCtrl,
-              decoration: InputDecoration(hintText: loc.t('filter_name_hint', fallback: 'Search by name')),
-            ),
-            const SizedBox(height: 12),
-            Text(loc.t('filter_address_label', fallback: 'Location / Address')),
-            const SizedBox(height: 6),
-            TextField(
-              controller: addressCtrl,
-              decoration: InputDecoration(hintText: loc.t('filter_address_hint', fallback: 'City, area or address')),
-            ),
-            const SizedBox(height: 16),
-            Text(loc.t('filter_price_range', fallback: 'Price range')),
-            RangeSlider(
-              values: RangeValues(priceMin, priceMax),
-              onChanged: (v) => setState(() {
-                priceMin = v.start;
-                priceMax = v.end;
-              }),
-              min: _priceSliderMin,
-              max: _priceSliderMax,
-            ),
-            const SizedBox(height: 12),
-            Text(loc.t('filter_duration', fallback: 'Duration per appointment')),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                ChoiceChip(
-                  label: Text(loc.t('filter_duration_one', fallback: '1 hour')),
-                  selected: duration == 1,
-                  onSelected: (_) => setState(() => duration = 1),
-                ),
-                ChoiceChip(
-                  label: Text(loc.t('filter_duration_two', fallback: '2 hours')),
-                  selected: duration == 2,
-                  onSelected: (_) => setState(() => duration = 2),
-                ),
-                ChoiceChip(
-                  label: Text(loc.t('filter_duration_any', fallback: 'Any')),
-                  selected: duration == null,
-                  onSelected: (_) => setState(() => duration = null),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(loc.t('filter_sort_by', fallback: 'Sort by')),
-            Wrap(
-              spacing: 8,
-              children: [
-                ChoiceChip(
-                  label: Text(loc.t('filter_sort_rating', fallback: 'Rating')),
-                  selected: sort == 'rating',
-                  onSelected: (_) => setState(() => sort = 'rating'),
-                ),
-                ChoiceChip(
-                  label: Text(loc.t('filter_sort_price_asc', fallback: 'Price ↑')),
-                  selected: sort == 'price_asc',
-                  onSelected: (_) => setState(() => sort = 'price_asc'),
-                ),
-                ChoiceChip(
-                  label: Text(loc.t('filter_sort_price_desc', fallback: 'Price ↓')),
-                  selected: sort == 'price_desc',
-                  onSelected: (_) => setState(() => sort = 'price_desc'),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _reset,
-                    child: Text(loc.t('btn_reset', fallback: 'Reset')),
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(loc.t('filter_ground_name', fallback: 'Service name')),
+              const SizedBox(height: 6),
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  hintText: loc.t(
+                    'filter_name_hint',
+                    fallback: 'Search by name',
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context, {
-                      'q': _composeQuery(),
-                      'minPrice': priceMin,
-                      'maxPrice': priceMax,
-                      'sort': sort,
-                      'duration': duration,
-                    }),
-                    child: Text(loc.t('btn_apply', fallback: 'Apply')),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                loc.t('filter_address_label', fallback: 'Location / Address'),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: addressCtrl,
+                decoration: InputDecoration(
+                  hintText: loc.t(
+                    'filter_address_hint',
+                    fallback: 'City, area or address',
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(height: 16),
+              Text(loc.t('filter_price_range', fallback: 'Price range')),
+              RangeSlider(
+                values: RangeValues(priceMin, priceMax),
+                onChanged: (v) => setState(() {
+                  priceMin = v.start;
+                  priceMax = v.end;
+                }),
+                min: _priceSliderMin,
+                max: _priceSliderMax,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                loc.t('filter_duration', fallback: 'Duration per appointment'),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: Text(
+                      loc.t('filter_duration_one', fallback: '1 hour'),
+                    ),
+                    selected: duration == 1,
+                    onSelected: (_) => setState(() => duration = 1),
+                  ),
+                  ChoiceChip(
+                    label: Text(
+                      loc.t('filter_duration_two', fallback: '2 hours'),
+                    ),
+                    selected: duration == 2,
+                    onSelected: (_) => setState(() => duration = 2),
+                  ),
+                  ChoiceChip(
+                    label: Text(loc.t('filter_duration_any', fallback: 'Any')),
+                    selected: duration == null,
+                    onSelected: (_) => setState(() => duration = null),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(loc.t('filter_sort_by', fallback: 'Sort by')),
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: Text(
+                      loc.t('filter_sort_rating', fallback: 'Rating'),
+                    ),
+                    selected: sort == 'rating',
+                    onSelected: (_) => setState(() => sort = 'rating'),
+                  ),
+                  ChoiceChip(
+                    label: Text(
+                      loc.t('filter_sort_price_asc', fallback: 'Price ↑'),
+                    ),
+                    selected: sort == 'price_asc',
+                    onSelected: (_) => setState(() => sort = 'price_asc'),
+                  ),
+                  ChoiceChip(
+                    label: Text(
+                      loc.t('filter_sort_price_desc', fallback: 'Price ↓'),
+                    ),
+                    selected: sort == 'price_desc',
+                    onSelected: (_) => setState(() => sort = 'price_desc'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _reset,
+                      child: Text(loc.t('btn_reset', fallback: 'Reset')),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context, {
+                        'q': _composeQuery(),
+                        'minPrice': priceMin,
+                        'maxPrice': priceMax,
+                        'sort': sort,
+                        'duration': duration,
+                      }),
+                      child: Text(loc.t('btn_apply', fallback: 'Apply')),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   String? _composeQuery() {
-    final parts = [nameCtrl.text.trim(), addressCtrl.text.trim()].where((e) => e.isNotEmpty).toList();
+    final parts = [
+      nameCtrl.text.trim(),
+      addressCtrl.text.trim(),
+    ].where((e) => e.isNotEmpty).toList();
     if (parts.isEmpty) return null;
     return parts.join(' ');
   }

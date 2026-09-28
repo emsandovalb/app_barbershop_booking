@@ -72,13 +72,17 @@ class _TournamentsPageState extends State<TournamentsPage> with RouteAware {
       floatingActionButton: auth.isAdmin
           ? FloatingActionButton.extended(
               onPressed: () async {
-                final result = await Navigator.of(context).pushNamed(AppRoutes.tournamentForm);
+                final result = await Navigator.of(
+                  context,
+                ).pushNamed(AppRoutes.tournamentForm);
                 if (result is Map<String, dynamic>) {
                   await _refresh();
                 }
               },
               icon: const Icon(Icons.add),
-              label: Text(loc.t('tournaments_create', fallback: 'Create tournament')),
+              label: Text(
+                loc.t('tournaments_create', fallback: 'Create tournament'),
+              ),
             )
           : null,
       body: FutureBuilder<Map<String, dynamic>>(
@@ -90,7 +94,11 @@ class _TournamentsPageState extends State<TournamentsPage> with RouteAware {
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
-                    loc.t('tournaments_error', fallback: 'Could not load tournaments. Please try again later.'),
+                    loc.t(
+                      'tournaments_error',
+                      fallback:
+                          'Could not load tournaments. Please try again later.',
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -117,18 +125,34 @@ class _TournamentsPageState extends State<TournamentsPage> with RouteAware {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.emoji_events_outlined, color: Colors.white70, size: 40),
+                        const Icon(
+                          Icons.emoji_events_outlined,
+                          color: Colors.white70,
+                          size: 40,
+                        ),
                         const SizedBox(height: 12),
                         Text(
-                          loc.t('tournaments_empty', fallback: 'No tournaments available yet.'),
+                          loc.t(
+                            'tournaments_empty',
+                            fallback: 'No tournaments available yet.',
+                          ),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          loc.t('tournaments_empty_subtitle', fallback: 'Check back later for upcoming competitions.'),
+                          loc.t(
+                            'tournaments_empty_subtitle',
+                            fallback:
+                                'Check back later for upcoming competitions.',
+                          ),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withOpacity(.72)),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.72),
+                          ),
                         ),
                       ],
                     ),
@@ -170,10 +194,7 @@ class _TournamentCard extends StatelessWidget {
   final Map<String, dynamic> tournament;
   final VoidCallback onTap;
 
-  const _TournamentCard({
-    required this.tournament,
-    required this.onTap,
-  });
+  const _TournamentCard({required this.tournament, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +206,9 @@ class _TournamentCard extends StatelessWidget {
     final fee = _money(tournament['entry_fee'], loc);
     final maxTeams = tournament['max_teams'];
     final dateLabel = _dateLabel(tournament, loc);
-    final cover = tournament['cover_image_url']?.toString() ?? tournament['cover_image']?.toString();
+    final cover =
+        tournament['cover_image_url']?.toString() ??
+        tournament['cover_image']?.toString();
 
     return InkWell(
       onTap: onTap,
@@ -200,7 +223,9 @@ class _TournamentCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: CourtImage(
                 images: cover,
                 height: 160,
@@ -221,17 +246,33 @@ class _TournamentCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              tournament['name']?.toString() ?? loc.t('tournaments_fallback_name', fallback: 'Tournament'),
-                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                              tournament['name']?.toString() ??
+                                  loc.t(
+                                    'tournaments_fallback_name',
+                                    fallback: 'Tournament',
+                                  ),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              tournament['description']?.toString().isNotEmpty == true
+                              tournament['description']
+                                          ?.toString()
+                                          .isNotEmpty ==
+                                      true
                                   ? tournament['description'].toString()
-                                  : loc.t('tournaments_no_description', fallback: 'No description provided.'),
+                                  : loc.t(
+                                      'tournaments_no_description',
+                                      fallback: 'No description provided.',
+                                    ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.72)),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.72),
+                              ),
                             ),
                           ],
                         ),
@@ -251,13 +292,19 @@ class _TournamentCard extends StatelessWidget {
                       ),
                       _MetaChip(
                         icon: Icons.sports_soccer_outlined,
-                        label: _formatTournamentFormat(tournament['format']?.toString(), loc),
+                        label: _formatTournamentFormat(
+                          tournament['format']?.toString(),
+                          loc,
+                        ),
                       ),
                       _MetaChip(
                         icon: Icons.person_outline,
                         label: organizer['name']?.toString().isNotEmpty == true
                             ? organizer['name'].toString()
-                            : loc.t('tournaments_organizer', fallback: 'Organizer'),
+                            : loc.t(
+                                'tournaments_organizer',
+                                fallback: 'Organizer',
+                              ),
                       ),
                       _MetaChip(
                         icon: Icons.place_outlined,
@@ -268,18 +315,20 @@ class _TournamentCard extends StatelessWidget {
                       _MetaChip(
                         icon: Icons.groups_outlined,
                         label: teamsCount == null
-                          ? loc.t('tournaments_team_count_zero', fallback: '0 teams')
+                            ? loc.t(
+                                'tournaments_team_count_zero',
+                                fallback: '0 teams',
+                              )
                             : '$teamsCount ${loc.t('tournaments_team_count_suffix', fallback: 'teams')}',
                       ),
                       if (maxTeams != null)
                         _MetaChip(
                           icon: Icons.people_alt_outlined,
-                          label: loc.t('tournaments_max_prefix', fallback: 'Max') + ' $maxTeams',
+                          label:
+                              loc.t('tournaments_max_prefix', fallback: 'Max') +
+                              ' $maxTeams',
                         ),
-                      _MetaChip(
-                        icon: Icons.payments_outlined,
-                        label: fee,
-                      ),
+                      _MetaChip(icon: Icons.payments_outlined, label: fee),
                     ],
                   ),
                 ],
@@ -311,7 +360,10 @@ class _MetaChip extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: Colors.white70),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -331,13 +383,13 @@ class _StatusPill extends StatelessWidget {
     final bg = isInactive
         ? Colors.red.withValues(alpha: 0.15)
         : isDraft
-            ? Colors.orange.withValues(alpha: 0.15)
-            : AppColors.success.withValues(alpha: 0.15);
+        ? Colors.orange.withValues(alpha: 0.15)
+        : AppColors.success.withValues(alpha: 0.15);
     final fg = isInactive
         ? Colors.redAccent
         : isDraft
-            ? Colors.orangeAccent
-            : Colors.greenAccent;
+        ? Colors.orangeAccent
+        : Colors.greenAccent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -354,14 +406,19 @@ class _StatusPill extends StatelessWidget {
 }
 
 String _money(dynamic value, LocalizationService loc) {
-  final num? parsed = value is num ? value : num.tryParse(value?.toString() ?? '');
+  final num? parsed = value is num
+      ? value
+      : num.tryParse(value?.toString() ?? '');
   if (parsed == null) return loc.t('tournaments_free', fallback: 'Free');
   if (parsed <= 0) return loc.t('tournaments_free', fallback: 'Free');
   return '\$${parsed.toStringAsFixed(2)}';
 }
 
 String _dateLabel(Map<String, dynamic> tournament, LocalizationService loc) {
-  final raw = tournament['starts_at'] ?? tournament['registration_deadline'] ?? tournament['ends_at'];
+  final raw =
+      tournament['starts_at'] ??
+      tournament['registration_deadline'] ??
+      tournament['ends_at'];
   if (raw == null) return loc.t('tournaments_no_dates', fallback: 'No dates');
   final parsed = DateTime.tryParse(raw.toString());
   if (parsed == null) return raw.toString();
@@ -383,9 +440,15 @@ String _statusLabel(String status, LocalizationService loc) {
 String _formatTournamentFormat(String? raw, LocalizationService loc) {
   switch (raw) {
     case 'single_elimination':
-      return loc.t('tournaments_format_single_elimination', fallback: 'Single elimination');
+      return loc.t(
+        'tournaments_format_single_elimination',
+        fallback: 'Single elimination',
+      );
     case 'double_elimination':
-      return loc.t('tournaments_format_double_elimination', fallback: 'Double elimination');
+      return loc.t(
+        'tournaments_format_double_elimination',
+        fallback: 'Double elimination',
+      );
     case 'round_robin':
       return loc.t('tournaments_format_round_robin', fallback: 'Round robin');
     default:

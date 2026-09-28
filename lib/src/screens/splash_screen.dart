@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
 import '../config/white_label_config.dart';
 import '../navigation/app_router.dart';
+import '../navigation/tenant_startup_route.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/barbershop_branding.dart';
 
@@ -27,11 +29,15 @@ class _SplashScreenState extends State<SplashScreen>
     )..repeat(reverse: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      FlutterNativeSplash.remove();
-      await Future<void>.delayed(const Duration(milliseconds: 900));
-      if (!mounted) return;
+      if (!kIsWeb) {
+        FlutterNativeSplash.remove();
+      }
       final auth = context.read<AuthProvider>();
-      final target = auth.isLoggedIn ? AppRoutes.home : AppRoutes.onboarding;
+      await auth.ready;
+      if (!mounted) return;
+      final target = TenantStartupRoute.forAuthentication(
+        isAuthenticated: auth.isLoggedIn,
+      );
       Navigator.of(context).pushReplacementNamed(target);
     });
   }
@@ -64,21 +70,25 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   BarbershopLogoMark(
                     assetPath: whiteLabel.logoTransparent,
+                    fallbackLabel: whiteLabel.shortName,
                     size: 200,
                     glowColor: whiteLabel.primaryGold,
                   ),
                   const SizedBox(height: 18),
-                  Text(
-                    whiteLabel.displayName.split(' ').first,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white.withOpacity(.88),
-                      letterSpacing: 1.0,
+                  if (whiteLabel.displayName.split(' ').first.toUpperCase() !=
+                      whiteLabel.shortName.toUpperCase()) ...[
+                    Text(
+                      whiteLabel.displayName.split(' ').first,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withOpacity(.88),
+                        letterSpacing: 1.0,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
+                    const SizedBox(height: 2),
+                  ],
                   Text(
                     whiteLabel.shortName.toUpperCase(),
                     textAlign: TextAlign.center,

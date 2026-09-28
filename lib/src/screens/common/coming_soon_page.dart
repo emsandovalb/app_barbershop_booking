@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../theme/colors.dart';
+import 'package:provider/provider.dart';
+import '../../theme/brand_theme.dart';
 import '../../navigation/app_router.dart';
 
 class ComingSoonPage extends StatelessWidget {
@@ -8,6 +9,7 @@ class ComingSoonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final t = title ?? 'Coming soon';
     return Scaffold(
       appBar: AppBar(title: Text(t)),
@@ -44,10 +46,13 @@ class ComingSoonPage extends StatelessWidget {
                 bottomRight: Radius.circular(22),
               ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.only(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.primary,
+                  borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(22),
                     bottomRight: Radius.circular(22),
                   ),

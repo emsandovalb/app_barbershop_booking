@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import '../../theme/brand_theme.dart';
+import '../../widgets/loadable_collection_view.dart';
 import 'admin_page_scaffold.dart';
 
 class AdminStaffPage extends StatefulWidget {
@@ -15,24 +18,41 @@ class AdminStaffPage extends StatefulWidget {
 }
 
 class _AdminStaffPageState extends State<AdminStaffPage> {
-  Future<Map<String, dynamic>>? _future;
+  late final LoadableController<List<Map<String, dynamic>>> _controller;
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _controller = LoadableController<List<Map<String, dynamic>>>(
+      _load,
+      preserveDataOnError: true,
+    );
   }
 
-  Future<Map<String, dynamic>> _load() {
-    return context.read<AuthProvider>().api.getStaff(perPage: 100);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
-  Future<void> _refresh() async {
-    final next = await _load();
-    if (!mounted) return;
-    setState(() {
-      _future = Future.value(next);
-    });
+  Future<List<Map<String, dynamic>>> _load() async {
+    final auth = context.read<AuthProvider>();
+    await auth.ready;
+
+    final response = await auth.api.getStaff(perPage: 100);
+    final data = response['data'];
+    if (data is! List) {
+      return const [];
+    }
+
+    return data
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList(growable: false);
+  }
+
+  Future<void> _refresh({bool clearData = false}) {
+    return _controller.load(clearData: clearData);
   }
 
   void _showSuccess(String message) {
@@ -46,16 +66,20 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final config = context.watch<AppConfig>();
     final loc = context.watch<LocalizationService>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     final auth = context.watch<AuthProvider>();
-    final canManage = auth.isAdmin && config.features.adminStaffManagement;
+    final canManage =
+        config.features.adminStaffManagement && auth.canManageBusiness;
 
     if (!canManage) {
       return Scaffold(
+        backgroundColor: theme.background,
         appBar: buildAdminAppBar(
           context,
-          title: loc.t('manage_staff', fallback: 'Manage barbers'),
+          title: loc.t('manage_staff', fallback: whiteLabel.staffPluralLabel),
         ),
         body: Center(
           child: Text(
@@ -63,237 +87,339 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
               'admin_only',
               fallback: 'Only administrators can access this section',
             ),
+            style: const TextStyle(color: Colors.white70),
           ),
         ),
       );
     }
 
-    return Scaffold(
-      appBar: buildAdminAppBar(
-        context,
-        title: loc.t('manage_staff', fallback: 'Manage barbers'),
-        actions: [
-          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final saved = await Navigator.of(
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: buildAdminAppBar(
             context,
-          ).pushNamed<bool>(
-            AppRoutes.staffForm,
-            arguments: const {'createMode': true},
-          );
-          if (saved == true) {
-            await _refresh();
-            _showSuccess('Barbero creado correctamente.');
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: Text(loc.t('add_staff', fallback: 'Add barber')),
-      ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _future,
-        builder: (context, snap) {
-          if (snap.connectionState != ConnectionState.done &&
-              !snap.hasData &&
-              !snap.hasError) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snap.hasError) {
-            return Center(
-              child: Text(
-                loc.t('staff_load_failed', fallback: 'Failed to load staff'),
+            title: loc.t('manage_staff', fallback: whiteLabel.staffPluralLabel),
+            actions: [
+              IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () async {
+              final saved = await Navigator.of(context).pushNamed<bool>(
+                AppRoutes.staffForm,
+                arguments: const {'createMode': true},
+              );
+              if (saved == true) {
+                await _refresh();
+                _showSuccess(
+                  '${whiteLabel.staffDisplayName} creado correctamente.',
+                );
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: Text(
+              loc.t(
+                'add_staff',
+                fallback: 'Agregar ${whiteLabel.staffDisplayName}',
               ),
-            );
-          }
-          final items = (snap.data?['data'] as List?) ?? const [];
-          if (items.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView(
+            ),
+          ),
+          body: LoadableCollectionView<List<Map<String, dynamic>>>(
+            controller: _controller,
+            isEmpty: (items) => items.isEmpty,
+            loadingBuilder: (_, __) {
+              return const Center(child: CircularProgressIndicator());
+            },
+            errorBuilder: (_, error, retry) {
+              return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
                 children: [
-                  const SizedBox(height: 160),
+                  const SizedBox(height: 120),
                   Center(
-                    child: Text(
-                      loc.t('staff_empty', fallback: 'No barbers found'),
-                      style: const TextStyle(color: Colors.white70),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _staffErrorMessage(error),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: retry,
+                          child: const Text('Reintentar'),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, index) {
-                final staff = Map<String, dynamic>.from(items[index] as Map);
-                final role = (staff['role'] as Map?) ?? const {};
-                final services = (staff['services'] as List?) ?? const [];
-                final isActive = staff['is_active'] == true;
-                return Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C2430),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            },
+            emptyBuilder: (_, __) {
+              return RefreshIndicator(
+                onRefresh: () => _refresh(clearData: false),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    const SizedBox(height: 120),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: config.brand.primaryColor
-                                .withOpacity(.18),
-                            backgroundImage:
-                                (staff['avatar_url']?.toString() ?? '')
-                                    .isNotEmpty
-                                ? NetworkImage(staff['avatar_url'].toString())
-                                : null,
-                            child:
-                                (staff['avatar_url']?.toString() ?? '').isEmpty
-                                ? const Icon(
-                                    Icons.content_cut_outlined,
-                                    color: Colors.white,
-                                  )
-                                : null,
+                          Text(
+                            loc.t(
+                              'staff_empty_title',
+                              fallback: 'Aún no hay miembros del equipo.',
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                          const SizedBox(height: 8),
+                          Text(
+                            loc.t(
+                              'staff_empty_hint',
+                              fallback:
+                                  'Agrega el primer miembro para comenzar.',
+                            ),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: .72),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            dataBuilder: (_, items, __, isLoading) {
+              return Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: () => _refresh(clearData: false),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, index) {
+                        final staff = items[index];
+                        final role = (staff['role'] as Map?) ?? const {};
+                        final services =
+                            (staff['services'] as List?) ?? const [];
+                        final isActive = staff['is_active'] == true;
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C2430),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: Colors.white10),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: config.brand.primaryColor
+                                        .withOpacity(.18),
+                                    backgroundImage:
+                                        (staff['avatar_url']?.toString() ?? '')
+                                            .isNotEmpty
+                                        ? NetworkImage(
+                                            staff['avatar_url'].toString(),
+                                          )
+                                        : null,
+                                    child:
+                                        (staff['avatar_url']?.toString() ?? '')
+                                            .isEmpty
+                                        ? const Icon(
+                                            Icons.content_cut_outlined,
+                                            color: Colors.white,
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          staff['name']?.toString() ??
+                                              loc.t(
+                                                'staff_title',
+                                                fallback:
+                                                    whiteLabel.staffDisplayName,
+                                              ),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          role['name']?.toString() ?? '',
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(.7),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${services.length} ${loc.t('staff_services', fallback: 'services')}',
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(.7),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Switch(
+                                    value: isActive,
+                                    onChanged: (value) async {
+                                      final api = context
+                                          .read<AuthProvider>()
+                                          .api;
+                                      if (value) {
+                                        await api.updateStaff(
+                                          staff['id'] as int,
+                                          {'is_active': true},
+                                        );
+                                      } else {
+                                        await api.deactivateStaff(
+                                          staff['id'] as int,
+                                        );
+                                      }
+                                      await _refresh(clearData: false);
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              if ((staff['email']?.toString() ?? '').isNotEmpty)
                                 Text(
-                                  staff['name']?.toString() ??
-                                      loc.t('staff_title', fallback: 'Barber'),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16,
+                                  staff['email'].toString(),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(.78),
                                   ),
                                 ),
+                              if ((staff['phone']?.toString() ?? '')
+                                  .isNotEmpty) ...[
                                 const SizedBox(height: 4),
                                 Text(
-                                  role['name']?.toString() ?? '',
+                                  staff['phone'].toString(),
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(.7),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${services.length} ${loc.t('staff_services', fallback: 'services')}',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(.7),
+                                    color: Colors.white.withOpacity(.78),
                                   ),
                                 ),
                               ],
-                            ),
-                          ),
-                          Switch(
-                            value: isActive,
-                            onChanged: (value) async {
-                              if (value) {
-                                await context
-                                    .read<AuthProvider>()
-                                    .api
-                                    .updateStaff(staff['id'] as int, {
-                                      'is_active': true,
-                                    });
-                              } else {
-                                await context
-                                    .read<AuthProvider>()
-                                    .api
-                                    .deactivateStaff(staff['id'] as int);
-                              }
-                              await _refresh();
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      if ((staff['email']?.toString() ?? '').isNotEmpty)
-                        Text(
-                          staff['email'].toString(),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.78),
-                          ),
-                        ),
-                      if ((staff['phone']?.toString() ?? '').isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          staff['phone'].toString(),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(.78),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                AppRoutes.staffDetail,
-                                arguments: {'staff': staff},
-                              );
-                            },
-                            icon: const Icon(Icons.person_outline),
-                            label: const Text('Ver perfil'),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              final saved = await Navigator.of(context)
-                                  .pushNamed(
-                                    AppRoutes.staffForm,
-                                    arguments: {
-                                      'staff': staff,
-                                      'createMode': false,
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                        AppRoutes.staffDetail,
+                                        arguments: {'staff': staff},
+                                      );
                                     },
-                                  );
-                              if (saved == true) {
-                                await _refresh();
-                              }
-                            },
-                            icon: const Icon(Icons.edit_outlined),
-                            label: Text(loc.t('edit', fallback: 'Edit')),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              final saved = await Navigator.of(context)
-                                  .pushNamed(
-                                    AppRoutes.staffResourceAssignment,
-                                    arguments: {
-                                      'staff_id': staff['id'],
-                                      'staff': staff,
+                                    icon: const Icon(Icons.person_outline),
+                                    label: const Text('Ver perfil'),
+                                  ),
+                                  OutlinedButton.icon(
+                                    onPressed: () async {
+                                      final saved = await Navigator.of(context)
+                                          .pushNamed(
+                                            AppRoutes.staffForm,
+                                            arguments: {
+                                              'staff': staff,
+                                              'createMode': false,
+                                            },
+                                          );
+                                      if (saved == true) {
+                                        await _refresh(clearData: false);
+                                      }
                                     },
-                                  );
-                              if (saved == true) {
-                                await _refresh();
-                              }
-                            },
-                            icon: const Icon(Icons.link_outlined),
-                            label: Text(loc.t('assign', fallback: 'Assign')),
+                                    icon: const Icon(Icons.edit_outlined),
+                                    label: Text(
+                                      loc.t('edit', fallback: 'Edit'),
+                                    ),
+                                  ),
+                                  OutlinedButton.icon(
+                                    onPressed: () async {
+                                      final saved = await Navigator.of(context)
+                                          .pushNamed(
+                                            AppRoutes.staffResourceAssignment,
+                                            arguments: {
+                                              'staff_id': staff['id'],
+                                              'staff': staff,
+                                            },
+                                          );
+                                      if (saved == true) {
+                                        await _refresh(clearData: false);
+                                      }
+                                    },
+                                    icon: const Icon(Icons.link_outlined),
+                                    label: Text(
+                                      loc.t('assign', fallback: 'Assign'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-            ),
-          );
-        },
-      ),
+                  if (isLoading)
+                    const Positioned(
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      child: LinearProgressIndicator(minHeight: 2),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  String _staffErrorMessage(Object error) {
+    final text = error.toString();
+    if (text.contains('401')) {
+      return 'Tu sesión expiró. Vuelve a iniciar sesión.';
+    }
+    if (text.contains('403')) {
+      return 'No tienes permiso para ver este módulo.';
+    }
+    if (text.contains('404')) {
+      return 'No se encontró el negocio actual.';
+    }
+    if (text.contains('422')) {
+      return 'La respuesta del servidor no es válida.';
+    }
+    if (text.contains('500')) {
+      return 'El servidor falló al cargar el equipo.';
+    }
+    return 'No se pudo cargar el equipo.';
   }
 }

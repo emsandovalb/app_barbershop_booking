@@ -24,7 +24,8 @@ double servicePrice(Map<String, dynamic> service) {
 int serviceDurationMinutes(Map<String, dynamic> service) {
   final direct = _intValue(service['duration_minutes']);
   if (direct != null && direct > 0) return direct;
-  final hours = _intValue(service['duration_hours']) ?? _intValue(service['duration']);
+  final hours =
+      _intValue(service['duration_hours']) ?? _intValue(service['duration']);
   if (hours != null && hours > 0) return hours * 60;
   return 60;
 }
@@ -79,7 +80,8 @@ int serviceStaffCount(Map<String, dynamic> service) {
 
 Map<String, dynamic> serviceStaffEntry(Map<String, dynamic> staff) {
   final role = (staff['role'] as Map?) ?? const {};
-  return Map<String, dynamic>.from(staff)..['role'] = Map<String, dynamic>.from(role);
+  return Map<String, dynamic>.from(staff)
+    ..['role'] = Map<String, dynamic>.from(role);
 }
 
 String staffDisplayName(Map<String, dynamic> staff) {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import '../../widgets/loadable_collection_view.dart';
 import 'admin_page_scaffold.dart';
 
 class StaffResourceAssignmentPage extends StatefulWidget {
@@ -16,12 +17,15 @@ class StaffResourceAssignmentPage extends StatefulWidget {
   });
 
   @override
-  State<StaffResourceAssignmentPage> createState() => _StaffResourceAssignmentPageState();
+  State<StaffResourceAssignmentPage> createState() =>
+      _StaffResourceAssignmentPageState();
 }
 
-class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPage> {
+class _StaffResourceAssignmentPageState
+    extends State<StaffResourceAssignmentPage> {
   Future<Map<String, dynamic>>? _future;
-  Future<Map<String, dynamic>>? _resourcesFuture;
+  late final LoadableController<List<Map<String, dynamic>>>
+  _resourcesController;
 
   @override
   void initState() {
@@ -29,25 +33,43 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
     _future = widget.initialStaff != null
         ? Future.value(widget.initialStaff!)
         : _loadStaff();
-    _resourcesFuture = _loadResources();
+    _resourcesController = LoadableController<List<Map<String, dynamic>>>(
+      _loadResources,
+    );
+    _resourcesController.load();
+  }
+
+  @override
+  void dispose() {
+    _resourcesController.dispose();
+    super.dispose();
   }
 
   Future<Map<String, dynamic>> _loadStaff() {
     return context.read<AuthProvider>().api.getStaffById(widget.staffId);
   }
 
-  Future<Map<String, dynamic>> _loadResources() {
-    return context.read<AuthProvider>().api.getResources(perPage: 100);
+  Future<List<Map<String, dynamic>>> _loadResources() async {
+    final response = await context.read<AuthProvider>().api.getResources(
+      perPage: 100,
+    );
+    final data = response['data'];
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList(growable: false);
+    }
+    return const [];
   }
 
   Future<void> _refresh() async {
     final staff = await _loadStaff();
-    final resources = await _loadResources();
     if (!mounted) return;
     setState(() {
       _future = Future.value(staff);
-      _resourcesFuture = Future.value(resources);
     });
+    await _resourcesController.load();
   }
 
   Set<int> _assignedIds(Map<String, dynamic> staff) {
@@ -70,37 +92,55 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
         context,
         title: loc.t('staff_resources', fallback: 'Services'),
         actions: [
-          IconButton(
-            onPressed: _refresh,
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _future,
         builder: (context, staffSnap) {
-          if (staffSnap.connectionState != ConnectionState.done && !staffSnap.hasData && !staffSnap.hasError) {
+          if (staffSnap.connectionState != ConnectionState.done &&
+              !staffSnap.hasData &&
+              !staffSnap.hasError) {
             return const Center(child: CircularProgressIndicator());
           }
           if (staffSnap.hasError || staffSnap.data == null) {
             return Center(
-              child: Text(loc.t('staff_load_failed', fallback: 'Failed to load staff')),
+              child: Text(
+                loc.t('staff_load_failed', fallback: 'Failed to load staff'),
+              ),
             );
           }
           final staff = staffSnap.data!;
           final assignedIds = _assignedIds(staff);
-          return FutureBuilder<Map<String, dynamic>>(
-            future: _resourcesFuture,
-            builder: (context, resourceSnap) {
-              if (resourceSnap.connectionState != ConnectionState.done && !resourceSnap.hasData && !resourceSnap.hasError) {
+          return AnimatedBuilder(
+            animation: _resourcesController,
+            builder: (context, _) {
+              final resourceState = _resourcesController.state;
+              final resources = resourceState.data ?? const [];
+              if (resourceState.isLoading && !resourceState.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (resourceSnap.hasError || resourceSnap.data == null) {
+              if (resourceState.hasError && !resourceState.hasData) {
                 return Center(
-                  child: Text(loc.t('resource_load_failed', fallback: 'Failed to load resources')),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'No fue posible cargar los servicios.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .78),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: _refresh,
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
+                  ),
                 );
               }
-              final resources = (resourceSnap.data?['data'] as List?) ?? const [];
               if (resources.isEmpty) {
                 return RefreshIndicator(
                   onRefresh: _refresh,
@@ -110,7 +150,10 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
                       const SizedBox(height: 160),
                       Center(
                         child: Text(
-                          loc.t('staff_no_resources', fallback: 'No service assignments yet'),
+                          loc.t(
+                            'staff_no_resources',
+                            fallback: 'No service assignments yet',
+                          ),
                         ),
                       ),
                     ],
@@ -124,30 +167,45 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
                   itemCount: resources.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, index) {
-                    final resource = Map<String, dynamic>.from(resources[index] as Map);
+                    final resource = resources[index];
                     final resourceId = resource['id'] as int;
                     final assigned = assignedIds.contains(resourceId);
                     return Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF1C2430),
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: assigned ? Colors.greenAccent.withOpacity(.5) : Colors.white10),
+                        border: Border.all(
+                          color: assigned
+                              ? Colors.greenAccent.withOpacity(.5)
+                              : Colors.white10,
+                        ),
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         title: Text(
-                          resource['name']?.toString() ?? loc.t('staff_resource', fallback: 'Service'),
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                          resource['name']?.toString() ??
+                              loc.t('staff_resource', fallback: 'Service'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         subtitle: Text(
                           resource['address']?.toString() ?? '',
-                          style: TextStyle(color: Colors.white.withOpacity(.72)),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.72),
+                          ),
                         ),
                         leading: CircleAvatar(
                           backgroundColor: Colors.white.withOpacity(.12),
                           child: Icon(
                             assigned ? Icons.link : Icons.link_off,
-                            color: assigned ? Colors.greenAccent : Colors.white70,
+                            color: assigned
+                                ? Colors.greenAccent
+                                : Colors.white70,
                           ),
                         ),
                         trailing: Switch(
@@ -155,9 +213,15 @@ class _StaffResourceAssignmentPageState extends State<StaffResourceAssignmentPag
                           onChanged: (value) async {
                             final api = context.read<AuthProvider>().api;
                             if (value) {
-                              await api.assignStaffToResource(widget.staffId, resourceId);
+                              await api.assignStaffToResource(
+                                widget.staffId,
+                                resourceId,
+                              );
                             } else {
-                              await api.removeStaffFromResource(widget.staffId, resourceId);
+                              await api.removeStaffFromResource(
+                                widget.staffId,
+                                resourceId,
+                              );
                             }
                             await _refresh();
                           },

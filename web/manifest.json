@@ -1,11 +1,11 @@
 {
-    "name": "playground_booking",
-    "short_name": "playground_booking",
+    "name": "Barbería Tres Amigos",
+    "short_name": "Tres Amigos",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#090909",
+    "theme_color": "#090909",
+    "description": "Reservas de barbería para Barbería Tres Amigos.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

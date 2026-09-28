@@ -20,7 +20,9 @@ class _GroundCategoryPageState extends State<GroundCategoryPage> {
     final loc = context.watch<LocalizationService>();
     final form = context.read<GroundFormProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('grounds_category_title', fallback: 'Service type'))),
+      appBar: AppBar(
+        title: Text(loc.t('grounds_category_title', fallback: 'Service type')),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -29,10 +31,22 @@ class _GroundCategoryPageState extends State<GroundCategoryPage> {
               contentPadding: EdgeInsets.zero,
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset(cat.asset, width: 40, height: 40, fit: BoxFit.cover),
+                child: Image.asset(
+                  cat.asset,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
               ),
-              title: Text(cat.label, style: const TextStyle(color: Colors.white)),
-              trailing: Radio<String>(value: cat.label, groupValue: category, onChanged: (v) => setState(() => category = v!)),
+              title: Text(
+                cat.label,
+                style: const TextStyle(color: Colors.white),
+              ),
+              trailing: Radio<String>(
+                value: cat.label,
+                groupValue: category,
+                onChanged: (v) => setState(() => category = v!),
+              ),
               onTap: () => setState(() => category = cat.label),
             ),
         ],

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 import 'appointment_helpers.dart';
@@ -22,12 +22,14 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final booking = widget.booking;
     final resource = appointmentResource(booking);
     final barber = appointmentBarber(booking);
     final status = appointmentStatusBucket(booking);
     final date = appointmentDate(booking);
     final isUpcoming = date != null ? date.isAfter(DateTime.now()) : false;
+    final canRebook = canRebookAppointment(booking);
     final canOpenBarberProfile = barber['id'] != null;
 
     return Scaffold(
@@ -43,11 +45,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0C0908),
-              Color(0xFF13100F),
-              Color(0xFF090909),
-            ],
+            colors: [Color(0xFF0C0908), Color(0xFF13100F), Color(0xFF090909)],
           ),
         ),
         child: ListView(
@@ -56,7 +54,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+                border: Border.all(
+                  color: theme.primary.withValues(alpha: .18),
+                ),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x59000000),
@@ -101,7 +101,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _Badge(
-                            label: appointmentStatusLabel(status),
+                            label: appointmentStatusLabelForBooking(booking),
                             foreground: appointmentStatusForeground(status),
                             background: appointmentStatusBackground(status),
                           ),
@@ -128,9 +128,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                                 : null,
                             child: Row(
                               children: [
-                                const Icon(
+                                 Icon(
                                   Icons.content_cut_outlined,
-                                  color: AppColors.secondary,
+                                  color: theme.secondary,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 6),
@@ -173,7 +173,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                 _kv('Precio', appointmentPriceLabel(booking)),
                 _kv(
                   'Estado',
-                  appointmentStatusLabel(status),
+                  appointmentStatusLabelForBooking(booking),
                   valueHighlight: true,
                 ),
               ],
@@ -186,8 +186,13 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   'Duración',
                   _durationLabel(
                     booking['duration_hours'] ?? resource['duration_hours'],
-                    resource['duration_minutes'],
+                    booking['duration_minutes'] ?? resource['duration_minutes'],
                   ),
+                ),
+                _kv(
+                  'Pago',
+                  appointmentPaymentLabel(booking),
+                  valueHighlight: true,
                 ),
                 _kv(
                   'Local',
@@ -220,9 +225,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.close_outlined),
-                  label: Text(
-                    loading ? 'Cancelando...' : 'Cancelar cita',
-                  ),
+                  label: Text(loading ? 'Cancelando...' : 'Cancelar cita'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF231315),
                     foregroundColor: const Color(0xFFFF9D9D),
@@ -235,29 +238,28 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
               ),
               const SizedBox(width: 10),
             ],
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: loading ? null : _rebook,
-                icon: loading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.autorenew_outlined),
-                label: Text(
-                  loading ? 'Reprogramando...' : 'Reagendar',
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: const Color(0xFF090909),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+            if (canRebook)
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: loading ? null : _rebook,
+                  icon: loading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.autorenew_outlined),
+                  label: Text(loading ? 'Reprogramando...' : 'Reagendar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    foregroundColor: const Color(0xFF090909),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -276,7 +278,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
           content: Text(
             loc.t(
               'booking_cancel_limit',
-              fallback: 'No se puede cancelar dentro de las 4 horas previas al inicio.',
+              fallback:
+                  'No se puede cancelar dentro de las 4 horas previas al inicio.',
             ),
           ),
         ),
@@ -314,9 +317,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     try {
       await auth.api.cancelReservation(_bookingId());
       if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Cita cancelada')),
-      );
+      messenger.showSnackBar(const SnackBar(content: Text('Cita cancelada')));
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -336,19 +337,22 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final result = await navigator.push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => SelectDateTimePage(court: resource)),
+      MaterialPageRoute(
+        builder: (_) => SelectDateTimePage(
+          court: resource,
+          preferredStaff: appointmentBarber(booking),
+        ),
+      ),
     );
     if (result == null) return;
 
     setState(() => loading = true);
     try {
-      await auth.api.rebookReservation(
-        _bookingId(),
-        {
-          'date': result['iso'] as String,
-          'time_slot': result['slot'] as String,
-        },
-      );
+      await auth.api.rebookReservation(_bookingId(), {
+        'date': result['iso'] as String,
+        'time_slot': result['slot'] as String,
+        'staff_id': result['staff_id'],
+      });
       if (!mounted) return;
       navigator.pushReplacementNamed(
         AppRoutes.orderPlaced,
@@ -386,20 +390,14 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     return int.tryParse(raw?.toString() ?? '') ?? 0;
   }
 
-  Widget _kv(
-    String key,
-    String value, {
-    bool valueHighlight = false,
-  }) {
+  Widget _kv(String key, String value, {bool valueHighlight = false}) {
+    final theme = context.watch<BrandTheme>();
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              key,
-              style: const TextStyle(color: Colors.white70),
-            ),
+            child: Text(key, style: const TextStyle(color: Colors.white70)),
           ),
           const SizedBox(width: 12),
           Flexible(
@@ -407,7 +405,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: valueHighlight ? AppColors.primary : Colors.white,
+                color: valueHighlight ? theme.primary : Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -422,18 +420,16 @@ class _InfoCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _InfoCard({
-    required this.title,
-    required this.children,
-  });
+  const _InfoCard({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF151110),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .16)),
+        border: Border.all(color: theme.primary.withValues(alpha: .16)),
       ),
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -468,6 +464,7 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(

@@ -9,7 +9,11 @@ import '../navigation/nav_key.dart';
 class InactivityListener extends StatefulWidget {
   final Widget child;
   final Duration timeout;
-  const InactivityListener({super.key, required this.child, this.timeout = const Duration(minutes: 5)});
+  const InactivityListener({
+    super.key,
+    required this.child,
+    this.timeout = const Duration(minutes: 5),
+  });
 
   @override
   State<InactivityListener> createState() => _InactivityListenerState();
@@ -39,7 +43,10 @@ class _InactivityListenerState extends State<InactivityListener> {
     final auth = appNavigatorKey.currentContext?.read<AuthProvider>();
     if (auth == null || !auth.isLoggedIn) return;
     await auth.logout();
-    appNavigatorKey.currentState?.pushNamedAndRemoveUntil(AppRoutes.login, (r) => false);
+    appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppRoutes.login,
+      (r) => false,
+    );
   }
 
   @override
@@ -58,4 +65,3 @@ class _InactivityListenerState extends State<InactivityListener> {
     );
   }
 }
-

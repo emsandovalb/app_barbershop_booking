@@ -26,6 +26,13 @@ int _intValue(dynamic value, int fallback) {
   return int.tryParse(value?.toString() ?? '') ?? fallback;
 }
 
+int? _nullableInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
 double _doubleValue(dynamic value, double fallback) {
   if (value is double) return value;
   if (value is num) return value.toDouble();
@@ -207,6 +214,10 @@ class BrandColors {
   final Color border;
   final Color textPrimary;
   final Color textSecondary;
+  final Color inputBackground;
+  final Color placeholder;
+  final Color disabledText;
+  final Color disabledBackground;
 
   const BrandColors({
     required this.primaryGold,
@@ -218,6 +229,10 @@ class BrandColors {
     required this.border,
     required this.textPrimary,
     required this.textSecondary,
+    required this.inputBackground,
+    required this.placeholder,
+    required this.disabledText,
+    required this.disabledBackground,
   });
 
   factory BrandColors.fromJson(
@@ -236,16 +251,23 @@ class BrandColors {
           border: Colors.transparent,
           textPrimary: Colors.white,
           textSecondary: Colors.white,
+          inputBackground: Colors.black,
+          placeholder: Colors.white,
+          disabledText: Colors.white,
+          disabledBackground: Colors.black,
         );
     final data = json ?? const <String, dynamic>{};
     return BrandColors(
-      primaryGold: _colorValue(data['primary_gold'], base.primaryGold),
+      primaryGold: _colorValue(
+        data['primary'] ?? data['primary_gold'],
+        base.primaryGold,
+      ),
       primaryGoldLight: _colorValue(
-        data['primary_gold_light'],
+        data['primary_light'] ?? data['primary_gold_light'],
         base.primaryGoldLight,
       ),
       primaryGoldDark: _colorValue(
-        data['primary_gold_dark'],
+        data['primary_dark'] ?? data['primary_gold_dark'],
         base.primaryGoldDark,
       ),
       background: _colorValue(data['background'], base.background),
@@ -254,6 +276,16 @@ class BrandColors {
       border: _colorValue(data['border'], base.border),
       textPrimary: _colorValue(data['text_primary'], base.textPrimary),
       textSecondary: _colorValue(data['text_secondary'], base.textSecondary),
+      inputBackground: _colorValue(
+        data['input_background'],
+        base.inputBackground,
+      ),
+      placeholder: _colorValue(data['placeholder'], base.placeholder),
+      disabledText: _colorValue(data['disabled_text'], base.disabledText),
+      disabledBackground: _colorValue(
+        data['disabled_background'],
+        base.disabledBackground,
+      ),
     );
   }
 }
@@ -506,6 +538,10 @@ class FeatureConfig {
 /// business hours, policies, terminology, and feature toggles that should vary
 /// per tenant or brand.
 class WhiteLabelConfig {
+  final int? businessId;
+  final String? slug;
+  final String? apiBaseUrl;
+  final String? logoUrl;
   final BusinessIdentity identity;
   final BrandAssets assets;
   final BrandColors colors;
@@ -516,6 +552,10 @@ class WhiteLabelConfig {
   final FeatureConfig features;
 
   const WhiteLabelConfig({
+    this.businessId,
+    this.slug,
+    this.apiBaseUrl,
+    this.logoUrl,
     required this.identity,
     required this.assets,
     required this.colors,
@@ -527,8 +567,15 @@ class WhiteLabelConfig {
   });
 
   factory WhiteLabelConfig.fromJson(Map<String, dynamic> json) {
-    final fallback = WhiteLabelConfig.tresAmigos;
+    final fallback = WhiteLabelConfig.presetForBusinessType(
+      json['business_type']?.toString(),
+      slug: json['slug']?.toString(),
+    );
     return WhiteLabelConfig(
+      businessId: _nullableInt(json['business_id']),
+      slug: _nullableString(json['slug']),
+      apiBaseUrl: _nullableString(json['api_base_url']),
+      logoUrl: _nullableString(json['logo_url']),
       identity: BusinessIdentity.fromJson(
         _asMap(json['identity']),
         fallback: fallback.identity,
@@ -564,10 +611,43 @@ class WhiteLabelConfig {
     );
   }
 
+  static WhiteLabelConfig presetForBusinessType(
+    String? businessType, {
+    String? slug,
+  }) {
+    final normalizedSlug = slug?.trim().toLowerCase();
+    if (normalizedSlug == 'barberia-tres-amigos') {
+      return tresAmigos;
+    }
+    if (normalizedSlug == 'jc-studio') {
+      return jcStudio;
+    }
+
+    switch (_normalizedBusinessType(businessType)) {
+      case 'barbershop':
+        return barbershop;
+      case 'salon':
+        return salon;
+      case 'spa':
+        return spa;
+      case 'clinic':
+        return clinic;
+      default:
+        return generic;
+    }
+  }
+
+  static String _normalizedBusinessType(String? businessType) {
+    final value = businessType?.trim().toLowerCase();
+    if (value == null || value.isEmpty) return 'generic';
+    return value;
+  }
+
   String get appName => identity.appName;
   String get legalName => identity.legalName ?? identity.displayName;
   String get displayName => identity.displayName;
   String get shortName => identity.shortName;
+  String get contactPhone => contact.phone;
   String get tagline => identity.tagline;
   String get subtitle => identity.subtitle;
   String get locationShort => identity.locationShort;
@@ -577,6 +657,11 @@ class WhiteLabelConfig {
   String get logoTransparent => assets.logoTransparent;
   String get heroBackground => assets.heroBackground;
   String get appIcon => assets.appIcon;
+  String get resolvedLogoUrl => logoUrl?.isNotEmpty == true
+      ? logoUrl!
+      : (assets.logoTransparent.isNotEmpty
+            ? assets.logoTransparent
+            : assets.appIcon);
   String get servicePlaceholder => assets.servicePlaceholder;
   String get premiumServicePlaceholder => assets.premiumServicePlaceholder;
   String get staffPlaceholder => assets.staffPlaceholder;
@@ -586,6 +671,10 @@ class WhiteLabelConfig {
   Color get primaryGoldDark => colors.primaryGoldDark;
   Color get backgroundColor => colors.background;
   Color get surfaceColor => colors.surface;
+  Color get inputBackgroundColor => colors.inputBackground;
+  Color get placeholderColor => colors.placeholder;
+  Color get disabledTextColor => colors.disabledText;
+  Color get disabledBackgroundColor => colors.disabledBackground;
   String get phone => contact.phone;
   String get whatsapp => contact.whatsapp;
   String get email => contact.email;
@@ -610,7 +699,484 @@ class WhiteLabelConfig {
   String get galleryLabel => terminology.gallery;
   String get reviewsLabel => terminology.reviews;
 
+  static const generic = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'Booking Base',
+      displayName: 'BOOKING BASE',
+      shortName: 'Base',
+      tagline: 'Reservas y experiencias premium',
+      subtitle: 'Tu experiencia, tu marca',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFF4C8BF5),
+      primaryGoldLight: Color(0xFF93B8FF),
+      primaryGoldDark: Color(0xFF1E4FA8),
+      background: Color(0xFF0B1020),
+      surface: Color(0xFF151C31),
+      card: Color(0xFF10172A),
+      border: Color(0x22FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFB9C3DD),
+      inputBackground: Color(0xFF151C31),
+      placeholder: Color(0xFFB9C3DD),
+      disabledText: Color(0xFF7D8CB3),
+      disabledBackground: Color(0xFF10172A),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'servicio',
+      services: 'servicios',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'personal',
+      staffPlural: 'personal',
+      staffDisplayName: 'personal',
+      manager: 'administrador',
+      businessProfile: 'perfil del negocio',
+      gallery: 'galerÃ­a',
+      reviews: 'reseÃ±as',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const barbershop = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'BarberÃ­a',
+      displayName: 'BARBERÃA',
+      shortName: 'BarberÃ­a',
+      tagline: 'Cortes, barba y cuidado personal',
+      subtitle: 'Tu estilo, tu experiencia',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFFD4A84F),
+      primaryGoldLight: Color(0xFFE8C36A),
+      primaryGoldDark: Color(0xFF9B6F24),
+      background: Color(0xFF090909),
+      surface: Color(0xFF1A1512),
+      card: Color(0xFF120E0B),
+      border: Color(0x22FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFB9AFA5),
+      inputBackground: Color(0xFF1A1512),
+      placeholder: Color(0xFFB9AFA5),
+      disabledText: Color(0xFF7C736C),
+      disabledBackground: Color(0xFF120E0B),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atenciÃ³n',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'servicio',
+      services: 'servicios',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'barbero',
+      staffPlural: 'barberos',
+      staffDisplayName: 'barbero',
+      manager: 'administrador',
+      businessProfile: 'perfil de la barberÃ­a',
+      gallery: 'galerÃ­a',
+      reviews: 'reseÃ±as',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const salon = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'SalÃ³n',
+      displayName: 'SALÃN',
+      shortName: 'SalÃ³n',
+      tagline: 'Belleza y cuidado personal',
+      subtitle: 'Tu momento, tu estilo',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFFE6B7A9),
+      primaryGoldLight: Color(0xFFF3D4CC),
+      primaryGoldDark: Color(0xFFA66A5E),
+      background: Color(0xFF120F14),
+      surface: Color(0xFF201A21),
+      card: Color(0xFF171218),
+      border: Color(0x26FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFE1CFC9),
+      inputBackground: Color(0xFF201A21),
+      placeholder: Color(0xFFE1CFC9),
+      disabledText: Color(0xFFAA9A96),
+      disabledBackground: Color(0xFF171218),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atenciÃ³n',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'tratamiento',
+      services: 'tratamientos',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'estilista',
+      staffPlural: 'estilistas',
+      staffDisplayName: 'estilista',
+      manager: 'administradora',
+      businessProfile: 'perfil del salÃ³n',
+      gallery: 'galerÃ­a',
+      reviews: 'reseÃ±as',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const jcStudio = WhiteLabelConfig(
+    slug: 'jc-studio',
+    identity: BusinessIdentity(
+      appName: 'JC Studio',
+      displayName: 'JC STUDIO',
+      shortName: 'JC',
+      tagline: 'Belleza, estilo y cuidado personal',
+      subtitle: 'Tu momento, tu estilo',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFFC98F86),
+      primaryGoldLight: Color(0xFFE7C9C3),
+      primaryGoldDark: Color(0xFF8D5A52),
+      background: Color(0xFFFBF7F3),
+      surface: Color(0xFFF4EDE8),
+      card: Color(0xFFFFFFFF),
+      border: Color(0x22A86E63),
+      textPrimary: Color(0xFF1F1614),
+      textSecondary: Color(0xFF6D5751),
+      inputBackground: Color(0xFFF4EDE8),
+      placeholder: Color(0xFF8D7A74),
+      disabledText: Color(0xFFAA9F9A),
+      disabledBackground: Color(0xFFF4EDE8),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atención',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las políticas de cancelación dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'servicio',
+      services: 'servicios',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'estilista',
+      staffPlural: 'estilistas',
+      staffDisplayName: 'estilista',
+      manager: 'administradora',
+      businessProfile: 'perfil del salón',
+      gallery: 'galería',
+      reviews: 'opiniones',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const spa = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'Spa',
+      displayName: 'SPA',
+      shortName: 'Spa',
+      tagline: 'Bienestar, pausa y renovaciÃ³n',
+      subtitle: 'Tu espacio de descanso',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFF79C7B8),
+      primaryGoldLight: Color(0xFFA8DDD4),
+      primaryGoldDark: Color(0xFF2D7A70),
+      background: Color(0xFF071719),
+      surface: Color(0xFF102528),
+      card: Color(0xFF0D1F22),
+      border: Color(0x22FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFC1DED9),
+      inputBackground: Color(0xFF102528),
+      placeholder: Color(0xFFC1DED9),
+      disabledText: Color(0xFF8EB4AE),
+      disabledBackground: Color(0xFF0D1F22),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atenciÃ³n',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'tratamiento',
+      services: 'tratamientos',
+      appointment: 'sesiÃ³n',
+      appointments: 'sesiones',
+      staff: 'terapeuta',
+      staffPlural: 'terapeutas',
+      staffDisplayName: 'terapeuta',
+      manager: 'administrador',
+      businessProfile: 'perfil del spa',
+      gallery: 'galerÃ­a',
+      reviews: 'reseÃ±as',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
+  static const clinic = WhiteLabelConfig(
+    identity: BusinessIdentity(
+      appName: 'ClÃ­nica',
+      displayName: 'CLÃNICA',
+      shortName: 'ClÃ­nica',
+      tagline: 'AtenciÃ³n profesional y confiable',
+      subtitle: 'Cuidado con respaldo',
+      locationShort: '',
+      locationFull: '',
+      rating: 4.8,
+      reviewCount: 0,
+    ),
+    assets: BrandAssets(
+      logoTransparent: '',
+      appIcon: '',
+      heroBackground: '',
+      servicePlaceholder: '',
+      premiumServicePlaceholder: '',
+      staffPlaceholder: '',
+      profilePlaceholder: '',
+    ),
+    colors: BrandColors(
+      primaryGold: Color(0xFF6BA9FF),
+      primaryGoldLight: Color(0xFF9FC5FF),
+      primaryGoldDark: Color(0xFF2C68B8),
+      background: Color(0xFF081425),
+      surface: Color(0xFF111C31),
+      card: Color(0xFF0F1829),
+      border: Color(0x22FFFFFF),
+      textPrimary: Colors.white,
+      textSecondary: Color(0xFFC0D1E8),
+      inputBackground: Color(0xFF111C31),
+      placeholder: Color(0xFFC0D1E8),
+      disabledText: Color(0xFF8DA1BE),
+      disabledBackground: Color(0xFF0F1829),
+    ),
+    contact: BusinessContact(
+      phone: '',
+      whatsapp: '',
+      email: '',
+      instagram: '',
+      facebook: '',
+      website: '',
+      address: '',
+    ),
+    hours: BusinessHours(
+      label: 'Horario de atenciÃ³n',
+      weeklySummary: 'Horario configurable por tenant',
+      detailedHours: ['Horario configurable por tenant'],
+    ),
+    policies: BusinessPolicies(
+      cancellationPolicyText:
+          'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+      cancellationWindowHours: 0,
+    ),
+    terminology: Terminology(
+      service: 'consulta',
+      services: 'consultas',
+      appointment: 'cita',
+      appointments: 'citas',
+      staff: 'profesional',
+      staffPlural: 'profesionales',
+      staffDisplayName: 'profesional',
+      manager: 'coordinador',
+      businessProfile: 'perfil de la clÃ­nica',
+      gallery: 'galerÃ­a',
+      reviews: 'reseÃ±as',
+    ),
+    features: FeatureConfig(
+      showStaff: true,
+      reservationStaffSelection: true,
+      adminStaffManagement: true,
+      showGallery: true,
+      showReviews: true,
+      showBusinessProfile: true,
+      showAdminDashboard: true,
+    ),
+  );
+
   static const tresAmigos = WhiteLabelConfig(
+    slug: 'barberia-tres-amigos',
+    logoUrl: 'assets/branding/logo_transparent.png',
     identity: BusinessIdentity(
       appName: 'Barbería Tres Amigos',
       legalName: 'Barbería Tres Amigos S.A.',
@@ -626,7 +1192,7 @@ class WhiteLabelConfig {
     assets: BrandAssets(
       logoTransparent: 'assets/branding/logo_transparent.png',
       appIcon: 'assets/branding/app_icon.png',
-      heroBackground: 'assets/branding/barbershop_hero_bg.png',
+      heroBackground: 'assets/branding/barbershop_hero_bg.jpg',
       servicePlaceholder: 'assets/branding/service_placeholder.png',
       premiumServicePlaceholder:
           'assets/branding/service_placeholder_premium.png',
@@ -643,6 +1209,10 @@ class WhiteLabelConfig {
       border: Color(0x22FFFFFF),
       textPrimary: Colors.white,
       textSecondary: Color(0xFFB9AFA5),
+      inputBackground: Color(0xFF1A1512),
+      placeholder: Color(0xFFB9AFA5),
+      disabledText: Color(0xFF7C736C),
+      disabledBackground: Color(0xFF120E0B),
     ),
     contact: BusinessContact(
       phone: '+506 8888-3366',
@@ -708,7 +1278,7 @@ class WhiteLabelConfig {
     assets: BrandAssets(
       logoTransparent: 'assets/branding/logo_transparent.png',
       appIcon: 'assets/branding/app_icon.png',
-      heroBackground: 'assets/branding/barbershop_hero_bg.png',
+      heroBackground: 'assets/branding/barbershop_hero_bg.jpg',
       servicePlaceholder: 'assets/branding/service_placeholder.png',
       premiumServicePlaceholder:
           'assets/branding/service_placeholder_premium.png',
@@ -725,6 +1295,10 @@ class WhiteLabelConfig {
       border: Color(0x22FFFFFF),
       textPrimary: Colors.white,
       textSecondary: Color(0xFFB9AFA5),
+      inputBackground: Color(0xFF1A1512),
+      placeholder: Color(0xFFB9AFA5),
+      disabledText: Color(0xFF7C736C),
+      disabledBackground: Color(0xFF120E0B),
     ),
     contact: BusinessContact(
       phone: '+506 7000-0000',

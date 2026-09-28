@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
@@ -10,18 +11,28 @@ import 'providers/auth_provider.dart';
 import 'services/api.dart';
 import 'providers/ground_form_provider.dart';
 import 'services/localization_service.dart';
+import 'services/salon_fallbacks.dart';
 import 'services/white_label_config_service.dart';
+import 'theme/brand_theme.dart';
 import 'widgets/inactivity_listener.dart';
 import 'navigation/nav_key.dart';
 
 String resolveApiBaseUrl() {
-  const defaultBase = String.fromEnvironment('API_BASE');
+  const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  const legacyBase = String.fromEnvironment('API_BASE');
+  if (apiBaseUrl.trim().isNotEmpty) {
+    return apiBaseUrl.trim().replaceAll(RegExp(r'\/+$'), '');
+  }
+  if (legacyBase.trim().isNotEmpty) {
+    return legacyBase.trim().replaceAll(RegExp(r'\/+$'), '');
+  }
+  if (kIsWeb) {
+    return '${Uri.base.origin}/api/v1';
+  }
   final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-  return defaultBase.isNotEmpty
-      ? defaultBase
-      : (isAndroid
-            ? 'http://10.0.2.2:8000/api/v1'
-            : 'http://127.0.0.1:8000/api/v1');
+  return isAndroid
+      ? 'http://10.0.2.2:8000/api/v1'
+      : 'http://127.0.0.1:8000/api/v1';
 }
 
 class BarbershopBookingApp extends StatelessWidget {
@@ -38,158 +49,11 @@ class BarbershopBookingApp extends StatelessWidget {
     this.businessSlug,
   });
 
-  ThemeData _buildTheme(WhiteLabelConfig whiteLabel) {
-    final colors = whiteLabel.colors;
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: colors.background,
-      primaryColor: colors.primaryGold,
-      colorScheme: ColorScheme.dark(
-        primary: colors.primaryGold,
-        secondary: colors.primaryGoldLight,
-        surface: colors.surface,
-        onPrimary: Colors.white,
-        onSecondary: colors.background,
-        onSurface: Colors.white,
-      ),
-      cardTheme: CardThemeData(
-        color: colors.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: colors.border),
-        ),
-        margin: EdgeInsets.zero,
-      ),
-      dividerTheme: DividerThemeData(
-        color: Colors.white.withOpacity(.08),
-        thickness: 1,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.white,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: const Color(0xFF14100E),
-        hintStyle: TextStyle(color: Colors.white.withOpacity(.6)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Colors.white.withOpacity(.06)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: colors.primaryGold),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colors.primaryGold,
-          foregroundColor: Colors.black,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          minimumSize: const Size.fromHeight(52),
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.w800,
-            letterSpacing: .4,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(color: colors.primaryGoldLight.withOpacity(.36)),
-          backgroundColor: const Color(0xFF15110E),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          minimumSize: const Size.fromHeight(48),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: colors.primaryGoldLight),
-      ),
-      datePickerTheme: DatePickerThemeData(
-        backgroundColor: colors.background,
-        headerBackgroundColor: colors.background,
-        headerForegroundColor: Colors.white,
-        headerHeadlineStyle: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-        dayForegroundColor: const WidgetStatePropertyAll(Colors.white),
-        dayBackgroundColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primaryGold
-              : Colors.transparent,
-        ),
-        todayForegroundColor: const WidgetStatePropertyAll(Colors.white),
-        todayBackgroundColor: WidgetStatePropertyAll(
-          colors.primaryGold.withOpacity(.25),
-        ),
-      ),
-      chipTheme: const ChipThemeData(
-        backgroundColor: Color(0xFF231C18),
-        labelStyle: TextStyle(color: Colors.white),
-        selectedColor: Color(0xFFD4A84F),
-        shape: StadiumBorder(),
-      ),
-      listTileTheme: ListTileThemeData(
-        iconColor: Colors.white,
-        textColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: colors.background,
-        selectedItemColor: colors.primaryGold,
-        unselectedItemColor: Colors.white.withOpacity(.55),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: colors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
-        contentTextStyle: TextStyle(color: Colors.white.withOpacity(.78)),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF171311),
-        contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        behavior: SnackBarBehavior.floating,
-      ),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final base = resolveApiBaseUrl();
     final translationsBase = _translationsBase(base);
-    // Simple debug log to verify runtime base URL
-    // ignore: avoid_print
-    print('API base: $base');
+    final fallbackBrandTheme = _brandThemeForConfig(whiteLabelConfig);
 
     return MultiProvider(
       providers: [
@@ -201,25 +65,32 @@ class BarbershopBookingApp extends StatelessWidget {
           ProxyProvider<WhiteLabelConfigService, WhiteLabelConfig>(
             update: (_, service, __) => service.config,
           ),
+          ProxyProvider<WhiteLabelConfigService, BrandTheme>(
+            update: (_, service, __) => service.brandTheme,
+          ),
         ] else ...[
           Provider<WhiteLabelConfig>.value(value: whiteLabelConfig),
+          Provider<BrandTheme>.value(value: fallbackBrandTheme),
         ],
         ChangeNotifierProvider(
           create: (_) => AuthProvider(
-          ApiClient(
-            baseUrl: base,
-            resourceEndpointValue: config.resourceEndpoint,
-            reservationEndpointValue: config.reservationEndpoint,
-            myResourcesEndpointValue: config.myResourcesEndpoint,
-            businessSlug: businessSlug,
+            ApiClient(
+              baseUrl: base,
+              resourceEndpointValue: config.resourceEndpoint,
+              reservationEndpointValue: config.reservationEndpoint,
+              myResourcesEndpointValue: config.myResourcesEndpoint,
+              businessSlug: businessSlug,
+            ),
           ),
-        ),
         ),
         ChangeNotifierProvider(create: (_) => GroundFormProvider()),
         ChangeNotifierProvider(
           create: (_) {
             final service = LocalizationService(
               translationsBaseUrl: translationsBase,
+              fallbackOverrides: whiteLabelConfig.slug == 'jc-studio'
+                  ? salonFallbacks
+                  : const {},
             );
             service.init(
               systemLocale: WidgetsBinding.instance.platformDispatcher.locale,
@@ -231,8 +102,10 @@ class BarbershopBookingApp extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final whiteLabel = context.watch<WhiteLabelConfig>();
-          final theme = _buildTheme(whiteLabel);
+          final brandTheme = context.watch<BrandTheme>();
+          final theme = brandTheme.buildThemeData();
           final localization = context.watch<LocalizationService>();
+          final overlayStyle = _overlayStyle(brandTheme);
           final app = InactivityListener(
             timeout: const Duration(minutes: 5),
             child: MaterialApp(
@@ -252,17 +125,27 @@ class BarbershopBookingApp extends StatelessWidget {
               ],
             ),
           );
+          final wrappedApp = AnnotatedRegion<SystemUiOverlayStyle>(
+            value: overlayStyle,
+            child: app,
+          );
+          if (kIsWeb) {
+            return wrappedApp;
+          }
           if (localization.isLoading) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: theme,
-              home: const Scaffold(
-                backgroundColor: Color(0xFF090909),
-                body: SizedBox.expand(),
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: overlayStyle,
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                theme: theme,
+                home: const Scaffold(
+                  backgroundColor: Color(0xFF0B1020),
+                  body: SizedBox.expand(),
+                ),
               ),
             );
           }
-          return app;
+          return wrappedApp;
         },
       ),
     );
@@ -277,5 +160,31 @@ class BarbershopBookingApp extends StatelessWidget {
     }
     final newUri = uri.replace(pathSegments: segments);
     return newUri.toString().replaceAll(RegExp(r'\/+$'), '');
+  }
+
+  BrandTheme _brandThemeForConfig(WhiteLabelConfig whiteLabel) {
+    if (whiteLabel.slug == 'barberia-tres-amigos') {
+      return BrandTheme.barbershop();
+    }
+    final shortName = whiteLabel.shortName.toLowerCase();
+    if (shortName.contains('sal') || shortName.contains('aurora')) {
+      return BrandTheme.salon();
+    }
+    return BrandTheme.generic();
+  }
+
+  SystemUiOverlayStyle _overlayStyle(BrandTheme theme) {
+    final brightness = theme.themeMode == ThemeMode.light
+        ? Brightness.dark
+        : Brightness.light;
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: brightness,
+      statusBarBrightness: theme.themeMode == ThemeMode.light
+          ? Brightness.light
+          : Brightness.dark,
+      systemNavigationBarColor: theme.background,
+      systemNavigationBarIconBrightness: brightness,
+    );
   }
 }

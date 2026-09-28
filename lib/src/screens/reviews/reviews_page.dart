@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/white_label_config.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 
 class ReviewsPage extends StatefulWidget {
@@ -17,9 +17,8 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final whiteLabel =
-        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
-        WhiteLabelConfig.tresAmigos;
+    final theme = context.watch<BrandTheme>();
+    final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final visibleReviews = _demoReviews
         .where((review) => review.matches(_filter))
         .toList(growable: false);
@@ -99,13 +98,14 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           whiteLabel.reviewsLabel.toUpperCase(),
           style: TextStyle(
-            color: AppColors.primary,
+            color: theme.primary,
             fontSize: 12,
             fontWeight: FontWeight.w800,
             letterSpacing: 2,
@@ -144,9 +144,10 @@ class _RatingSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 28,
-      borderColor: AppColors.primary.withValues(alpha: .16),
+      borderColor: theme.primary.withValues(alpha: .16),
       backgroundColor: const Color(0xFF130F0C),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,22 +162,22 @@ class _RatingSummaryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primary.withValues(alpha: .30),
-                      AppColors.primary.withValues(alpha: .10),
+                      theme.primary.withValues(alpha: .30),
+                      theme.primary.withValues(alpha: .10),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   border: Border.all(
-                    color: AppColors.primary.withValues(alpha: .22),
+                    color: theme.primary.withValues(alpha: .22),
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                     Icon(
                       Icons.star_rounded,
-                      color: AppColors.primary,
+                      color: theme.primary,
                       size: 24,
                     ),
                     const SizedBox(height: 2),
@@ -206,7 +207,7 @@ class _RatingSummaryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'La barbería mantiene una reputación consistente con una valoración alta y estable.',
+                      'El negocio mantiene una reputación consistente con una valoración alta y estable.',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: .72),
                         height: 1.35,
@@ -244,6 +245,7 @@ class _FeaturedReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
@@ -256,7 +258,7 @@ class _FeaturedReviewCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .34)),
+        border: Border.all(color: theme.primary.withValues(alpha: .34)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: .30),
@@ -273,7 +275,7 @@ class _FeaturedReviewCard extends StatelessWidget {
             child: Icon(
               Icons.format_quote_rounded,
               size: 88,
-              color: AppColors.primary.withValues(alpha: .12),
+              color: theme.primary.withValues(alpha: .12),
             ),
           ),
           Padding(
@@ -365,6 +367,7 @@ class _FilterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return SizedBox(
       height: 44,
       child: ListView.separated(
@@ -381,17 +384,17 @@ class _FilterRow extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : const Color(0xFF171311),
+                color: isSelected ? theme.primary : const Color(0xFF171311),
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primary
+                      ? theme.primary
                       : Colors.white.withValues(alpha: .06),
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: .20),
+                          color: theme.primary.withValues(alpha: .20),
                           blurRadius: 18,
                           offset: const Offset(0, 8),
                         ),
@@ -422,6 +425,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -454,6 +458,7 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       child: Column(
@@ -536,12 +541,13 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       child: Column(
         children: [
           Icon(
             Icons.rate_review_outlined,
-            color: AppColors.primary.withValues(alpha: .88),
+            color: theme.primary.withValues(alpha: .88),
             size: 36,
           ),
           const SizedBox(height: 10),
@@ -581,6 +587,7 @@ class _DistributionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final ratio = total == 0 ? 0.0 : count / total;
     return Row(
       children: [
@@ -609,8 +616,8 @@ class _DistributionRow extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.primary.withValues(alpha: .96),
-                        AppColors.tertiary.withValues(alpha: .88),
+                        theme.primary.withValues(alpha: .96),
+                        theme.accent.withValues(alpha: .88),
                       ],
                     ),
                   ),
@@ -645,6 +652,7 @@ class _StarStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
@@ -656,7 +664,7 @@ class _StarStrip extends StatelessWidget {
             : Icons.star_border_rounded;
         return Padding(
           padding: EdgeInsets.only(right: index == 4 ? 0 : 2),
-          child: Icon(icon, color: AppColors.primary, size: iconSize),
+          child: Icon(icon, color: theme.primary, size: iconSize),
         );
       }),
     );
@@ -671,6 +679,7 @@ class _AvatarBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final initials = review.initials;
     if (review.avatarUrl != null && review.avatarUrl!.isNotEmpty) {
       return ClipOval(
@@ -679,14 +688,14 @@ class _AvatarBadge extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _initialsAvatar(initials),
+          errorBuilder: (_, __, ___) => _initialsAvatar(initials, theme),
         ),
       );
     }
-    return _initialsAvatar(initials);
+    return _initialsAvatar(initials, theme);
   }
 
-  Widget _initialsAvatar(String initials) {
+  Widget _initialsAvatar(String initials, BrandTheme theme) {
     return Container(
       width: size,
       height: size,
@@ -694,13 +703,13 @@ class _AvatarBadge extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            AppColors.primary.withValues(alpha: .24),
-            AppColors.primary.withValues(alpha: .08),
+            theme.primary.withValues(alpha: .24),
+            theme.primary.withValues(alpha: .08),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .18)),
+        border: Border.all(color: theme.primary.withValues(alpha: .18)),
       ),
       child: Center(
         child: Text(
@@ -724,6 +733,7 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -734,7 +744,7 @@ class _MetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: AppColors.primary),
+          Icon(icon, size: 13, color: theme.primary),
           const SizedBox(width: 6),
           Text(
             label,
@@ -758,17 +768,18 @@ class _HighlightedMetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: .11),
+        color: theme.primary.withValues(alpha: .11),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withValues(alpha: .26)),
+        border: Border.all(color: theme.primary.withValues(alpha: .26)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: AppColors.primary),
+          Icon(icon, size: 13, color: theme.primary),
           const SizedBox(width: 6),
           Text(
             label,

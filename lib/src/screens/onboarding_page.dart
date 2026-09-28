@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/white_label_config.dart';
-import '../navigation/app_router.dart';
+import '../navigation/tenant_startup_route.dart';
 import '../widgets/barbershop_branding.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -17,12 +17,26 @@ class OnboardingPage extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Positioned.fill(
-            child: Image.asset(
-              whiteLabel.heroBackground,
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-              filterQuality: FilterQuality.high,
-            ),
+            child: whiteLabel.heroBackground.trim().isEmpty
+                ? Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF151C31),
+                          Color(0xFF10172A),
+                          Color(0xFF0B1020),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  )
+                : Image.asset(
+                    whiteLabel.heroBackground,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    filterQuality: FilterQuality.high,
+                  ),
           ),
           Positioned.fill(
             child: DecoratedBox(
@@ -86,26 +100,33 @@ class OnboardingPage extends StatelessWidget {
                         children: [
                           BarbershopLogoMark(
                             assetPath: whiteLabel.logoTransparent,
+                            fallbackLabel: whiteLabel.shortName,
                             size: 232,
                             glowSize: .75,
                             glowColor: whiteLabel.primaryGold,
                             showGlow: true,
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            whiteLabel.displayName.split(' ').first,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(
-                                0xFFF5E9C8,
-                              ).withValues(alpha: .92),
-                              letterSpacing: 3.0,
-                              height: 1.0,
+                          if (whiteLabel.displayName
+                                  .split(' ')
+                                  .first
+                                  .toUpperCase() !=
+                              whiteLabel.shortName.toUpperCase()) ...[
+                            Text(
+                              whiteLabel.displayName.split(' ').first,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(
+                                  0xFFF5E9C8,
+                                ).withValues(alpha: .92),
+                                letterSpacing: 3.0,
+                                height: 1.0,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
+                            const SizedBox(height: 2),
+                          ],
                           Text(
                             whiteLabel.shortName.toUpperCase(),
                             textAlign: TextAlign.center,
@@ -142,9 +163,10 @@ class OnboardingPage extends StatelessWidget {
                         SizedBox(
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: () => Navigator.of(
-                              context,
-                            ).pushReplacementNamed(AppRoutes.login),
+                            onPressed: () =>
+                                Navigator.of(context).pushReplacementNamed(
+                                  TenantStartupRoute.afterOnboarding(),
+                                ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: whiteLabel.primaryGold,
                               foregroundColor: Colors.black,
@@ -164,9 +186,10 @@ class OnboardingPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
                         TextButton(
-                          onPressed: () => Navigator.of(
-                            context,
-                          ).pushReplacementNamed(AppRoutes.home),
+                          onPressed: () =>
+                              Navigator.of(context).pushReplacementNamed(
+                                TenantStartupRoute.afterOnboarding(),
+                              ),
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFFF1E6D0),
                             textStyle: const TextStyle(

@@ -5,6 +5,7 @@ import '../../config/app_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/ground_form_provider.dart';
 import '../../services/localization_service.dart';
+import '../../widgets/keyboard_aware_list_view.dart';
 
 class AddGroundPage extends StatefulWidget {
   const AddGroundPage({super.key});
@@ -27,24 +28,48 @@ class _AddGroundPageState extends State<AddGroundPage> {
     final loc = context.watch<LocalizationService>();
     final config = context.watch<AppConfig>();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: const BackButton(),
         title: Text(loc.t('grounds_add_title', fallback: 'Add service')),
       ),
-      body: ListView(
+      body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(controller: nameCtrl, decoration: InputDecoration(hintText: loc.t('form_name', fallback: 'Name'))),
+          TextField(
+            controller: nameCtrl,
+            decoration: InputDecoration(
+              hintText: loc.t('form_name', fallback: 'Name'),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: emailCtrl, decoration: InputDecoration(hintText: loc.t('form_email', fallback: 'Email address'))),
+          TextField(
+            controller: emailCtrl,
+            decoration: InputDecoration(
+              hintText: loc.t('form_email', fallback: 'Email address'),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: phoneCtrl, decoration: InputDecoration(hintText: loc.t('form_phone', fallback: 'Phone'))),
+          TextField(
+            controller: phoneCtrl,
+            decoration: InputDecoration(
+              hintText: loc.t('form_phone', fallback: 'Phone'),
+            ),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: addressCtrl, decoration: InputDecoration(hintText: loc.t('form_address', fallback: 'Address'))),
+          TextField(
+            controller: addressCtrl,
+            decoration: InputDecoration(
+              hintText: loc.t('form_address', fallback: 'Address'),
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             loc.t('grounds_operating_hours', fallback: 'Shop hours'),
-            style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -54,7 +79,10 @@ class _AddGroundPageState extends State<AddGroundPage> {
                   label: loc.t('grounds_opens', fallback: 'Opens'),
                   value: _fmt(openTime),
                   onTap: () async {
-                    final picked = await showTimePicker(context: context, initialTime: openTime);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: openTime,
+                    );
                     if (picked != null) setState(() => openTime = picked);
                   },
                 ),
@@ -65,7 +93,10 @@ class _AddGroundPageState extends State<AddGroundPage> {
                   label: loc.t('grounds_closes', fallback: 'Closes'),
                   value: _fmt(closeTime),
                   onTap: () async {
-                    final picked = await showTimePicker(context: context, initialTime: closeTime);
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: closeTime,
+                    );
                     if (picked != null) setState(() => closeTime = picked);
                   },
                 ),
@@ -74,8 +105,14 @@ class _AddGroundPageState extends State<AddGroundPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            loc.t('grounds_duration_label', fallback: 'Duration per appointment'),
-            style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+            loc.t(
+              'grounds_duration_label',
+              fallback: 'Duration per appointment',
+            ),
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -99,9 +136,17 @@ class _AddGroundPageState extends State<AddGroundPage> {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () {
-            if (nameCtrl.text.trim().isEmpty || addressCtrl.text.trim().isEmpty) {
+            if (nameCtrl.text.trim().isEmpty ||
+                addressCtrl.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(loc.t('grounds_name_required', fallback: 'Name and Address are required'))),
+                SnackBar(
+                  content: Text(
+                    loc.t(
+                      'grounds_name_required',
+                      fallback: 'Name and Address are required',
+                    ),
+                  ),
+                ),
               );
               return;
             }
@@ -154,7 +199,11 @@ class _TimeTile extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _TimeTile({required this.label, required this.value, required this.onTap});
+  const _TimeTile({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -169,9 +218,18 @@ class _TimeTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
             const SizedBox(height: 6),
-            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       ),
@@ -183,7 +241,11 @@ class _DurationPill extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _DurationPill({required this.label, required this.selected, required this.onTap});
+  const _DurationPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +256,9 @@ class _DurationPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF282828),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? Colors.white : Colors.transparent),
+          border: Border.all(
+            color: selected ? Colors.white : Colors.transparent,
+          ),
         ),
         child: Text(label, style: const TextStyle(color: Colors.white)),
       ),

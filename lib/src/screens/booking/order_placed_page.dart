@@ -22,7 +22,9 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(title: Text(loc.t('order_placed_title', fallback: 'Cita confirmada'))),
+      appBar: AppBar(
+        title: Text(loc.t('order_placed_title', fallback: 'Cita confirmada')),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -34,7 +36,12 @@ class OrderPlacedPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              title.isNotEmpty ? title : loc.t('booking_success_title', fallback: 'Appointment confirmed'),
+              title.isNotEmpty
+                  ? title
+                  : loc.t(
+                      'booking_success_title',
+                      fallback: 'Appointment confirmed',
+                    ),
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
             const SizedBox(height: 8),
@@ -43,7 +50,10 @@ class OrderPlacedPage extends StatelessWidget {
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t('booking_success_subtitle', fallback: 'Tu cita quedó registrada correctamente.'),
+                    : loc.t(
+                        'booking_success_subtitle',
+                        fallback: 'Tu cita quedó registrada correctamente.',
+                      ),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),
@@ -55,7 +65,11 @@ class OrderPlacedPage extends StatelessWidget {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: () => _handleAction(context),
-          child: Text(buttonText.isNotEmpty ? buttonText : loc.t('btn_back_home', fallback: 'Volver al inicio')),
+          child: Text(
+            buttonText.isNotEmpty
+                ? buttonText
+                : loc.t('btn_back_home', fallback: 'Volver al inicio'),
+          ),
         ),
       ),
     );

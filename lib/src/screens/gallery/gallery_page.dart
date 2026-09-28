@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
 import '../../config/white_label_config.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 
 class GalleryPage extends StatefulWidget {
@@ -25,7 +25,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   static const _featuredWork = <_GalleryItem>[
     _GalleryItem(
-      asset: 'assets/branding/barbershop_hero_bg.png',
+      asset: '',
       title: 'Fade Signature',
       description: 'Líneas limpias, textura controlada y acabado premium.',
       category: 'cortes',
@@ -33,7 +33,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.18,
     ),
     _GalleryItem(
-      asset: 'assets/branding/service_placeholder_premium.png',
+      asset: '',
       title: 'Experiencia Premium',
       description:
           'Un servicio pensado para sentirse impecable de principio a fin.',
@@ -42,7 +42,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.05,
     ),
     _GalleryItem(
-      asset: 'assets/branding/barber_placeholder.png',
+      asset: '',
       title: 'Barba Clásica',
       description: 'Perfilado preciso, balance visual y detalles limpios.',
       category: 'barbas',
@@ -50,7 +50,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.1,
     ),
     _GalleryItem(
-      asset: 'assets/branding/profile_placeholder.png',
+      asset: '',
       title: 'Spa Facial',
       description: 'Una pausa premium para refrescar la piel y relajar el día.',
       category: 'spa',
@@ -61,7 +61,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   static const _galleryItems = <_GalleryItem>[
     _GalleryItem(
-      asset: 'assets/branding/barbershop_hero_bg.png',
+      asset: '',
       title: 'Fade Classic',
       description: 'Transición suave y textura natural.',
       category: 'cortes',
@@ -69,7 +69,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.12,
     ),
     _GalleryItem(
-      asset: 'assets/branding/barber_placeholder.png',
+      asset: '',
       title: 'Barba Clean',
       description: 'Perfilado detallado con acabado definido.',
       category: 'barbas',
@@ -77,7 +77,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.32,
     ),
     _GalleryItem(
-      asset: 'assets/branding/service_placeholder_premium.png',
+      asset: '',
       title: 'Premium Lounge',
       description: 'Ambiente oscuro, cómodo y de alto estándar.',
       category: 'instalaciones',
@@ -85,7 +85,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.02,
     ),
     _GalleryItem(
-      asset: 'assets/branding/profile_placeholder.png',
+      asset: '',
       title: 'Spa Facial',
       description: 'Cuidado facial con sensación de limpieza profunda.',
       category: 'spa',
@@ -93,7 +93,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.18,
     ),
     _GalleryItem(
-      asset: 'assets/branding/barbershop_hero_bg.png',
+      asset: '',
       title: 'Corte Premium',
       description: 'Volumen controlado y acabado elegante.',
       category: 'premium',
@@ -101,7 +101,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.28,
     ),
     _GalleryItem(
-      asset: 'assets/branding/barber_placeholder.png',
+      asset: '',
       title: 'Barba y Navaja',
       description: 'Líneas finas para un look más pulido.',
       category: 'barbas',
@@ -109,7 +109,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.05,
     ),
     _GalleryItem(
-      asset: 'assets/branding/service_placeholder_premium.png',
+      asset: '',
       title: 'Corte Fade',
       description: 'Una de nuestras firmas más pedidas.',
       category: 'cortes',
@@ -117,7 +117,7 @@ class _GalleryPageState extends State<GalleryPage> {
       heightFactor: 1.22,
     ),
     _GalleryItem(
-      asset: 'assets/branding/profile_placeholder.png',
+      asset: '',
       title: 'Espacio Premium',
       description: 'Iluminación cálida y una atmósfera de confianza.',
       category: 'instalaciones',
@@ -168,9 +168,8 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final whiteLabel =
-        Provider.of<WhiteLabelConfig?>(context, listen: false) ??
-        WhiteLabelConfig.tresAmigos;
+    final theme = context.watch<BrandTheme>();
+    final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final items = _filteredItems;
 
     return Scaffold(
@@ -361,6 +360,7 @@ class _GalleryTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         _IconBubble(icon: Icons.arrow_back_rounded, onTap: onBack),
@@ -379,7 +379,7 @@ class _GalleryTopBar extends StatelessWidget {
         TextButton(
           onPressed: onReserve,
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.secondary,
+            foregroundColor: theme.secondary,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
           child: const Text(
@@ -407,6 +407,7 @@ class _GalleryHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: SizedBox(
@@ -414,7 +415,22 @@ class _GalleryHero extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(whiteLabel.heroBackground, fit: BoxFit.cover),
+            if (whiteLabel.heroBackground.trim().isNotEmpty)
+              Image.asset(whiteLabel.heroBackground, fit: BoxFit.cover)
+            else
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF151C31),
+                      Color(0xFF10172A),
+                      Color(0xFF0B1020),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -433,7 +449,7 @@ class _GalleryHero extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.primary.withValues(alpha: .12),
+                      theme.primary.withValues(alpha: .12),
                       Colors.transparent,
                     ],
                     radius: .9,
@@ -480,7 +496,7 @@ class _GalleryHero extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Cada foto está pensada para transmitir confianza, detalle y el estándar visual de la barbería.',
+                    'Cada foto está pensada para transmitir confianza, detalle y el estándar visual del negocio.',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .68),
                       height: 1.45,
@@ -536,6 +552,7 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -545,17 +562,17 @@ class _CategoryChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : const Color(0xFF171311),
+            color: selected ? theme.primary : const Color(0xFF171311),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: selected
-                  ? AppColors.primary.withValues(alpha: .42)
+                  ? theme.primary.withValues(alpha: .42)
                   : Colors.white.withValues(alpha: .06),
             ),
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: .14),
+                      color: theme.primary.withValues(alpha: .14),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -584,6 +601,7 @@ class _MasonryGalleryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     if (items.isEmpty) {
       return BarbershopPremiumCard(
         padding: const EdgeInsets.all(18),
@@ -659,6 +677,7 @@ class _GalleryTileState extends State<_GalleryTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final item = widget.item;
     return AnimatedScale(
       scale: _pressed ? .98 : 1,
@@ -686,7 +705,22 @@ class _GalleryTileState extends State<_GalleryTile> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(item.asset, fit: BoxFit.cover),
+              if (item.asset.isNotEmpty)
+                Image.asset(item.asset, fit: BoxFit.cover)
+              else
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF151C31),
+                        Color(0xFF10172A),
+                        Color(0xFF0B1020),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -757,6 +791,7 @@ class _FeaturedCardState extends State<_FeaturedCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final item = widget.item;
     return AnimatedScale(
       scale: _pressed ? .985 : 1,
@@ -774,7 +809,22 @@ class _FeaturedCardState extends State<_FeaturedCard> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(item.asset, fit: BoxFit.cover),
+                if (item.asset.isNotEmpty)
+                  Image.asset(item.asset, fit: BoxFit.cover)
+                else
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF151C31),
+                          Color(0xFF10172A),
+                          Color(0xFF0B1020),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
                 DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -840,6 +890,7 @@ class _GalleryViewerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: SafeArea(
@@ -858,7 +909,22 @@ class _GalleryViewerPage extends StatelessWidget {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.asset(item.asset, fit: BoxFit.cover),
+                          if (item.asset.isNotEmpty)
+                            Image.asset(item.asset, fit: BoxFit.cover)
+                          else
+                            Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF151C31),
+                                    Color(0xFF10172A),
+                                    Color(0xFF0B1020),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                              ),
+                            ),
                           DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -940,6 +1006,7 @@ class _SocialActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -951,11 +1018,11 @@ class _SocialActionButton extends StatelessWidget {
             vertical: compact ? 12 : 14,
           ),
           decoration: BoxDecoration(
-            color: filled ? AppColors.primary : const Color(0xFF171311),
+            color: filled ? theme.primary : const Color(0xFF171311),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: filled
-                  ? AppColors.primary.withValues(alpha: .22)
+                  ? theme.primary.withValues(alpha: .22)
                   : Colors.white.withValues(alpha: .06),
             ),
           ),
@@ -965,7 +1032,7 @@ class _SocialActionButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: filled ? Colors.black : AppColors.secondary,
+                color: filled ? Colors.black : theme.secondary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -992,6 +1059,7 @@ class _IconBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: InkWell(

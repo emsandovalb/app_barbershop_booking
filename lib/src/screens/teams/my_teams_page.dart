@@ -37,8 +37,18 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
 
     if (!auth.isLoggedIn) {
       return Scaffold(
-        appBar: AppBar(leading: const BackButton(), title: Text(loc.t('teams_title', fallback: 'My teams'))),
-        body: Center(child: Text(loc.t('auth_login_required', fallback: 'Please log in to continue.'))),
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: Text(loc.t('teams_title', fallback: 'My teams')),
+        ),
+        body: Center(
+          child: Text(
+            loc.t(
+              'auth_login_required',
+              fallback: 'Please log in to continue.',
+            ),
+          ),
+        ),
       );
     }
 
@@ -56,7 +66,9 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final saved = await Navigator.of(context).pushNamed(AppRoutes.teamForm);
+          final saved = await Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.teamForm);
           if (saved == true && mounted) {
             await _refresh();
           }
@@ -73,7 +85,10 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    loc.t('teams_load_failed', fallback: 'Could not load teams. Please try again later.'),
+                    loc.t(
+                      'teams_load_failed',
+                      fallback: 'Could not load teams. Please try again later.',
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -100,28 +115,45 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.groups_outlined, color: Colors.white70, size: 40),
+                        const Icon(
+                          Icons.groups_outlined,
+                          color: Colors.white70,
+                          size: 40,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           loc.t('teams_empty', fallback: 'No teams yet'),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          loc.t('teams_empty_help', fallback: 'Create your first team to enroll it in tournaments.'),
+                          loc.t(
+                            'teams_empty_help',
+                            fallback:
+                                'Create your first team to enroll it in tournaments.',
+                          ),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: .72)),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: .72),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () async {
-                            final saved = await Navigator.of(context).pushNamed(AppRoutes.teamForm);
+                            final saved = await Navigator.of(
+                              context,
+                            ).pushNamed(AppRoutes.teamForm);
                             if (saved == true && mounted) {
                               await _refresh();
                             }
                           },
-                          child: Text(loc.t('teams_create', fallback: 'Create team')),
+                          child: Text(
+                            loc.t('teams_create', fallback: 'Create team'),
+                          ),
                         ),
                       ],
                     ),
@@ -143,10 +175,9 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
                 return _TeamCard(
                   team: team,
                   onTap: () async {
-                    final saved = await Navigator.of(context).pushNamed(
-                      AppRoutes.teamForm,
-                      arguments: {'team': team},
-                    );
+                    final saved = await Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.teamForm, arguments: {'team': team});
                     if (saved == true && mounted) {
                       await _refresh();
                     }
@@ -206,29 +237,52 @@ class _TeamCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    team['name']?.toString() ?? loc.t('teams_title', fallback: 'Team'),
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                    team['name']?.toString() ??
+                        loc.t('teams_title', fallback: 'Team'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     team['description']?.toString().isNotEmpty == true
                         ? team['description'].toString()
-                        : loc.t('teams_empty_help', fallback: 'Create your first team to enroll it in tournaments.'),
+                        : loc.t(
+                            'teams_empty_help',
+                            fallback:
+                                'Create your first team to enroll it in tournaments.',
+                          ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white.withValues(alpha: .72)),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .72),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _Chip(label: '${members ?? 0} ${loc.t('teams_members', fallback: 'Members')}'),
-                      _Chip(label: '${tournaments ?? 0} ${loc.t('teams_tournaments', fallback: 'Tournaments')}'),
+                      _Chip(
+                        label:
+                            '${members ?? 0} ${loc.t('teams_members', fallback: 'Members')}',
+                      ),
+                      _Chip(
+                        label:
+                            '${tournaments ?? 0} ${loc.t('teams_tournaments', fallback: 'Tournaments')}',
+                      ),
                       _Chip(
                         label: status == 'inactive'
-                            ? loc.t('tournaments_status_inactive', fallback: 'Inactive')
-                            : loc.t('tournaments_status_active', fallback: 'Active'),
+                            ? loc.t(
+                                'tournaments_status_inactive',
+                                fallback: 'Inactive',
+                              )
+                            : loc.t(
+                                'tournaments_status_active',
+                                fallback: 'Active',
+                              ),
                         danger: status == 'inactive',
                       ),
                       if ((team['city'] ?? '').toString().isNotEmpty)

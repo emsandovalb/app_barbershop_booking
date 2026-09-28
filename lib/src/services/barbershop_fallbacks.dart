@@ -1,4 +1,19 @@
 const Map<String, String> barbershopFallbacks = {
+  'booking_barber_required': 'Elegí un profesional para continuar.',
+  'booking_barber_picker_hint':
+      'Elegí el profesional que realizará tu servicio.',
+  'booking_payment_pending': 'Pago pendiente',
+  'booking_payment_pending_hint':
+      'El negocio registrará el pago cuando corresponda.',
+  'booking_status_pending': 'Pendiente',
+  'booking_status_confirmed': 'Confirmada',
+  'booking_status_completed': 'Completada',
+  'booking_status_cancelled': 'Cancelada',
+  'booking_status_rejected': 'Rechazada',
+  'bookings_title': 'Mis citas',
+  'bookings_tab_upcoming': 'Próximas',
+  'bookings_tab_completed': 'Completadas',
+  'bookings_tab_cancelled': 'Canceladas',
   'nav_booking': 'Citas',
   'nav_reservations': 'Citas',
   'nav_home': 'Inicio',
@@ -20,15 +35,15 @@ const Map<String, String> barbershopFallbacks = {
   'home_policy_text':
       'Podés cancelar o reprogramar hasta 4 horas antes de tu cita.',
   'home_location_title': 'Ubicación y contacto',
-  'home_location_text': 'Puntarenas, El Roble, Costa Rica',
+  'home_location_text': 'Ubicación configurable',
   'home_brand_badge': 'Premium Experience',
-  'home_hero_title': 'Barbería Tres Amigos',
-  'home_hero_subtitle': 'Cortes, barba y experiencias premium',
+  'home_hero_title': 'Centro de reservas',
+  'home_hero_subtitle': 'Reservas, atención y experiencias premium',
   'home_hours_card_title': 'Horario semanal',
   'home_hours_card_body':
       'Lun 10:00 AM - 7:00 PM · Mar 10:00 AM - 12:00 PM · 2:00 PM - 8:00 PM · Vie-Sáb 10:00 AM - 7:00 PM · Domingo cerrado',
-  'home_location_card_body': 'Puntarenas, El Roble, Costa Rica',
-  'home_contact_card_body': '+506 8888-3366 · hola@barberiatresamigos.com',
+  'home_location_card_body': 'Ubicación configurable',
+  'home_contact_card_body': 'Contacto configurable',
   'home_staff_title': 'Barberos destacados',
   'home_staff_card_title': 'Administrar barberos y asignaciones',
   'home_staff_card_body':
@@ -49,7 +64,6 @@ const Map<String, String> barbershopFallbacks = {
   'booking_barber_selected': 'Barbero seleccionado',
   'booking_barber_choose': 'Elegir barbero',
   'booking_barber_picker_title': 'Elegí tu barbero',
-  'booking_barber_picker_hint': 'Elegí un barbero o continuá sin asignar uno.',
   'booking_barber_picker_error': 'No se pudieron cargar los barberos',
   'booking_barber_none': 'Sin preferencia de barbero',
   'booking_barber_none_subtitle': 'Continuar sin asignar un barbero',

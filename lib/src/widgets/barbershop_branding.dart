@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../theme/colors.dart';
+import '../theme/brand_theme.dart';
 
 class BarbershopPremiumBackdrop extends StatelessWidget {
   final Widget child;
@@ -24,6 +25,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -77,7 +79,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               left: -80,
               child: _GlowBlob(
                 size: 280,
-                color: AppColors.primary.withOpacity(.18),
+                color: theme.primary.withOpacity(.18),
               ),
             ),
           if (topGlow)
@@ -104,7 +106,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               right: -100,
               child: _GlowBlob(
                 size: 240,
-                color: AppColors.primary.withOpacity(.12),
+                color: theme.primary.withOpacity(.12),
               ),
             ),
           Positioned.fill(
@@ -141,6 +143,7 @@ class BarbershopCinematicPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: Stack(
@@ -196,22 +199,26 @@ class BarbershopCinematicPanel extends StatelessWidget {
 
 class BarbershopLogoMark extends StatelessWidget {
   final String assetPath;
+  final String? fallbackLabel;
   final double size;
   final double glowSize;
-  final Color glowColor;
+  final Color? glowColor;
   final bool showGlow;
 
   const BarbershopLogoMark({
     super.key,
     required this.assetPath,
+    this.fallbackLabel,
     this.size = 160,
     this.glowSize = 1.0,
-    this.glowColor = AppColors.primary,
+    this.glowColor,
     this.showGlow = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final resolvedGlowColor = glowColor ?? theme.primary;
     final logo = Image.asset(
       assetPath,
       fit: BoxFit.contain,
@@ -239,7 +246,7 @@ class BarbershopLogoMark extends StatelessWidget {
                   opacity: .18,
                   child: ColorFiltered(
                     colorFilter: ColorFilter.mode(
-                      glowColor.withOpacity(.65),
+                      resolvedGlowColor.withOpacity(.65),
                       BlendMode.srcIn,
                     ),
                     child: SizedBox(
@@ -282,6 +289,7 @@ class BarbershopPremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: padding,
       decoration: BoxDecoration(
@@ -320,15 +328,16 @@ class PremiumBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 8 : 10,
         vertical: compact ? 3 : 5,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(.16),
+        color: theme.primary.withOpacity(.16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.primary.withOpacity(.30)),
+        border: Border.all(color: theme.primary.withOpacity(.30)),
       ),
       child: Text(
         label,
@@ -357,6 +366,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -378,7 +388,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 actionLabel!,
                 style: TextStyle(
-                  color: AppColors.secondary.withOpacity(.95),
+                  color: theme.secondary.withOpacity(.95),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -397,6 +407,7 @@ class _GlowBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return ImageFiltered(
       imageFilter: ImageFilter.blur(sigmaX: 48, sigmaY: 48),
       child: Container(

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import 'service_management_utils.dart';
@@ -11,10 +12,7 @@ import 'admin_page_scaffold.dart';
 class ServiceBarberAssignmentPage extends StatefulWidget {
   final Map<String, dynamic> service;
 
-  const ServiceBarberAssignmentPage({
-    super.key,
-    required this.service,
-  });
+  const ServiceBarberAssignmentPage({super.key, required this.service});
 
   @override
   State<ServiceBarberAssignmentPage> createState() =>
@@ -53,17 +51,15 @@ class _ServiceBarberAssignmentPageState
       }
     }
 
-    final barbers = staffRaw
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .where(staffIsBarber)
-        .toList(growable: false)
-      ..sort((a, b) => staffDisplayName(a).compareTo(staffDisplayName(b)));
+    final barbers =
+        staffRaw
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .where(staffIsBarber)
+            .toList(growable: false)
+          ..sort((a, b) => staffDisplayName(a).compareTo(staffDisplayName(b)));
 
-    return _AssignmentData(
-      barbers: barbers,
-      assignedIds: assignedIds,
-    );
+    return _AssignmentData(barbers: barbers, assignedIds: assignedIds);
   }
 
   Future<void> _refresh() async {
@@ -76,14 +72,16 @@ class _ServiceBarberAssignmentPageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     return Scaffold(
-      backgroundColor: AppColors.primaryBackground,
+      backgroundColor: theme.background,
       appBar: buildAdminAppBar(
         context,
-        title: 'Asignar barberos',
+        title: 'Asignar ${whiteLabel.staffPluralLabel}',
       ),
       body: BarbershopCinematicPanel(
-        backgroundAsset: 'assets/branding/barbershop_hero_bg.png',
+        backgroundAsset: '',
         opacity: .16,
         blurSigma: 14,
         child: SafeArea(
@@ -98,8 +96,10 @@ class _ServiceBarberAssignmentPageState
               if (snap.hasError || snap.data == null) {
                 return Center(
                   child: Text(
-                    'No se pudieron cargar los barberos',
-                    style: TextStyle(color: Colors.white.withValues(alpha: .78)),
+                    'No se pudieron cargar los ${whiteLabel.staffPluralLabel}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .78),
+                    ),
                   ),
                 );
               }
@@ -108,7 +108,7 @@ class _ServiceBarberAssignmentPageState
               final assignedIds = data.assignedIds;
 
               return RefreshIndicator(
-                color: AppColors.primary,
+                color: theme.primary,
                 onRefresh: _refresh,
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -116,9 +116,10 @@ class _ServiceBarberAssignmentPageState
                     BarbershopPremiumCard(
                       radius: 28,
                       padding: const EdgeInsets.all(16),
-                      backgroundColor:
-                          const Color(0xFF140F0C).withValues(alpha: .96),
-                      borderColor: AppColors.primary.withValues(alpha: .18),
+                      backgroundColor: const Color(
+                        0xFF140F0C,
+                      ).withValues(alpha: .96),
+                      borderColor: theme.primary.withValues(alpha: .18),
                       child: Row(
                         children: [
                           ClipRRect(
@@ -154,7 +155,7 @@ class _ServiceBarberAssignmentPageState
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  '${serviceStaffCount(widget.service)} barberos asignados · ${serviceDurationLabel(widget.service)}',
+                                  '${serviceStaffCount(widget.service)} ${whiteLabel.staffPluralLabel} asignados · ${serviceDurationLabel(widget.service)}',
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: .72),
                                     height: 1.25,
@@ -168,8 +169,9 @@ class _ServiceBarberAssignmentPageState
                     ),
                     const SizedBox(height: 16),
                     const _SectionTitle(
-                      title: 'Barberos asignados',
-                      subtitle: 'Activa o desactiva la relación de cada barbero con este servicio.',
+                      title: 'Asignaciones activas',
+                      subtitle:
+                          'Activa o desactiva la relación de cada estilista con este servicio.',
                     ),
                     const SizedBox(height: 12),
                     if (data.barbers.isEmpty)
@@ -182,10 +184,7 @@ class _ServiceBarberAssignmentPageState
                             barber: barber,
                             assigned: assignedIds.contains(barber['id']),
                             busy: _saving,
-                            onChanged: (value) => _toggleBarber(
-                              barber,
-                              value,
-                            ),
+                            onChanged: (value) => _toggleBarber(barber, value),
                           ),
                         ),
                       ),
@@ -199,10 +198,7 @@ class _ServiceBarberAssignmentPageState
     );
   }
 
-  Future<void> _toggleBarber(
-    Map<String, dynamic> barber,
-    bool assign,
-  ) async {
+  Future<void> _toggleBarber(Map<String, dynamic> barber, bool assign) async {
     final id = barber['id'] as int?;
     if (id == null) return;
     setState(() => _saving = true);
@@ -246,15 +242,19 @@ class _BarberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     final active = barber['is_active'] != false;
-    final avatar = barber['avatar_url']?.toString().trim() ?? barber['avatar']?.toString().trim() ?? '';
+    final avatar =
+        barber['avatar_url']?.toString().trim() ??
+        barber['avatar']?.toString().trim() ??
+        '';
 
     return BarbershopPremiumCard(
       radius: 24,
       padding: const EdgeInsets.all(14),
       backgroundColor: const Color(0xFF120E0B).withValues(alpha: .96),
       borderColor: assigned
-          ? AppColors.primary.withValues(alpha: .36)
+          ? theme.primary.withValues(alpha: .36)
           : Colors.white.withValues(alpha: .08),
       child: Row(
         children: [
@@ -263,7 +263,10 @@ class _BarberTile extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: .08),
             backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
             child: avatar.isEmpty
-                ? const Icon(Icons.content_cut_rounded, color: AppColors.primary)
+                ?  Icon(
+                    Icons.content_cut_rounded,
+                    color: theme.primary,
+                  )
                 : null,
           ),
           const SizedBox(width: 12),
@@ -294,11 +297,11 @@ class _BarberTile extends StatelessWidget {
                   children: [
                     _MiniBadge(
                       label: active ? 'Activo' : 'Inactivo',
-                      color: active ? AppColors.success : Colors.redAccent,
+                      color: active ? theme.success : Colors.redAccent,
                     ),
                     _MiniBadge(
                       label: assigned ? 'Asignado' : 'Sin asignar',
-                      color: assigned ? AppColors.primary : Colors.white70,
+                      color: assigned ? theme.primary : Colors.white70,
                     ),
                   ],
                 ),
@@ -309,7 +312,7 @@ class _BarberTile extends StatelessWidget {
           Switch(
             value: assigned,
             onChanged: busy ? null : onChanged,
-            activeThumbColor: AppColors.primary,
+            activeThumbColor: theme.primary,
           ),
         ],
       ),
@@ -321,13 +324,11 @@ class _MiniBadge extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _MiniBadge({
-    required this.label,
-    required this.color,
-  });
+  const _MiniBadge({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -351,13 +352,11 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const _SectionTitle({
-    required this.title,
-    required this.subtitle,
-  });
+  const _SectionTitle({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -387,6 +386,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       padding: const EdgeInsets.all(20),
@@ -394,7 +394,7 @@ class _EmptyState extends StatelessWidget {
       borderColor: Colors.white.withValues(alpha: .08),
       child: Center(
         child: Text(
-          'No se encontraron barberos para asignar.',
+          'No se encontraron estilistas para asignar.',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withValues(alpha: .76),
@@ -410,8 +410,5 @@ class _AssignmentData {
   final List<Map<String, dynamic>> barbers;
   final Set<int> assignedIds;
 
-  const _AssignmentData({
-    required this.barbers,
-    required this.assignedIds,
-  });
+  const _AssignmentData({required this.barbers, required this.assignedIds});
 }

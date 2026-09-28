@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/brand_theme.dart';
 import '../reviews/reviews_page.dart';
 import '../ground/ground_detail_page.dart';
 
@@ -32,7 +33,8 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
 
     try {
       final res = await context.read<AuthProvider>().api.getStaffById(id);
-      final fetched = _asMap(res['data']) ?? _asMap(res) ?? const <String, dynamic>{};
+      final fetched =
+          _asMap(res['data']) ?? _asMap(res) ?? const <String, dynamic>{};
       return _mergeStaff(initial, fetched);
     } catch (_) {
       return initial;
@@ -52,6 +54,8 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
@@ -78,18 +82,27 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final staff = Map<String, dynamic>.from(snapshot.data ?? widget.staff);
+            final staff = Map<String, dynamic>.from(
+              snapshot.data ?? widget.staff,
+            );
             final services = _parseServices(staff);
             final avatar = _avatarUrl(context, staff);
-            final name = _text(staff, ['name'], fallback: 'Barbero');
-            final title = _text(staff, ['title', 'role_name', 'specialty', 'headline'], fallback: _roleName(staff));
+            final name = _text(staff, [
+              'name',
+            ], fallback: whiteLabel.staffDisplayName);
+            final title = _text(staff, [
+              'title',
+              'role_name',
+              'specialty',
+              'headline',
+            ], fallback: _roleName(staff));
             final rating = _rating(staff);
             final isActive = _isActive(staff);
             final bio = _text(
               staff,
               ['bio', 'about', 'description'],
               fallback:
-                  'Especialista en acabados limpios, cortes precisos y una experiencia premium de barbería.',
+                  'Especialista en acabados limpios, atención precisa y una experiencia premium.',
             );
             final specialties = _specialties(staff, services);
             final schedule = _scheduleText(staff);
@@ -110,9 +123,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 _ReviewsPreviewCard(
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const ReviewsPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const ReviewsPage()),
                     );
                   },
                 ),
@@ -143,21 +154,27 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 _SectionCard(
                   title: 'Servicios disponibles',
                   subtitle: services.isEmpty
-                      ? 'Este barbero todavía no tiene servicios asignados.'
+                      ? 'Este perfil todavía no tiene servicios asignados.'
                       : '${services.length} servicios listos para reservar',
                   child: services.isEmpty
                       ? Text(
                           'En breve se mostrarán los servicios asignados.',
-                          style: TextStyle(color: Colors.white.withValues(alpha: .72)),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: .72),
+                          ),
                         )
                       : Column(
                           children: [
                             for (var i = 0; i < services.length; i++) ...[
                               _ServiceCard(
                                 service: services[i],
-                                onTap: () => _openServiceDetail(staff, services[i].resource),
+                                onTap: () => _openServiceDetail(
+                                  staff,
+                                  services[i].resource,
+                                ),
                               ),
-                              if (i != services.length - 1) const SizedBox(height: 10),
+                              if (i != services.length - 1)
+                                const SizedBox(height: 10),
                             ],
                           ],
                         ),
@@ -183,7 +200,8 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                       children: [
                         for (var i = 0; i < contacts.length; i++) ...[
                           _ContactRow(contact: contacts[i]),
-                          if (i != contacts.length - 1) const SizedBox(height: 10),
+                          if (i != contacts.length - 1)
+                            const SizedBox(height: 10),
                         ],
                       ],
                     ),
@@ -199,16 +217,18 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snapshot) {
-            final staff = Map<String, dynamic>.from(snapshot.data ?? widget.staff);
+            final staff = Map<String, dynamic>.from(
+              snapshot.data ?? widget.staff,
+            );
             final services = _parseServices(staff);
             return ElevatedButton.icon(
               onPressed: services.isNotEmpty
                   ? () => _openReservationFlow(staff, services)
                   : null,
               icon: const Icon(Icons.calendar_month_outlined),
-              label: const Text('Reservar con este barbero'),
+              label: const Text('Reservar con este perfil'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: theme.primary,
                 foregroundColor: const Color(0xFF090909),
                 disabledBackgroundColor: const Color(0xFF3A3127),
                 disabledForegroundColor: Colors.white38,
@@ -229,7 +249,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
     List<_AssignedService> services,
   ) async {
     if (services.isEmpty) {
-      _showMessage(context, 'No hay servicios asignados a este barbero.');
+      _showMessage(context, 'No hay servicios asignados a este perfil.');
       return;
     }
 
@@ -277,7 +297,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Reservá con este barbero desde el servicio que mejor te convenga.',
+                  'Reservá desde el servicio que mejor te convenga.',
                   style: TextStyle(color: Colors.white.withValues(alpha: .72)),
                 ),
                 const SizedBox(height: 12),
@@ -291,7 +311,8 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                       final service = services[index];
                       return _ServiceSheetCard(
                         service: service,
-                        onTap: () => Navigator.of(context).pop(service.resource),
+                        onTap: () =>
+                            Navigator.of(context).pop(service.resource),
                       );
                     },
                   ),
@@ -324,14 +345,18 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   List<_AssignedService> _parseServices(Map<String, dynamic> staff) {
     final items = (staff['services'] as List?) ?? const [];
     return items
         .whereType<Map>()
-        .map((item) => _AssignedService.fromEntry(Map<String, dynamic>.from(item)))
+        .map(
+          (item) => _AssignedService.fromEntry(Map<String, dynamic>.from(item)),
+        )
         .where((service) => service.name.isNotEmpty)
         .toList(growable: false);
   }
@@ -404,7 +429,9 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
 
   String _rating(Map<String, dynamic> staff) {
     final raw = staff['rating'] ?? staff['score'] ?? staff['average_rating'];
-    final parsed = raw is num ? raw.toDouble() : double.tryParse(raw?.toString() ?? '');
+    final parsed = raw is num
+        ? raw.toDouble()
+        : double.tryParse(raw?.toString() ?? '');
     final value = parsed ?? 4.8;
     return value.toStringAsFixed(1);
   }
@@ -495,6 +522,7 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -513,9 +541,18 @@ class _HeroCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: Image.asset(
-                'assets/branding/barbershop_hero_bg.png',
-                fit: BoxFit.cover,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF151C31),
+                      Color(0xFF10172A),
+                      Color(0xFF0B1020),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
               ),
             ),
             Positioned.fill(
@@ -562,8 +599,8 @@ class _HeroCard extends StatelessWidget {
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [
-                              AppColors.primary.withValues(alpha: .92),
-                              AppColors.secondary.withValues(alpha: .55),
+                              theme.primary.withValues(alpha: .92),
+                              theme.secondary.withValues(alpha: .55),
                               const Color(0xFF4B3418),
                             ],
                           ),
@@ -603,18 +640,21 @@ class _HeroCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: .12),
+                      color: theme.primary.withValues(alpha: .12),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: .26),
+                        color: theme.primary.withValues(alpha: .26),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Experiencia premium',
                       style: TextStyle(
-                        color: AppColors.secondary,
+                        color: theme.secondary,
                         fontWeight: FontWeight.w800,
                         letterSpacing: .2,
                       ),
@@ -627,7 +667,7 @@ class _HeroCard extends StatelessWidget {
                       _MiniStat(
                         icon: Icons.star_rounded,
                         label: rating,
-                        iconColor: AppColors.primary,
+                        iconColor: theme.primary,
                       ),
                       const SizedBox(width: 10),
                       _MiniStat(
@@ -656,10 +696,17 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     if (avatarUrl.isEmpty) {
-      return Image.asset(
-        'assets/branding/barber_placeholder.png',
-        fit: BoxFit.cover,
+      return const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF151C31), Color(0xFF10172A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(child: Icon(Icons.person_rounded, color: Colors.white70)),
       );
     }
 
@@ -667,9 +714,8 @@ class _Avatar extends StatelessWidget {
       return Image.asset(
         avatarUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Image.asset(
-          'assets/branding/barber_placeholder.png',
-          fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.person_rounded, color: Colors.white70),
         ),
       );
     }
@@ -677,9 +723,8 @@ class _Avatar extends StatelessWidget {
     return Image.network(
       avatarUrl,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Image.asset(
-        'assets/branding/barber_placeholder.png',
-        fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const Center(
+        child: Icon(Icons.person_rounded, color: Colors.white70),
       ),
     );
   }
@@ -698,6 +743,7 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -712,7 +758,10 @@ class _MiniStat extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -727,13 +776,16 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isActive ? const Color(0xFF143325) : const Color(0xFF2E2420),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: isActive ? const Color(0xFF2F8A62) : Colors.white.withValues(alpha: .08),
+          color: isActive
+              ? const Color(0xFF2F8A62)
+              : Colors.white.withValues(alpha: .08),
         ),
       ),
       child: Text(
@@ -752,14 +804,11 @@ class _SectionCard extends StatelessWidget {
   final String? subtitle;
   final Widget child;
 
-  const _SectionCard({
-    required this.title,
-    required this.child,
-    this.subtitle,
-  });
+  const _SectionCard({required this.title, required this.child, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -810,6 +859,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -818,7 +868,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           color: const Color(0xFF14100E),
-          border: Border.all(color: AppColors.primary.withValues(alpha: .16)),
+          border: Border.all(color: theme.primary.withValues(alpha: .16)),
         ),
         child: Row(
           children: [
@@ -827,19 +877,16 @@ class _ReviewsPreviewCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: .12),
+                color: theme.primary.withValues(alpha: .12),
               ),
-              child: const Icon(
-                Icons.star_rounded,
-                color: AppColors.primary,
-              ),
+              child:  Icon(Icons.star_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Opiniones de clientes',
                     style: TextStyle(
                       color: Colors.white,
@@ -856,7 +903,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
                   Text(
                     'Ver opiniones',
                     style: TextStyle(
-                      color: AppColors.secondary,
+                      color: theme.secondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -864,7 +911,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+             Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -880,23 +927,24 @@ class _TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: highlighted
-            ? AppColors.primary.withValues(alpha: .10)
+            ? theme.primary.withValues(alpha: .10)
             : const Color(0xFF1E1916),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: highlighted
-              ? AppColors.primary.withValues(alpha: .28)
+              ? theme.primary.withValues(alpha: .28)
               : Colors.white.withValues(alpha: .06),
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: highlighted ? AppColors.secondary : Colors.white,
+          color: highlighted ? theme.secondary : Colors.white,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -912,6 +960,7 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -922,7 +971,7 @@ class _ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: service.premium
-                ? AppColors.primary.withValues(alpha: .24)
+                ? theme.primary.withValues(alpha: .24)
                 : Colors.white.withValues(alpha: .06),
           ),
         ),
@@ -932,14 +981,14 @@ class _ServiceCard extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: .12),
+                color: theme.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 service.premium
                     ? Icons.workspace_premium_outlined
                     : Icons.content_cut_outlined,
-                color: service.premium ? AppColors.primary : Colors.white70,
+                color: service.premium ? theme.primary : Colors.white70,
               ),
             ),
             const SizedBox(width: 12),
@@ -991,6 +1040,7 @@ class _ServiceSheetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -1007,14 +1057,14 @@ class _ServiceSheetCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: .12),
+                color: theme.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 service.premium
                     ? Icons.workspace_premium_outlined
                     : Icons.content_cut_outlined,
-                color: service.premium ? AppColors.primary : Colors.white70,
+                color: service.premium ? theme.primary : Colors.white70,
               ),
             ),
             const SizedBox(width: 12),
@@ -1041,7 +1091,11 @@ class _ServiceSheetCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 14),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white54,
+              size: 14,
+            ),
           ],
         ),
       ),
@@ -1060,11 +1114,8 @@ class _ContactItem {
     required this.value,
   });
 
-  _ContactItem withValue(String nextValue) => _ContactItem(
-        icon: icon,
-        label: label,
-        value: nextValue,
-      );
+  _ContactItem withValue(String nextValue) =>
+      _ContactItem(icon: icon, label: label, value: nextValue);
 }
 
 class _ContactRow extends StatelessWidget {
@@ -1074,16 +1125,17 @@ class _ContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Container(
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: .12),
+            color: theme.primary.withValues(alpha: .12),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(contact.icon, color: AppColors.primary, size: 20),
+          child: Icon(contact.icon, color: theme.primary, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1130,18 +1182,25 @@ class _AssignedService {
 
   factory _AssignedService.fromEntry(Map<String, dynamic> entry) {
     final resource = _asMap(entry['resource']) ?? entry;
-    final name = _firstText(
-      [resource['name'], entry['name'], resource['title']],
-      fallback: 'Servicio',
-    );
+    final name = _firstText([
+      resource['name'],
+      entry['name'],
+      resource['title'],
+    ], fallback: 'Servicio');
     final durationLabel = _durationLabel(
-      resource['duration_hours'] ?? entry['duration_hours'] ?? entry['duration'],
+      resource['duration_hours'] ??
+          entry['duration_hours'] ??
+          entry['duration'],
       resource['duration_minutes'] ?? entry['duration_minutes'],
     );
     final priceLabel = _priceLabel(
-      resource['price_per_hour'] ?? entry['price_per_hour'] ?? resource['price'] ?? entry['price'],
+      resource['price_per_hour'] ??
+          entry['price_per_hour'] ??
+          resource['price'] ??
+          entry['price'],
     );
-    final premium = _isPremium(resource) ||
+    final premium =
+        _isPremium(resource) ||
         entry['is_primary'] == true ||
         entry['premium'] == true ||
         entry['is_premium'] == true;
@@ -1164,7 +1223,9 @@ class _AssignedService {
   }
 
   static String _priceLabel(dynamic value) {
-    final number = value is num ? value.toDouble() : double.tryParse(value?.toString() ?? '') ?? 0;
+    final number = value is num
+        ? value.toDouble()
+        : double.tryParse(value?.toString() ?? '') ?? 0;
     return NumberFormat.currency(
       locale: 'es_CR',
       symbol: '₡',
@@ -1197,8 +1258,12 @@ class _AssignedService {
       resource['package'],
       resource['type'],
     ].map((value) => value?.toString().trim().toLowerCase() ?? '');
-    return raw.any((value) =>
-        value.contains('premium') || value.contains('vip') || value.contains('gold'));
+    return raw.any(
+      (value) =>
+          value.contains('premium') ||
+          value.contains('vip') ||
+          value.contains('gold'),
+    );
   }
 
   static Map<String, dynamic>? _asMap(dynamic value) {

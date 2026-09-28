@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
+import 'package:provider/provider.dart';
+import '../theme/brand_theme.dart';
 
 class PaginationBar extends StatelessWidget {
   final int current;
   final int last;
   final ValueChanged<int> onSelect;
-  const PaginationBar({super.key, required this.current, required this.last, required this.onSelect});
+  const PaginationBar({
+    super.key,
+    required this.current,
+    required this.last,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<BrandTheme>();
     if (last <= 1) return const SizedBox.shrink();
     final items = _buildItems(current, last);
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        _arrowButton(Icons.chevron_left, current > 1 ? () => onSelect(current - 1) : null),
+        _arrowButton(
+          Icons.chevron_left,
+          current > 1 ? () => onSelect(current - 1) : null,
+        ),
         const SizedBox(width: 8),
         ...items.map((item) {
           if (item is String) {
@@ -31,15 +41,20 @@ class PaginationBar extends StatelessWidget {
               onTap: () => onSelect(item as int),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary.withOpacity(.2) : Colors.transparent,
+                  color: isActive
+                      ? theme.primary.withOpacity(.2)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$item',
                   style: TextStyle(
-                    color: isActive ? AppColors.primary : Colors.white,
+                    color: isActive ? theme.primary : Colors.white,
                     fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
@@ -48,7 +63,10 @@ class PaginationBar extends StatelessWidget {
           );
         }),
         const SizedBox(width: 8),
-        _arrowButton(Icons.chevron_right, current < last ? () => onSelect(current + 1) : null),
+        _arrowButton(
+          Icons.chevron_right,
+          current < last ? () => onSelect(current + 1) : null,
+        ),
       ],
     );
   }
@@ -65,7 +83,11 @@ class PaginationBar extends StatelessWidget {
           border: Border.all(color: Colors.white24),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: onTap == null ? Colors.white30 : Colors.white, size: 20),
+        child: Icon(
+          icon,
+          color: onTap == null ? Colors.white30 : Colors.white,
+          size: 20,
+        ),
       ),
     );
   }
@@ -80,6 +102,7 @@ class PaginationBar extends StatelessWidget {
         items.add(value);
       }
     }
+
     if (current > 3) items.add('...');
     for (var page = current - 1; page <= current + 1; page++) {
       add(page);

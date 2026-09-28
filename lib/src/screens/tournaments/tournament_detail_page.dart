@@ -40,7 +40,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
 
     final results = await Future.wait([tournamentFuture, enrolledTeamsFuture]);
     final tournament = Map<String, dynamic>.from(results[0] as Map);
-    final enrolledTeamsData = (results[1] as Map<String, dynamic>)['data'] as List? ?? const [];
+    final enrolledTeamsData =
+        (results[1] as Map<String, dynamic>)['data'] as List? ?? const [];
     final enrolledTeams = enrolledTeamsData
         .whereType<Map>()
         .map((entry) => Map<String, dynamic>.from(entry))
@@ -90,8 +91,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => _TeamSelectSheet(
-        title: loc.t('tournaments_registration_select_team', fallback: 'Select a team'),
-        hint: loc.t('tournaments_registration_select_team_hint', fallback: 'Choose one team to continue with enrollment.'),
+        title: loc.t(
+          'tournaments_registration_select_team',
+          fallback: 'Select a team',
+        ),
+        hint: loc.t(
+          'tournaments_registration_select_team_hint',
+          fallback: 'Choose one team to continue with enrollment.',
+        ),
         teams: teams,
       ),
     );
@@ -103,7 +110,10 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     await _enrollTeam(tournament, selected);
   }
 
-  Future<void> _enrollTeam(Map<String, dynamic> tournament, Map<String, dynamic> team) async {
+  Future<void> _enrollTeam(
+    Map<String, dynamic> tournament,
+    Map<String, dynamic> team,
+  ) async {
     final auth = context.read<AuthProvider>();
     final loc = context.read<LocalizationService>();
     final teamId = team['id'] as int?;
@@ -114,10 +124,18 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
         tournamentId: tournament['id'] as int,
         teamId: teamId,
       );
-      final enrollment = (response['enrollment'] as Map<String, dynamic>?) ?? const {};
+      final enrollment =
+          (response['enrollment'] as Map<String, dynamic>?) ?? const {};
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.t('tournaments_registration_success', fallback: 'Team enrolled successfully'))),
+        SnackBar(
+          content: Text(
+            loc.t(
+              'tournaments_registration_success',
+              fallback: 'Team enrolled successfully',
+            ),
+          ),
+        ),
       );
       setState(() {
         _future = _loadData();
@@ -128,9 +146,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     } catch (e) {
       if (!mounted) return;
       final message = _friendlyEnrollmentError(e.toString(), loc);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -142,7 +160,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(loc.t('tournaments_detail_title', fallback: 'Tournament details')),
+        title: Text(
+          loc.t('tournaments_detail_title', fallback: 'Tournament details'),
+        ),
       ),
       body: FutureBuilder<_TournamentDetailData>(
         future: _future,
@@ -153,7 +173,10 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    loc.t('tournaments_detail_error', fallback: 'Could not load tournament details.'),
+                    loc.t(
+                      'tournaments_detail_error',
+                      fallback: 'Could not load tournament details.',
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -166,26 +189,37 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           final tournament = data.tournament;
           final enrolledTeams = data.enrolledTeams;
           final court = (tournament['court'] as Map<String, dynamic>?) ?? {};
-          final organizer = (tournament['organizer'] as Map<String, dynamic>?) ?? {};
+          final organizer =
+              (tournament['organizer'] as Map<String, dynamic>?) ?? {};
           final teamsCount = tournament['teams_count'];
           final canManage = auth.isAdmin;
           final status = (tournament['status'] ?? 'draft').toString();
-          final cover = tournament['cover_image_url']?.toString() ?? tournament['cover_image']?.toString();
+          final cover =
+              tournament['cover_image_url']?.toString() ??
+              tournament['cover_image']?.toString();
           final userTeams = auth.manageableTeams;
           final enrollmentByTeamId = {
             for (final enrollment in enrolledTeams)
-              if (enrollment['team_id'] != null) enrollment['team_id'].toString(): enrollment,
+              if (enrollment['team_id'] != null)
+                enrollment['team_id'].toString(): enrollment,
           };
           final enrolledUserTeams = userTeams
-              .where((team) => enrollmentByTeamId.containsKey(team['id']?.toString()))
+              .where(
+                (team) =>
+                    enrollmentByTeamId.containsKey(team['id']?.toString()),
+              )
               .map((team) {
                 final mapped = Map<String, dynamic>.from(team);
-                mapped['enrollment'] = enrollmentByTeamId[team['id']?.toString()];
+                mapped['enrollment'] =
+                    enrollmentByTeamId[team['id']?.toString()];
                 return mapped;
               })
               .toList(growable: false);
           final availableTeams = userTeams
-              .where((team) => !enrollmentByTeamId.containsKey(team['id']?.toString()))
+              .where(
+                (team) =>
+                    !enrollmentByTeamId.containsKey(team['id']?.toString()),
+              )
               .toList(growable: false);
           final enrollmentState = _enrollmentState(
             tournament: tournament,
@@ -236,8 +270,16 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  tournament['name']?.toString() ?? loc.t('tournaments_fallback_name', fallback: 'Tournament'),
-                                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
+                                  tournament['name']?.toString() ??
+                                      loc.t(
+                                        'tournaments_fallback_name',
+                                        fallback: 'Tournament',
+                                      ),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 _StatusPill(status: status),
@@ -246,18 +288,24 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                           ),
                           if (canManage)
                             PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert, color: Colors.white70),
+                              icon: const Icon(
+                                Icons.more_vert,
+                                color: Colors.white70,
+                              ),
                               onSelected: (value) async {
                                 if (value == 'edit') {
-                                  final updated = await Navigator.of(context).pushNamed(
-                                    AppRoutes.tournamentForm,
-                                    arguments: {'tournament': tournament},
-                                  );
+                                  final updated = await Navigator.of(context)
+                                      .pushNamed(
+                                        AppRoutes.tournamentForm,
+                                        arguments: {'tournament': tournament},
+                                      );
                                   if (updated is Map<String, dynamic>) {
                                     setState(() {
                                       _future = Future.value(
                                         _TournamentDetailData(
-                                          tournament: Map<String, dynamic>.from(updated),
+                                          tournament: Map<String, dynamic>.from(
+                                            updated,
+                                          ),
                                           enrolledTeams: const [],
                                         ),
                                       );
@@ -272,11 +320,18 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                               itemBuilder: (_) => [
                                 PopupMenuItem(
                                   value: 'edit',
-                                  child: Text(loc.t('tournaments_edit', fallback: 'Edit')),
+                                  child: Text(
+                                    loc.t('tournaments_edit', fallback: 'Edit'),
+                                  ),
                                 ),
                                 PopupMenuItem(
                                   value: 'close',
-                                  child: Text(loc.t('tournaments_close', fallback: 'Close tournament')),
+                                  child: Text(
+                                    loc.t(
+                                      'tournaments_close',
+                                      fallback: 'Close tournament',
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -286,8 +341,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       Text(
                         tournament['description']?.toString().isNotEmpty == true
                             ? tournament['description'].toString()
-                            : loc.t('tournaments_no_description', fallback: 'No description provided.'),
-                        style: TextStyle(color: Colors.white.withOpacity(.78), height: 1.4),
+                            : loc.t(
+                                'tournaments_no_description',
+                                fallback: 'No description provided.',
+                              ),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(.78),
+                          height: 1.4,
+                        ),
                       ),
                     ],
                   ),
@@ -300,18 +361,52 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                     state: enrollmentState,
                     enrolledUserTeams: enrolledUserTeams,
                     availableTeams: availableTeams,
-                    onEnroll: () => _openEnrollSheet(tournament, availableTeams),
-                    onCreateTeam: () => Navigator.of(context).pushNamed(AppRoutes.teamForm),
-                    onOpenTeams: () => Navigator.of(context).pushNamed(AppRoutes.myTeams),
+                    onEnroll: () =>
+                        _openEnrollSheet(tournament, availableTeams),
+                    onCreateTeam: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.teamForm),
+                    onOpenTeams: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.myTeams),
                   ),
                   const SizedBox(height: 16),
                 ],
                 _InfoGrid(
                   items: [
-                    _InfoItem(label: loc.t('tournaments_organizer', fallback: 'Organizer'), value: organizer['name']?.toString() ?? loc.t('tournaments_placeholder_dash', fallback: '—')),
-                    _InfoItem(label: loc.t('tournaments_court', fallback: 'Court'), value: court['name']?.toString() ?? loc.t('tournaments_placeholder_dash', fallback: '—')),
-                    _InfoItem(label: loc.t('tournaments_max_teams', fallback: 'Max teams'), value: (tournament['max_teams'] ?? loc.t('tournaments_placeholder_dash', fallback: '—')).toString()),
-                    _InfoItem(label: loc.t('tournaments_fee', fallback: 'Registration fee'), value: _money(tournament['entry_fee'], loc)),
+                    _InfoItem(
+                      label: loc.t(
+                        'tournaments_organizer',
+                        fallback: 'Organizer',
+                      ),
+                      value:
+                          organizer['name']?.toString() ??
+                          loc.t('tournaments_placeholder_dash', fallback: '—'),
+                    ),
+                    _InfoItem(
+                      label: loc.t('tournaments_court', fallback: 'Court'),
+                      value:
+                          court['name']?.toString() ??
+                          loc.t('tournaments_placeholder_dash', fallback: '—'),
+                    ),
+                    _InfoItem(
+                      label: loc.t(
+                        'tournaments_max_teams',
+                        fallback: 'Max teams',
+                      ),
+                      value:
+                          (tournament['max_teams'] ??
+                                  loc.t(
+                                    'tournaments_placeholder_dash',
+                                    fallback: '—',
+                                  ))
+                              .toString(),
+                    ),
+                    _InfoItem(
+                      label: loc.t(
+                        'tournaments_fee',
+                        fallback: 'Registration fee',
+                      ),
+                      value: _money(tournament['entry_fee'], loc),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -326,17 +421,46 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        loc.t('tournaments_summary', fallback: 'Tournament summary'),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                        loc.t(
+                          'tournaments_summary',
+                          fallback: 'Tournament summary',
+                        ),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      _RowValue(label: loc.t('tournaments_team_count', fallback: 'Registered teams'), value: teamsCount == null ? loc.t('tournaments_team_count_zero', fallback: '0 teams') : teamsCount.toString()),
+                      _RowValue(
+                        label: loc.t(
+                          'tournaments_team_count',
+                          fallback: 'Registered teams',
+                        ),
+                        value: teamsCount == null
+                            ? loc.t(
+                                'tournaments_team_count_zero',
+                                fallback: '0 teams',
+                              )
+                            : teamsCount.toString(),
+                      ),
                       const SizedBox(height: 8),
-                      _RowValue(label: loc.t('tournaments_format', fallback: 'Format'), value: _formatLabel(tournament['format']?.toString(), loc)),
+                      _RowValue(
+                        label: loc.t('tournaments_format', fallback: 'Format'),
+                        value: _formatLabel(
+                          tournament['format']?.toString(),
+                          loc,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      _RowValue(label: loc.t('tournaments_starts', fallback: 'Starts'), value: _formatDate(tournament['starts_at'], loc)),
+                      _RowValue(
+                        label: loc.t('tournaments_starts', fallback: 'Starts'),
+                        value: _formatDate(tournament['starts_at'], loc),
+                      ),
                       const SizedBox(height: 8),
-                      _RowValue(label: loc.t('tournaments_ends', fallback: 'Ends'), value: _formatDate(tournament['ends_at'], loc)),
+                      _RowValue(
+                        label: loc.t('tournaments_ends', fallback: 'Ends'),
+                        value: _formatDate(tournament['ends_at'], loc),
+                      ),
                     ],
                   ),
                 ),
@@ -355,10 +479,22 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(loc.t('tournaments_close', fallback: 'Close tournament')),
-        content: Text(loc.t('tournaments_close_confirm', fallback: 'Do you want to close this tournament? It will be marked inactive.')),
+        content: Text(
+          loc.t(
+            'tournaments_close_confirm',
+            fallback:
+                'Do you want to close this tournament? It will be marked inactive.',
+          ),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(loc.t('btn_cancel', fallback: 'Cancel'))),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: Text(loc.t('btn_close', fallback: 'Close'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(loc.t('btn_cancel', fallback: 'Cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(loc.t('btn_close', fallback: 'Close')),
+          ),
         ],
       ),
     );
@@ -366,11 +502,18 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     if (confirmed != true) return;
 
     try {
-      final response = await context.read<AuthProvider>().api.closeTournament(tournament['id'] as int);
-      final updated = (response['tournament'] as Map<String, dynamic>?) ?? tournament;
+      final response = await context.read<AuthProvider>().api.closeTournament(
+        tournament['id'] as int,
+      );
+      final updated =
+          (response['tournament'] as Map<String, dynamic>?) ?? tournament;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.t('tournaments_closed', fallback: 'Tournament closed'))),
+        SnackBar(
+          content: Text(
+            loc.t('tournaments_closed', fallback: 'Tournament closed'),
+          ),
+        ),
       );
       setState(() {
         _future = Future.value(
@@ -383,7 +526,11 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${loc.t('tournaments_close_failed', fallback: 'Failed to close tournament')}: $e')),
+          SnackBar(
+            content: Text(
+              '${loc.t('tournaments_close_failed', fallback: 'Failed to close tournament')}: $e',
+            ),
+          ),
         );
       }
     }
@@ -416,13 +563,22 @@ class _InfoGrid extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(item.label, style: TextStyle(color: Colors.white.withOpacity(.62), fontSize: 12)),
+              Text(
+                item.label,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(.62),
+                  fontSize: 12,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(
                 item.value,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -451,11 +607,21 @@ class _RowValue extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(label, style: TextStyle(color: Colors.white.withOpacity(.72))),
+          child: Text(
+            label,
+            style: TextStyle(color: Colors.white.withOpacity(.72)),
+          ),
         ),
         const SizedBox(width: 12),
         Flexible(
-          child: Text(value, textAlign: TextAlign.right, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ],
     );
@@ -497,7 +663,10 @@ class _EnrollmentSection extends StatelessWidget {
         children: [
           Text(
             loc.t('tournaments_registration', fallback: 'Team registration'),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
           _EnrollmentStateBanner(
@@ -509,22 +678,38 @@ class _EnrollmentSection extends StatelessWidget {
           if (enrolledUserTeams.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
-              loc.t('tournaments_registration_status', fallback: 'Enrollment status'),
+              loc.t(
+                'tournaments_registration_status',
+                fallback: 'Enrollment status',
+              ),
               style: TextStyle(color: Colors.white.withOpacity(.74)),
             ),
             const SizedBox(height: 10),
             Column(
-              children: enrolledUserTeams.map((team) {
-                final enrollment = (team['enrollment'] as Map<String, dynamic>?) ?? const {};
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _TeamEnrollmentTile(
-                    teamName: team['name']?.toString() ?? loc.t('tournaments_fallback_name', fallback: 'Tournament'),
-                    status: (enrollment['status'] ?? 'pending').toString(),
-                    subtitle: loc.t('tournaments_registration_already_enrolled', fallback: 'This team is already enrolled in the tournament.'),
-                  ),
-                );
-              }).toList(growable: false),
+              children: enrolledUserTeams
+                  .map((team) {
+                    final enrollment =
+                        (team['enrollment'] as Map<String, dynamic>?) ??
+                        const {};
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _TeamEnrollmentTile(
+                        teamName:
+                            team['name']?.toString() ??
+                            loc.t(
+                              'tournaments_fallback_name',
+                              fallback: 'Tournament',
+                            ),
+                        status: (enrollment['status'] ?? 'pending').toString(),
+                        subtitle: loc.t(
+                          'tournaments_registration_already_enrolled',
+                          fallback:
+                              'This team is already enrolled in the tournament.',
+                        ),
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
             ),
           ],
           if (state == _TournamentEnrollmentState.ready) ...[
@@ -534,7 +719,12 @@ class _EnrollmentSection extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onEnroll,
                 icon: const Icon(Icons.how_to_reg_outlined),
-                label: Text(loc.t('tournaments_registration_cta', fallback: 'Enroll team')),
+                label: Text(
+                  loc.t(
+                    'tournaments_registration_cta',
+                    fallback: 'Enroll team',
+                  ),
+                ),
               ),
             ),
           ],
@@ -594,9 +784,21 @@ class _TeamEnrollmentTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(teamName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                Text(
+                  teamName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(.68), height: 1.35)),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(.68),
+                    height: 1.35,
+                  ),
+                ),
               ],
             ),
           ),
@@ -630,9 +832,15 @@ class _EnrollmentStateBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isReady ? AppColors.primary.withValues(alpha: 0.10) : Colors.white.withValues(alpha: 0.04),
+        color: isReady
+            ? AppColors.primary.withValues(alpha: 0.10)
+            : Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: isReady ? AppColors.primary.withValues(alpha: 0.30) : Colors.white10),
+        border: Border.all(
+          color: isReady
+              ? AppColors.primary.withValues(alpha: 0.30)
+              : Colors.white10,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -640,7 +848,9 @@ class _EnrollmentStateBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isReady ? AppColors.primary.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.08),
+              color: isReady
+                  ? AppColors.primary.withValues(alpha: 0.18)
+                  : Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(info.icon, color: Colors.white),
@@ -650,16 +860,38 @@ class _EnrollmentStateBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(info.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                Text(
+                  info.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text(info.message, style: TextStyle(color: Colors.white.withOpacity(.72), height: 1.4)),
+                Text(
+                  info.message,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(.72),
+                    height: 1.4,
+                  ),
+                ),
                 if (isReady) ...[
                   const SizedBox(height: 10),
                   Text(
                     hasTeams
-                        ? loc.t('tournaments_registration_choose_team', fallback: 'Choose one of your teams to enroll.')
-                        : loc.t('tournaments_registration_no_teams_help', fallback: 'You need to own or manage a team before enrolling in a tournament.'),
-                    style: TextStyle(color: Colors.white.withOpacity(.62), height: 1.4),
+                        ? loc.t(
+                            'tournaments_registration_choose_team',
+                            fallback: 'Choose one of your teams to enroll.',
+                          )
+                        : loc.t(
+                            'tournaments_registration_no_teams_help',
+                            fallback:
+                                'You need to own or manage a team before enrolling in a tournament.',
+                          ),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(.62),
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ],
@@ -686,17 +918,20 @@ class _EnrollmentStatusChip extends StatelessWidget {
     final bg = isApproved
         ? Colors.green.withValues(alpha: 0.15)
         : isRejected || isWithdrawn
-            ? Colors.red.withValues(alpha: 0.15)
-            : Colors.orange.withValues(alpha: 0.15);
+        ? Colors.red.withValues(alpha: 0.15)
+        : Colors.orange.withValues(alpha: 0.15);
     final fg = isApproved
         ? Colors.greenAccent
         : isRejected || isWithdrawn
-            ? Colors.redAccent
-            : Colors.orangeAccent;
+        ? Colors.redAccent
+        : Colors.orangeAccent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Text(
         _enrollmentStatusLabel(normalized, loc).toUpperCase(),
         style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w700),
@@ -718,13 +953,13 @@ class _StatusPill extends StatelessWidget {
     final bg = isInactive
         ? Colors.red.withValues(alpha: 0.15)
         : isDraft
-            ? Colors.orange.withValues(alpha: 0.15)
-            : AppColors.success.withValues(alpha: 0.15);
+        ? Colors.orange.withValues(alpha: 0.15)
+        : AppColors.success.withValues(alpha: 0.15);
     final fg = isInactive
         ? Colors.redAccent
         : isDraft
-            ? Colors.orangeAccent
-            : Colors.greenAccent;
+        ? Colors.orangeAccent
+        : Colors.greenAccent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -761,7 +996,9 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
   @override
   void initState() {
     super.initState();
-    selectedTeamId = widget.teams.isNotEmpty ? widget.teams.first['id'] as int? : null;
+    selectedTeamId = widget.teams.isNotEmpty
+        ? widget.teams.first['id'] as int?
+        : null;
   }
 
   @override
@@ -769,7 +1006,12 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
     final loc = context.watch<LocalizationService>();
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.only(left: 16, right: 16, top: 12, bottom: bottom + 16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: bottom + 16,
+      ),
       child: SafeArea(
         top: false,
         child: Column(
@@ -787,12 +1029,27 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(widget.title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(
+              widget.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 6),
-            Text(widget.hint, style: TextStyle(color: Colors.white.withOpacity(.68), height: 1.4)),
+            Text(
+              widget.hint,
+              style: TextStyle(
+                color: Colors.white.withOpacity(.68),
+                height: 1.4,
+              ),
+            ),
             const SizedBox(height: 16),
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: widget.teams.length,
@@ -809,9 +1066,15 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.04),
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.12)
+                            : Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: isSelected ? AppColors.primary.withValues(alpha: 0.6) : Colors.white10),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary.withValues(alpha: 0.6)
+                              : Colors.white10,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -820,15 +1083,23 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  team['name']?.toString() ?? loc.t('tournaments_fallback_name', fallback: 'Team'),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                  team['name']?.toString() ??
+                                      loc.t(
+                                        'tournaments_fallback_name',
+                                        fallback: 'Team',
+                                      ),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  role == null
-                                      ? ''
-                                      : role.toUpperCase(),
-                                  style: TextStyle(color: Colors.white.withOpacity(.65), fontSize: 12),
+                                  role == null ? '' : role.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(.65),
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ],
                             ),
@@ -836,7 +1107,8 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                           Radio<int?>(
                             value: teamId,
                             groupValue: selectedTeamId,
-                            onChanged: (value) => setState(() => selectedTeamId = value),
+                            onChanged: (value) =>
+                                setState(() => selectedTeamId = value),
                             activeColor: AppColors.primary,
                           ),
                         ],
@@ -853,17 +1125,30 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                 onPressed: selectedTeamId == null
                     ? null
                     : () => Navigator.pop(
-                          context,
-                          widget.teams.firstWhere(
-                            (team) => team['id']?.toString() == selectedTeamId.toString(),
-                          ),
+                        context,
+                        widget.teams.firstWhere(
+                          (team) =>
+                              team['id']?.toString() ==
+                              selectedTeamId.toString(),
                         ),
-                child: Text(loc.t('tournaments_registration_enroll_now', fallback: 'Enroll now')),
+                      ),
+                child: Text(
+                  loc.t(
+                    'tournaments_registration_enroll_now',
+                    fallback: 'Enroll now',
+                  ),
+                ),
               ),
             ),
             if (selectedTeamId == null) ...[
               const SizedBox(height: 8),
-              Text(loc.t('tournaments_registration_no_selection', fallback: 'Please select a team to continue.'), style: TextStyle(color: Colors.white.withOpacity(.6))),
+              Text(
+                loc.t(
+                  'tournaments_registration_no_selection',
+                  fallback: 'Please select a team to continue.',
+                ),
+                style: TextStyle(color: Colors.white.withOpacity(.6)),
+              ),
             ],
           ],
         ),
@@ -882,13 +1167,7 @@ class _TournamentDetailData {
   });
 }
 
-enum _TournamentEnrollmentState {
-  draft,
-  closed,
-  needTeam,
-  allEnrolled,
-  ready,
-}
+enum _TournamentEnrollmentState { draft, closed, needTeam, allEnrolled, ready }
 
 class _EnrollmentStateInfo {
   final String title;
@@ -936,7 +1215,9 @@ _TournamentEnrollmentState _enrollmentState({
   }
 
   final rawDeadline = tournament['registration_deadline'];
-  final parsedDeadline = rawDeadline == null ? null : DateTime.tryParse(rawDeadline.toString());
+  final parsedDeadline = rawDeadline == null
+      ? null
+      : DateTime.tryParse(rawDeadline.toString());
   if (parsedDeadline != null && DateTime.now().isAfter(parsedDeadline)) {
     return _TournamentEnrollmentState.closed;
   }
@@ -964,40 +1245,58 @@ _EnrollmentStateInfo _enrollmentStateInfo(
   switch (state) {
     case _TournamentEnrollmentState.draft:
       return _EnrollmentStateInfo(
-        title: loc.t('tournaments_registration_not_open', fallback: 'Tournament not open yet'),
+        title: loc.t(
+          'tournaments_registration_not_open',
+          fallback: 'Tournament not open yet',
+        ),
         message: loc.t(
           'tournaments_registration_not_open_help',
-          fallback: 'This tournament is still in draft. It must be opened before teams can enroll.',
+          fallback:
+              'This tournament is still in draft. It must be opened before teams can enroll.',
         ),
         icon: Icons.schedule_outlined,
       );
     case _TournamentEnrollmentState.closed:
       return _EnrollmentStateInfo(
-        title: loc.t('tournaments_registration_closed', fallback: 'Registration closed'),
+        title: loc.t(
+          'tournaments_registration_closed',
+          fallback: 'Registration closed',
+        ),
         message: _registrationClosedReason(tournament, loc),
         icon: Icons.lock_outline,
       );
     case _TournamentEnrollmentState.needTeam:
       return _EnrollmentStateInfo(
-        title: loc.t('tournaments_registration_no_teams', fallback: 'You need a team to enroll'),
+        title: loc.t(
+          'tournaments_registration_no_teams',
+          fallback: 'You need a team to enroll',
+        ),
         message: loc.t(
           'tournaments_registration_no_teams_help',
-          fallback: 'You need to own or manage a team before enrolling in a tournament.',
+          fallback:
+              'You need to own or manage a team before enrolling in a tournament.',
         ),
         icon: Icons.groups_outlined,
       );
     case _TournamentEnrollmentState.allEnrolled:
       return _EnrollmentStateInfo(
-        title: loc.t('tournaments_registration_all_enrolled', fallback: 'All your teams are already enrolled'),
+        title: loc.t(
+          'tournaments_registration_all_enrolled',
+          fallback: 'All your teams are already enrolled',
+        ),
         message: loc.t(
           'tournaments_registration_all_enrolled_help',
-          fallback: 'None of your manageable teams are available for this tournament.',
+          fallback:
+              'None of your manageable teams are available for this tournament.',
         ),
         icon: Icons.verified_outlined,
       );
     case _TournamentEnrollmentState.ready:
       return _EnrollmentStateInfo(
-        title: loc.t('tournaments_registration_ready', fallback: 'You can enroll now'),
+        title: loc.t(
+          'tournaments_registration_ready',
+          fallback: 'You can enroll now',
+        ),
         message: loc.t(
           'tournaments_registration_choose_team',
           fallback: 'Choose one of your teams to enroll.',
@@ -1010,14 +1309,26 @@ _EnrollmentStateInfo _enrollmentStateInfo(
 String _enrollmentStatusLabel(String status, LocalizationService loc) {
   switch (status) {
     case 'approved':
-      return loc.t('tournaments_registration_status_approved', fallback: 'Approved');
+      return loc.t(
+        'tournaments_registration_status_approved',
+        fallback: 'Approved',
+      );
     case 'rejected':
-      return loc.t('tournaments_registration_status_rejected', fallback: 'Rejected');
+      return loc.t(
+        'tournaments_registration_status_rejected',
+        fallback: 'Rejected',
+      );
     case 'withdrawn':
-      return loc.t('tournaments_registration_status_withdrawn', fallback: 'Withdrawn');
+      return loc.t(
+        'tournaments_registration_status_withdrawn',
+        fallback: 'Withdrawn',
+      );
     case 'pending':
     default:
-      return loc.t('tournaments_registration_status_pending', fallback: 'Pending');
+      return loc.t(
+        'tournaments_registration_status_pending',
+        fallback: 'Pending',
+      );
   }
 }
 
@@ -1040,48 +1351,81 @@ bool _isRegistrationOpen(Map<String, dynamic> tournament) {
   return DateTime.now().isBefore(parsed);
 }
 
-String _registrationClosedReason(Map<String, dynamic> tournament, LocalizationService loc) {
+String _registrationClosedReason(
+  Map<String, dynamic> tournament,
+  LocalizationService loc,
+) {
   final status = (tournament['status'] ?? 'draft').toString();
   if (status == 'draft') {
     return loc.t(
       'tournaments_registration_not_open_help',
-      fallback: 'This tournament is still in draft. It must be opened before teams can enroll.',
+      fallback:
+          'This tournament is still in draft. It must be opened before teams can enroll.',
     );
   }
   if (status == 'inactive') {
-    return loc.t('tournaments_registration_closed', fallback: 'This tournament is closed for enrollment.');
+    return loc.t(
+      'tournaments_registration_closed',
+      fallback: 'This tournament is closed for enrollment.',
+    );
   }
 
   final teamsCount = int.tryParse((tournament['teams_count'] ?? '').toString());
   final maxTeams = int.tryParse((tournament['max_teams'] ?? '').toString());
   if (teamsCount != null && maxTeams != null && teamsCount >= maxTeams) {
-    return loc.t('tournaments_registration_full', fallback: 'This tournament is full.');
+    return loc.t(
+      'tournaments_registration_full',
+      fallback: 'This tournament is full.',
+    );
   }
 
   final rawDeadline = tournament['registration_deadline'];
-  final parsed = rawDeadline == null ? null : DateTime.tryParse(rawDeadline.toString());
+  final parsed = rawDeadline == null
+      ? null
+      : DateTime.tryParse(rawDeadline.toString());
   if (parsed != null && DateTime.now().isAfter(parsed)) {
-    return loc.t('tournaments_registration_deadline', fallback: 'The registration deadline has passed.');
+    return loc.t(
+      'tournaments_registration_deadline',
+      fallback: 'The registration deadline has passed.',
+    );
   }
 
-  return loc.t('tournaments_registration_closed', fallback: 'This tournament is closed for enrollment.');
+  return loc.t(
+    'tournaments_registration_closed',
+    fallback: 'This tournament is closed for enrollment.',
+  );
 }
 
 String _friendlyEnrollmentError(String raw, LocalizationService loc) {
   final lower = raw.toLowerCase();
   if (lower.contains('already enrolled')) {
-    return loc.t('tournaments_registration_already_enrolled', fallback: 'This team is already enrolled in the tournament.');
+    return loc.t(
+      'tournaments_registration_already_enrolled',
+      fallback: 'This team is already enrolled in the tournament.',
+    );
   }
   if (lower.contains('tournament is full')) {
-    return loc.t('tournaments_registration_full', fallback: 'This tournament is full.');
+    return loc.t(
+      'tournaments_registration_full',
+      fallback: 'This tournament is full.',
+    );
   }
   if (lower.contains('tournament is closed')) {
-    return loc.t('tournaments_registration_closed', fallback: 'This tournament is closed for enrollment.');
+    return loc.t(
+      'tournaments_registration_closed',
+      fallback: 'This tournament is closed for enrollment.',
+    );
   }
   if (lower.contains('forbidden')) {
-    return loc.t('tournaments_registration_failed', fallback: 'Could not enroll the team');
+    return loc.t(
+      'tournaments_registration_failed',
+      fallback: 'Could not enroll the team',
+    );
   }
-  return loc.t('tournaments_registration_failed', fallback: 'Could not enroll the team');
+  return loc.t(
+    'tournaments_registration_failed',
+    fallback: 'Could not enroll the team',
+  );
 }
 
 String _formatDate(dynamic raw, LocalizationService loc) {
@@ -1092,17 +1436,26 @@ String _formatDate(dynamic raw, LocalizationService loc) {
 }
 
 String _money(dynamic value, LocalizationService loc) {
-  final num? parsed = value is num ? value : num.tryParse(value?.toString() ?? '');
-  if (parsed == null || parsed <= 0) return loc.t('tournaments_free', fallback: 'Free');
+  final num? parsed = value is num
+      ? value
+      : num.tryParse(value?.toString() ?? '');
+  if (parsed == null || parsed <= 0)
+    return loc.t('tournaments_free', fallback: 'Free');
   return '\$${parsed.toStringAsFixed(2)}';
 }
 
 String _formatLabel(String? raw, LocalizationService loc) {
   switch (raw) {
     case 'single_elimination':
-      return loc.t('tournaments_format_single_elimination', fallback: 'Single elimination');
+      return loc.t(
+        'tournaments_format_single_elimination',
+        fallback: 'Single elimination',
+      );
     case 'double_elimination':
-      return loc.t('tournaments_format_double_elimination', fallback: 'Double elimination');
+      return loc.t(
+        'tournaments_format_double_elimination',
+        fallback: 'Double elimination',
+      );
     case 'round_robin':
       return loc.t('tournaments_format_round_robin', fallback: 'Round robin');
     default:

@@ -37,7 +37,10 @@ class _HomeTabState extends State<HomeTab> {
     try {
       final api = context.read<AuthProvider>().api;
       final pop = await api.getCourts(sort: 'rating');
-      final nb = await api.getCourts(category: categoryFilter, durationHours: durationFilter);
+      final nb = await api.getCourts(
+        category: categoryFilter,
+        durationHours: durationFilter,
+      );
       if (!mounted) return;
       setState(() {
         popular = pop['data'] ?? [];
@@ -57,7 +60,14 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _applyFilters() async {
     try {
       final api = context.read<AuthProvider>().api;
-      final res = await api.getCourts(q: q, minPrice: minPrice, maxPrice: maxPrice, sort: sort, category: categoryFilter, durationHours: durationFilter);
+      final res = await api.getCourts(
+        q: q,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        sort: sort,
+        category: categoryFilter,
+        durationHours: durationFilter,
+      );
       if (!mounted) return;
       setState(() {
         nearby = res['data'] ?? [];
@@ -78,20 +88,36 @@ class _HomeTabState extends State<HomeTab> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Builder(builder: (context) {
-                final auth = context.watch<AuthProvider>();
-                final name = (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Guest').toString();
-                return Text('${loc.t('home_hello', fallback: 'Hello')}, $name', style: const TextStyle(fontSize: 14, color: Colors.white70));
-              }),
+              Builder(
+                builder: (context) {
+                  final auth = context.watch<AuthProvider>();
+                  final name =
+                      (auth.user?['first_name'] ??
+                              auth.user?['name'] ??
+                              'Guest')
+                          .toString();
+                  return Text(
+                    '${loc.t('home_hello', fallback: 'Hello')}, $name',
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  );
+                },
+              ),
               const SizedBox(height: 2),
               Text(
                 '${loc.t('home_good_morning', fallback: 'Good morning')} 🌞',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none))
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_none),
+            ),
           ],
         ),
         SliverToBoxAdapter(
@@ -107,7 +133,10 @@ class _HomeTabState extends State<HomeTab> {
                         onChanged: (v) => q = v,
                         onSubmitted: (_) => _applyFilters(),
                         decoration: InputDecoration(
-                          hintText: loc.t('home_search_hint', fallback: 'Search'),
+                          hintText: loc.t(
+                            'home_search_hint',
+                            fallback: 'Search',
+                          ),
                           prefixIcon: const Icon(Icons.search),
                         ),
                       ),
@@ -115,20 +144,24 @@ class _HomeTabState extends State<HomeTab> {
                     const SizedBox(width: 12),
                     GestureDetector(
                       onTap: () async {
-                      final result = await Navigator.of(context).push<Map<String, dynamic>>(
-                        MaterialPageRoute(builder: (_) => const FilterPage()),
-                      );
-                      if (result != null) {
-                        minPrice = result['minPrice'] as double?;
-                        maxPrice = result['maxPrice'] as double?;
-                        sort = result['sort'] as String?;
-                        final filterQ = result['q'] as String?;
-                        if (filterQ != null && filterQ.isNotEmpty) q = filterQ;
-                        categoryFilter = result['category'] as String?;
-                        durationFilter = result['duration'] as int?;
-                        await _applyFilters();
-                      }
-                    },
+                        final result = await Navigator.of(context)
+                            .push<Map<String, dynamic>>(
+                              MaterialPageRoute(
+                                builder: (_) => const FilterPage(),
+                              ),
+                            );
+                        if (result != null) {
+                          minPrice = result['minPrice'] as double?;
+                          maxPrice = result['maxPrice'] as double?;
+                          sort = result['sort'] as String?;
+                          final filterQ = result['q'] as String?;
+                          if (filterQ != null && filterQ.isNotEmpty)
+                            q = filterQ;
+                          categoryFilter = result['category'] as String?;
+                          durationFilter = result['duration'] as int?;
+                          await _applyFilters();
+                        }
+                      },
                       child: Container(
                         height: 52,
                         width: 52,
@@ -145,10 +178,18 @@ class _HomeTabState extends State<HomeTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(loc.t('home_categories', fallback: 'Categories'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
-                    Text(loc.t('home_view_all', fallback: 'View all'),
-                        style: TextStyle(color: Colors.white.withOpacity(.8)))
+                    Text(
+                      loc.t('home_categories', fallback: 'Categories'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      loc.t('home_view_all', fallback: 'View all'),
+                      style: TextStyle(color: Colors.white.withOpacity(.8)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -157,12 +198,16 @@ class _HomeTabState extends State<HomeTab> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (_, i) {
-                      final c = AppCategories.list[i % AppCategories.list.length];
+                      final c =
+                          AppCategories.list[i % AppCategories.list.length];
                       return Column(
                         children: [
                           CategoryIcon(asset: c.asset, size: 56),
                           const SizedBox(height: 6),
-                          Text(c.title, style: const TextStyle(color: Colors.white))
+                          Text(
+                            c.title,
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ],
                       );
                     },
@@ -174,13 +219,22 @@ class _HomeTabState extends State<HomeTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(loc.t('home_popular', fallback: 'Popular ground'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                    Text(
+                      loc.t('home_popular', fallback: 'Popular ground'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
                     InkWell(
-                      onTap: () => Navigator.of(context).pushNamed(AppRoutes.categories),
-                      child: Text(loc.t('home_view_all', fallback: 'View all'),
-                          style: TextStyle(color: Colors.white.withOpacity(.8))),
-                    )
+                      onTap: () =>
+                          Navigator.of(context).pushNamed(AppRoutes.categories),
+                      child: Text(
+                        loc.t('home_view_all', fallback: 'View all'),
+                        style: TextStyle(color: Colors.white.withOpacity(.8)),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -188,7 +242,10 @@ class _HomeTabState extends State<HomeTab> {
                   height: 180,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder: (_, i) => _GroundCard(index: i, data: i < popular.length ? popular[i] : null),
+                    itemBuilder: (_, i) => _GroundCard(
+                      index: i,
+                      data: i < popular.length ? popular[i] : null,
+                    ),
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
                     itemCount: popular.length,
                   ),
@@ -197,10 +254,18 @@ class _HomeTabState extends State<HomeTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(loc.t('home_nearby', fallback: 'Nearby you'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
-                    Text(loc.t('home_view_all', fallback: 'View all'),
-                        style: TextStyle(color: Colors.white.withOpacity(.8)))
+                    Text(
+                      loc.t('home_nearby', fallback: 'Nearby you'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      loc.t('home_view_all', fallback: 'View all'),
+                      style: TextStyle(color: Colors.white.withOpacity(.8)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -208,7 +273,10 @@ class _HomeTabState extends State<HomeTab> {
                   height: 180,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemBuilder: (_, i) => _GroundCard(index: i, data: i < nearby.length ? nearby[i] : null),
+                    itemBuilder: (_, i) => _GroundCard(
+                      index: i,
+                      data: i < nearby.length ? nearby[i] : null,
+                    ),
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
                     itemCount: nearby.length,
                   ),
@@ -216,7 +284,7 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -254,27 +322,40 @@ class _GroundCard extends StatelessWidget {
                   Positioned.fill(
                     child: CourtImage(
                       images: data?['images'],
-                      radius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                      radius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
                     ),
                   ),
                   Positioned(
                     right: 8,
                     top: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(.4),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.place, size: 14, color: Colors.white),
+                          const Icon(
+                            Icons.place,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                           const SizedBox(width: 4),
-                          Text(loc.t('home_distance_sample', fallback: '1.2 km'), style: const TextStyle(color: Colors.white)),
+                          Text(
+                            loc.t('home_distance_sample', fallback: '1.2 km'),
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -285,17 +366,26 @@ class _GroundCard extends StatelessWidget {
                 children: [
                   Text(
                     data?['name']?.toString() ?? 'Ground ${index + 1}',
-                    style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 16, color: Colors.white70),
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: Colors.white70,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           data?['address']?.toString() ?? 'Address',
-                          style: TextStyle(color: Colors.white.withOpacity(.75)),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(.75),
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -303,7 +393,7 @@ class _GroundCard extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

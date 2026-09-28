@@ -5,6 +5,7 @@ import 'package:app_barbershop_booking/src/providers/auth_provider.dart';
 import 'package:app_barbershop_booking/src/screens/auth/login_page.dart';
 import 'package:app_barbershop_booking/src/services/api.dart';
 import 'package:app_barbershop_booking/src/services/localization_service.dart';
+import 'package:app_barbershop_booking/src/theme/brand_theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,7 @@ void main() {
         providers: [
           Provider<AppConfig>.value(value: AppConfig.barbershop),
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
+          Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
             value: LocalizationService(translationsBaseUrl: 'http://localhost'),

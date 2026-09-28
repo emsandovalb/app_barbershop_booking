@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
+import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import 'admin_page_scaffold.dart';
+import '../../widgets/keyboard_aware_list_view.dart';
 
 class StaffFormPage extends StatefulWidget {
   final Map<String, dynamic>? staff;
   final bool createMode;
 
-  const StaffFormPage({
-    super.key,
-    this.staff,
-    this.createMode = false,
-  });
+  const StaffFormPage({super.key, this.staff, this.createMode = false});
 
   @override
   State<StaffFormPage> createState() => _StaffFormPageState();
@@ -39,11 +37,21 @@ class _StaffFormPageState extends State<StaffFormPage> {
   void initState() {
     super.initState();
     final staff = widget.staff ?? const <String, dynamic>{};
-    _nameController = TextEditingController(text: staff['name']?.toString() ?? '');
-    _emailController = TextEditingController(text: staff['email']?.toString() ?? '');
-    _phoneController = TextEditingController(text: staff['phone']?.toString() ?? '');
-    _bioController = TextEditingController(text: staff['bio']?.toString() ?? '');
-    _avatarController = TextEditingController(text: staff['avatar']?.toString() ?? '');
+    _nameController = TextEditingController(
+      text: staff['name']?.toString() ?? '',
+    );
+    _emailController = TextEditingController(
+      text: staff['email']?.toString() ?? '',
+    );
+    _phoneController = TextEditingController(
+      text: staff['phone']?.toString() ?? '',
+    );
+    _bioController = TextEditingController(
+      text: staff['bio']?.toString() ?? '',
+    );
+    _avatarController = TextEditingController(
+      text: staff['avatar']?.toString() ?? '',
+    );
     _isActive = staff['is_active'] != false;
     final role = staff['role'];
     if (role is Map && role['id'] != null) {
@@ -92,10 +100,18 @@ class _StaffFormPageState extends State<StaffFormPage> {
       final api = context.read<AuthProvider>().api;
       final payload = <String, dynamic>{
         'name': _nameController.text.trim(),
-        'email': _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-        'phone': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-        'bio': _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
-        'avatar': _avatarController.text.trim().isEmpty ? null : _avatarController.text.trim(),
+        'email': _emailController.text.trim().isEmpty
+            ? null
+            : _emailController.text.trim(),
+        'phone': _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        'bio': _bioController.text.trim().isEmpty
+            ? null
+            : _bioController.text.trim(),
+        'avatar': _avatarController.text.trim().isEmpty
+            ? null
+            : _avatarController.text.trim(),
         'staff_role_id': _selectedRoleId,
         'is_active': _isActive,
       };
@@ -110,9 +126,9 @@ class _StaffFormPageState extends State<StaffFormPage> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) {
         setState(() => _saving = false);
@@ -124,9 +140,13 @@ class _StaffFormPageState extends State<StaffFormPage> {
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
     final loc = context.watch<LocalizationService>();
+    final whiteLabel = context.watch<WhiteLabelConfig>();
     final title = _isCreating
-        ? loc.t('add_staff', fallback: 'Add barber')
-        : loc.t('edit_staff', fallback: 'Edit barber');
+        ? loc.t('add_staff', fallback: 'Agregar ${whiteLabel.staffDisplayName}')
+        : loc.t(
+            'edit_staff',
+            fallback: 'Editar ${whiteLabel.staffDisplayName}',
+          );
 
     return Scaffold(
       appBar: buildAdminAppBar(context, title: title),
@@ -134,93 +154,112 @@ class _StaffFormPageState extends State<StaffFormPage> {
           ? const Center(child: CircularProgressIndicator())
           : GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
-              child: SingleChildScrollView(
+              child: KeyboardAwareListView(
                 padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: loc.t('name', fallback: config.terminology.staff),
+                children: [
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: loc.t(
+                              'name',
+                              fallback: whiteLabel.staffDisplayName,
+                            ),
+                          ),
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                              ? loc.t('required', fallback: 'Required')
+                              : null,
                         ),
-                        validator: (value) =>
-                            (value == null || value.trim().isEmpty) ? loc.t('required', fallback: 'Required') : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: loc.t('email', fallback: 'Email'),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: loc.t('email', fallback: 'Email'),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: loc.t('phone', fallback: 'Phone'),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            labelText: loc.t('phone', fallback: 'Phone'),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _bioController,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          labelText: loc.t('bio', fallback: 'Bio'),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _bioController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            labelText: loc.t('bio', fallback: 'Bio'),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _avatarController,
-                        decoration: InputDecoration(
-                          labelText: loc.t('avatar', fallback: 'Avatar URL or path'),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _avatarController,
+                          decoration: InputDecoration(
+                            labelText: loc.t(
+                              'avatar',
+                              fallback: 'Avatar URL or path',
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        value: _selectedRoleId,
-                        items: _roles
-                            .map(
-                              (role) => DropdownMenuItem<int>(
-                                value: role['id'] as int?,
-                                child: Text(role['name']?.toString() ?? ''),
-                              ),
-                            )
-                            .toList(growable: false),
-                        onChanged: (value) => setState(() => _selectedRoleId = value),
-                        decoration: InputDecoration(
-                          labelText: loc.t('staff_role', fallback: 'Staff role'),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<int>(
+                          value: _selectedRoleId,
+                          items: _roles
+                              .map(
+                                (role) => DropdownMenuItem<int>(
+                                  value: role['id'] as int?,
+                                  child: Text(role['name']?.toString() ?? ''),
+                                ),
+                              )
+                              .toList(growable: false),
+                          onChanged: (value) =>
+                              setState(() => _selectedRoleId = value),
+                          decoration: InputDecoration(
+                            labelText: loc.t(
+                              'staff_role',
+                              fallback: 'Staff role',
+                            ),
+                          ),
+                          validator: (value) => value == null
+                              ? loc.t('required', fallback: 'Required')
+                              : null,
                         ),
-                        validator: (value) => value == null ? loc.t('required', fallback: 'Required') : null,
-                      ),
-                      const SizedBox(height: 12),
-                      SwitchListTile(
-                        value: _isActive,
-                        onChanged: (value) => setState(() => _isActive = value),
-                        title: Text(loc.t('active', fallback: 'Active')),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saving ? null : _save,
-                          child: _saving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Text(loc.t('save', fallback: 'Save')),
+                        const SizedBox(height: 12),
+                        SwitchListTile(
+                          value: _isActive,
+                          onChanged: (value) =>
+                              setState(() => _isActive = value),
+                          title: Text(loc.t('active', fallback: 'Active')),
+                          contentPadding: EdgeInsets.zero,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _saving ? null : _save,
+                            child: _saving
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(loc.t('save', fallback: 'Save')),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
     );
