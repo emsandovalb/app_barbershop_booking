@@ -182,12 +182,18 @@ Color appointmentStatusForeground(AppointmentStatusBucket bucket) {
   }
 }
 
-bool canCancelAppointment(Map<String, dynamic> booking) {
+/// Whether the customer may still cancel: [windowHours] is the business's
+/// cancellation window (WhiteLabelConfig.cancellationWindowHours), the same
+/// rule the API enforces.
+bool canCancelAppointment(
+  Map<String, dynamic> booking, {
+  required int windowHours,
+}) {
   final bucket = appointmentStatusBucket(booking);
   if (bucket != AppointmentStatusBucket.upcoming) return false;
   final date = appointmentDate(booking);
   if (date == null) return false;
-  return date.difference(BusinessClock.now()).inHours >= 4;
+  return date.difference(BusinessClock.now()).inHours >= windowHours;
 }
 
 bool canRebookAppointment(Map<String, dynamic> booking) {

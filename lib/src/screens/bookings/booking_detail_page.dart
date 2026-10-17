@@ -9,6 +9,7 @@ import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 import 'appointment_helpers.dart';
 import '../../services/business_clock.dart';
+import '../../config/white_label_config.dart';
 
 class BookingDetailPage extends StatefulWidget {
   final Map<String, dynamic> booking;
@@ -281,10 +282,17 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     final booking = widget.booking;
     final auth = context.read<AuthProvider>();
     final messenger = ScaffoldMessenger.of(context);
-    if (!canCancelAppointment(booking)) {
+    final windowHours = context
+        .read<WhiteLabelConfig>()
+        .cancellationWindowHours;
+    if (!canCancelAppointment(booking, windowHours: windowHours)) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text(loc.t('booking_cancel_limit'))),
+        SnackBar(
+          content: Text(
+            loc.t('booking_cancel_limit', args: {'hours': windowHours}),
+          ),
+        ),
       );
       return;
     }
@@ -363,7 +371,12 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
         AppRoutes.orderPlaced,
         arguments: {
           'title': loc.t('booking_rebook_success_title'),
-          'subtitle': loc.t('booking_rebook_success_subtitle'),
+          'subtitle': loc.t(
+            'booking_rebook_success_subtitle',
+            args: {
+              'hours': context.read<WhiteLabelConfig>().cancellationWindowHours,
+            },
+          ),
           'buttonText': loc.t('btn_back_home'),
           'backRoute': AppRoutes.home,
         },

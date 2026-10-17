@@ -57,7 +57,7 @@ void main() {
 
     // Compared on the UTC clock, 15:00 would already be in the past.
     expect(appointmentStatusBucket(booking), AppointmentStatusBucket.upcoming);
-    expect(canCancelAppointment(booking), isTrue);
+    expect(canCancelAppointment(booking, windowHours: 4), isTrue);
   });
 
   test('cancellation closes four hours before the local start', () {
@@ -66,6 +66,17 @@ void main() {
       'date': '2026-10-20T13:00:00.000000Z',
     };
 
-    expect(canCancelAppointment(booking), isFalse);
+    expect(canCancelAppointment(booking, windowHours: 4), isFalse);
+  });
+
+  test('the business window decides, not a fixed 4 hours', () {
+    final booking = {
+      'status': 'confirmed',
+      'date': '2026-10-20T15:00:00.000000Z',
+    };
+
+    // Five hours ahead of the local 10:00.
+    expect(canCancelAppointment(booking, windowHours: 2), isTrue);
+    expect(canCancelAppointment(booking, windowHours: 24), isFalse);
   });
 }

@@ -8,6 +8,7 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 import 'appointment_helpers.dart';
+import '../../config/white_label_config.dart';
 
 class BookingsTab extends StatefulWidget {
   final int initialIndex;
@@ -236,7 +237,10 @@ class _AppointmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
     final status = appointmentStatusBucket(booking);
-    final canCancel = canCancelAppointment(booking);
+    final canCancel = canCancelAppointment(
+      booking,
+      windowHours: context.watch<WhiteLabelConfig>().cancellationWindowHours,
+    );
     final canRebook = canRebookAppointment(booking);
 
     return Container(
@@ -401,9 +405,16 @@ class _AppointmentCard extends StatelessWidget {
     final loc = context.read<LocalizationService>();
     final auth = context.read<AuthProvider>();
     final messenger = ScaffoldMessenger.of(context);
-    if (!canCancelAppointment(booking)) {
+    final windowHours = context
+        .read<WhiteLabelConfig>()
+        .cancellationWindowHours;
+    if (!canCancelAppointment(booking, windowHours: windowHours)) {
       messenger.showSnackBar(
-        SnackBar(content: Text(loc.t('booking_cancel_limit'))),
+        SnackBar(
+          content: Text(
+            loc.t('booking_cancel_limit', args: {'hours': windowHours}),
+          ),
+        ),
       );
       return;
     }
