@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'src/config/app_config.dart';
 import 'src/config/white_label_config.dart';
@@ -58,13 +59,31 @@ void main() async {
     fallback: initialWhiteLabel,
   );
   unawaited(whiteLabelConfigService.initialize());
-  runApp(
+  void startApp() => runApp(
     BarbershopBookingApp(
       config: initialAppConfig,
       whiteLabelConfig: initialWhiteLabel,
       whiteLabelConfigService: whiteLabelConfigService,
       businessSlug: normalizedSlug,
     ),
+  );
+
+  // Crash and error reporting. Only active when the build passes
+  // --dart-define=SENTRY_DSN=<dsn>; a Sentry DSN is meant to be public, so
+  // compiling it into the app is safe.
+  const sentryDsn = String.fromEnvironment('SENTRY_DSN');
+  if (sentryDsn.trim().isEmpty) {
+    startApp();
+    return;
+  }
+  await SentryFlutter.init((options) {
+    options.dsn = sentryDsn.trim();
+    options.environment = kReleaseMode ? 'production' : 'development';
+    options.sendDefaultPii = false;
+    options.tracesSampleRate = 0;
+  }, appRunner: startApp);
+  await Sentry.configureScope(
+    (scope) => scope.setTag('business_slug', normalizedSlug),
   );
 }
 

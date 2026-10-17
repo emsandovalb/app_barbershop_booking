@@ -33,7 +33,11 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$BusinessSlug,
 
-    [string]$ApiBaseUrl = ''
+    [string]$ApiBaseUrl = '',
+
+    # Optional. Sentry DSN for crash reporting; defaults to $env:SENTRY_DSN.
+    # Empty disables reporting. A DSN is public by design, unlike API keys.
+    [string]$SentryDsn = $env:SENTRY_DSN
 )
 
 $ErrorActionPreference = 'Stop'
@@ -57,6 +61,11 @@ if ($ApiBaseUrl) {
     Write-Host "API base URL override: $ApiBaseUrl"
 } else {
     Write-Host "No API_BASE_URL override — client will default to `$origin/api/v1 (same-origin deploy)."
+}
+if ($SentryDsn) {
+    Write-Host "Sentry crash reporting enabled."
+} else {
+    Write-Host "No SENTRY_DSN — crash reporting disabled for this build."
 }
 
 # flutter.bat writes routine, non-fatal notices (e.g. its "Wasm dry run"
@@ -82,9 +91,9 @@ try {
     # command line worked. Passing each flag as its own literal
     # argument avoids that failure mode.
     if ($ApiBaseUrl) {
-        & flutter build web --release "--dart-define=BUSINESS_SLUG=$BusinessSlug" "--dart-define=API_BASE_URL=$ApiBaseUrl"
+        & flutter build web --release "--dart-define=BUSINESS_SLUG=$BusinessSlug" "--dart-define=API_BASE_URL=$ApiBaseUrl" "--dart-define=SENTRY_DSN=$SentryDsn"
     } else {
-        & flutter build web --release "--dart-define=BUSINESS_SLUG=$BusinessSlug"
+        & flutter build web --release "--dart-define=BUSINESS_SLUG=$BusinessSlug" "--dart-define=SENTRY_DSN=$SentryDsn"
     }
 } finally {
     $ErrorActionPreference = $previousErrorActionPreference
