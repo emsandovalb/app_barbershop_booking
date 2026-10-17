@@ -462,6 +462,8 @@
   "signup_email_taken": "Ya existe una cuenta con este correo electrónico",
   "signup_failed": "No se pudo crear la cuenta",
   "signup_have_account": "¿Ya tenés cuenta? Iniciá sesión",
+  "signup_incomplete": "No se pudo completar el registro.",
+  "signup_incomplete_retry": "No se pudo completar el registro. Intentá de nuevo.",
   "signup_subtitle": "Completá tus datos para empezar a reservar citas.",
   "signup_title": "Crear cuenta",
   "staff_about_me": "Sobre mí",

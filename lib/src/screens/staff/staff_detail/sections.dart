@@ -212,7 +212,10 @@ class _ServiceCard extends StatelessWidget {
                         ),
                       ),
                       if (service.premium)
-                        const _TagChip(label: 'Premium', highlighted: true),
+                        _TagChip(
+                          label: tr('home_premium_badge'),
+                          highlighted: true,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 4),

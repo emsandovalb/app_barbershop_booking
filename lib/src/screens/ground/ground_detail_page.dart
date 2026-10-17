@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../config/app_config.dart';
 import '../../services/localization_service.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/court_image.dart';
@@ -20,7 +19,6 @@ class GroundDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
     final loc = context.watch<LocalizationService>();
-    final terminology = context.watch<AppConfig>().terminology;
     final resource = court;
     final barbers = (resource['staff'] as List?) ?? const [];
     final isPremium = _isPremium(resource);
@@ -151,7 +149,7 @@ class GroundDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            terminology.shopAmenities,
+            loc.t('common_facilities'),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,

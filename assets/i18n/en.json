@@ -462,6 +462,8 @@
   "signup_email_taken": "An account with this email already exists",
   "signup_failed": "Couldn't create the account",
   "signup_have_account": "Already have an account? Log in",
+  "signup_incomplete": "Couldn't complete the sign-up.",
+  "signup_incomplete_retry": "Couldn't complete the sign-up. Please try again.",
   "signup_subtitle": "Enter your details to start booking appointments.",
   "signup_title": "Create account",
   "staff_about_me": "About me",

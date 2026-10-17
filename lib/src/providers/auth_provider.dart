@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api.dart';
+import '../services/localization_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   static const String _tokenKey = 'auth_token';
@@ -181,7 +182,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final data = await api.register(name, email, password);
       if (data['token'] == null) {
-        registrationError = 'No se pudo completar el registro.';
+        registrationError = tr('signup_incomplete');
         notifyListeners();
         return false;
       }
@@ -209,7 +210,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (_) {
-      registrationError = 'No se pudo completar el registro. Intentá de nuevo.';
+      registrationError = tr('signup_incomplete_retry');
       notifyListeners();
       return false;
     }
