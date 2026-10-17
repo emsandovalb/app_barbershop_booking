@@ -234,7 +234,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                   CircleAvatar(
                                     radius: 24,
                                     backgroundColor: config.brand.primaryColor
-                                        .withOpacity(.18),
+                                        .withValues(alpha: .18),
                                     backgroundImage:
                                         (staff['avatar_url']?.toString() ?? '')
                                             .isNotEmpty
@@ -274,14 +274,14 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                         Text(
                                           role['name']?.toString() ?? '',
                                           style: TextStyle(
-                                            color: Colors.white.withOpacity(.7),
+                                            color: Colors.white.withValues(alpha: .7),
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           '${services.length} ${loc.t('staff_services', fallback: 'services')}',
                                           style: TextStyle(
-                                            color: Colors.white.withOpacity(.7),
+                                            color: Colors.white.withValues(alpha: .7),
                                           ),
                                         ),
                                       ],
@@ -313,7 +313,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                 Text(
                                   staff['email'].toString(),
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(.78),
+                                    color: Colors.white.withValues(alpha: .78),
                                   ),
                                 ),
                               if ((staff['phone']?.toString() ?? '')
@@ -322,7 +322,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                 Text(
                                   staff['phone'].toString(),
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(.78),
+                                    color: Colors.white.withValues(alpha: .78),
                                   ),
                                 ),
                               ],

@@ -36,7 +36,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
 
   String get _cacheKey => _businessSlug == null
       ? defaultCacheKey
-      : 'white_label_config_cache_v${_cacheSchemaVersion}_${_businessSlug}';
+      : 'white_label_config_cache_v${_cacheSchemaVersion}_$_businessSlug';
 
   WhiteLabelConfig get config => _config;
   BrandTheme get brandTheme => _brandTheme;

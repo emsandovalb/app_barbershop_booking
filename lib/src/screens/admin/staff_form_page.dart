@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/app_config.dart';
 import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
@@ -138,7 +137,6 @@ class _StaffFormPageState extends State<StaffFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final config = context.watch<AppConfig>();
     final loc = context.watch<LocalizationService>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     final title = _isCreating
@@ -211,7 +209,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<int>(
-                          value: _selectedRoleId,
+                          initialValue: _selectedRoleId,
                           items: _roles
                               .map(
                                 (role) => DropdownMenuItem<int>(

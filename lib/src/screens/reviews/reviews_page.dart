@@ -17,7 +17,6 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final visibleReviews = _demoReviews
         .where((review) => review.matches(_filter))
@@ -425,7 +424,6 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -458,7 +456,6 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       child: Column(
@@ -875,7 +872,6 @@ class ReviewEntry {
 }
 
 const double _summaryRating = 4.9;
-const int _totalReviews = 128;
 
 const Map<int, int> _ratingDistribution = {5: 98, 4: 18, 3: 7, 2: 3, 1: 2};
 

@@ -44,8 +44,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                       );
                       if (x != null) {
                         final encoded = await _compressAndEncodeImage(x);
-                        if (encoded != null)
+                        if (encoded != null) {
                           setState(() => images.add(encoded));
+                        }
                       }
                     },
                     child: Container(
@@ -78,8 +79,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                           final value = await _compressAndEncodeImage(image);
                           if (value != null) encoded.add(value);
                         }
-                        if (encoded.isNotEmpty)
+                        if (encoded.isNotEmpty) {
                           setState(() => images.addAll(encoded));
+                        }
                       }
                     },
                     child: Container(

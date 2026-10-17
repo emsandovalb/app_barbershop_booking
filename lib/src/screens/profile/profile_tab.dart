@@ -186,28 +186,27 @@ class ProfileTab extends StatelessWidget {
             color: const Color(0xFF282828),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            children: languageOptions.map((lang) {
-              final code = lang['code']!;
-              return RadioListTile<String>(
-                value: code,
-                groupValue: currentLang,
-                onChanged: localization.isLoading
-                    ? null
-                    : (value) {
-                        if (value != null) {
-                          context.read<LocalizationService>().changeLanguage(
-                            value,
-                          );
-                        }
-                      },
-                title: Text(
-                  lang['label']!,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                activeColor: whiteLabel.primaryGold,
-              );
-            }).toList(),
+          child: RadioGroup<String>(
+            groupValue: currentLang,
+            onChanged: (value) {
+              if (value != null && !localization.isLoading) {
+                context.read<LocalizationService>().changeLanguage(value);
+              }
+            },
+            child: Column(
+              children: languageOptions.map((lang) {
+                final code = lang['code']!;
+                return RadioListTile<String>(
+                  value: code,
+                  enabled: !localization.isLoading,
+                  title: Text(
+                    lang['label']!,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  activeColor: whiteLabel.primaryGold,
+                );
+              }).toList(),
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -246,7 +245,7 @@ class ProfileTab extends StatelessWidget {
                 ],
               ),
             );
-            if (confirmed == true) {
+            if (confirmed == true && context.mounted) {
               await context.read<AuthProvider>().logout();
               if (context.mounted) {
                 Navigator.of(

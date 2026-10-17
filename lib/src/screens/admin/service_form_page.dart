@@ -441,7 +441,6 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -478,12 +477,11 @@ class _PremiumField extends StatelessWidget {
   const _PremiumField({
     required this.controller,
     required this.label,
-    this.hintText,
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.prefixText,
     this.validator,
-  });
+  }) : hintText = null;
 
   @override
   Widget build(BuildContext context) {

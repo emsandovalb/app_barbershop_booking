@@ -53,7 +53,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     fallback:
                         'Please enter your name, email address and password details to sign up',
                   ),
-                  style: TextStyle(color: Colors.white.withOpacity(.75)),
+                  style: TextStyle(color: Colors.white.withValues(alpha: .75)),
                 ),
                 const SizedBox(height: 24),
 
@@ -252,7 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             email: email,
                             password: passCtrl.text,
                           );
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           if (ok) {
                             Navigator.of(
                               context,

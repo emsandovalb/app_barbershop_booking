@@ -93,9 +93,9 @@ class _LoginPageState extends State<LoginPage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  const Color(0xFF050505).withOpacity(.42),
-                  const Color(0xFF090909).withOpacity(.30),
-                  const Color(0xFF050505).withOpacity(.62),
+                  const Color(0xFF050505).withValues(alpha: .42),
+                  const Color(0xFF090909).withValues(alpha: .30),
+                  const Color(0xFF050505).withValues(alpha: .62),
                 ],
               ),
             ),
@@ -103,20 +103,20 @@ class _LoginPageState extends State<LoginPage> {
           Positioned(
             top: -90,
             left: -90,
-            child: _GlowOrb(color: colors.primaryGold.withOpacity(.18), size: 240),
+            child: _GlowOrb(color: colors.primaryGold.withValues(alpha: .18), size: 240),
           ),
           Positioned(
             top: 80,
             right: -80,
             child: _GlowOrb(
-              color: colors.primaryGoldDark.withOpacity(.14),
+              color: colors.primaryGoldDark.withValues(alpha: .14),
               size: 180,
             ),
           ),
           Positioned(
             bottom: -110,
             left: -110,
-            child: _GlowOrb(color: Colors.white.withOpacity(.05), size: 260),
+            child: _GlowOrb(color: Colors.white.withValues(alpha: .05), size: 260),
           ),
           SafeArea(
             child: KeyboardAwareListView(
@@ -157,9 +157,9 @@ class _LoginPageState extends State<LoginPage> {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withOpacity(.34),
-                                    Colors.black.withOpacity(.22),
-                                    Colors.black.withOpacity(.32),
+                                    Colors.black.withValues(alpha: .34),
+                                    Colors.black.withValues(alpha: .22),
+                                    Colors.black.withValues(alpha: .32),
                                   ],
                                 ),
                               ),
@@ -211,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                                             gradient: LinearGradient(
                                               colors: [
                                                 Colors.transparent,
-                                                colors.primaryGold.withOpacity(.72),
+                                                colors.primaryGold.withValues(alpha: .72),
                                               ],
                                             ),
                                           ),
@@ -236,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
-                                                colors.primaryGold.withOpacity(.72),
+                                                colors.primaryGold.withValues(alpha: .72),
                                                 Colors.transparent,
                                               ],
                                             ),
@@ -257,11 +257,11 @@ class _LoginPageState extends State<LoginPage> {
                   BarbershopPremiumCard(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                     radius: 30,
-                    backgroundColor: const Color(0xFF120E0B).withOpacity(.92),
-                    borderColor: colors.primaryGoldDark.withOpacity(.45),
+                    backgroundColor: const Color(0xFF120E0B).withValues(alpha: .92),
+                    borderColor: colors.primaryGoldDark.withValues(alpha: .45),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(.34),
+                        color: Colors.black.withValues(alpha: .34),
                         blurRadius: 30,
                         offset: const Offset(0, 14),
                       ),
@@ -329,7 +329,7 @@ class _LoginPageState extends State<LoginPage> {
                                       emailCtrl.text.trim(),
                                       passCtrl.text,
                                     );
-                                    if (!mounted) return;
+                                    if (!context.mounted) return;
                                     if (ok) {
                                       Navigator.of(context).pushReplacementNamed(AppRoutes.home);
                                     } else {
@@ -370,7 +370,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: _SocialButton(
                                 label: 'Google',
                                 icon: const _GoogleBrandIcon(),
-                                borderColor: colors.primaryGold.withOpacity(.52),
+                                borderColor: colors.primaryGold.withValues(alpha: .52),
                                 onTap: () => _notImplemented(context, 'Google Sign-In'),
                               ),
                             ),
@@ -383,7 +383,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Color(0xFF1877F2),
                                   size: 20,
                                 ),
-                                borderColor: colors.primaryGold.withOpacity(.52),
+                                borderColor: colors.primaryGold.withValues(alpha: .52),
                                 onTap: () => _notImplemented(context, 'Facebook Login'),
                               ),
                             ),
@@ -396,7 +396,7 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                borderColor: colors.primaryGold.withOpacity(.52),
+                                borderColor: colors.primaryGold.withValues(alpha: .52),
                                 onTap: () => _notImplemented(context, 'Apple / Face ID'),
                               ),
                             ),
@@ -407,7 +407,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(
-                                color: Colors.white.withOpacity(.88),
+                                color: Colors.white.withValues(alpha: .88),
                                 fontSize: 14,
                               ),
                               children: [
@@ -513,7 +513,7 @@ class _SocialDivider extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  lineColor.withOpacity(.55),
+                  lineColor.withValues(alpha: .55),
                 ],
               ),
             ),
@@ -537,7 +537,7 @@ class _SocialDivider extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  lineColor.withOpacity(.55),
+                  lineColor.withValues(alpha: .55),
                   Colors.transparent,
                 ],
               ),

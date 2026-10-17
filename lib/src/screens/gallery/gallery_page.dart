@@ -168,7 +168,6 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final items = _filteredItems;
 
@@ -601,7 +600,6 @@ class _MasonryGalleryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     if (items.isEmpty) {
       return BarbershopPremiumCard(
         padding: const EdgeInsets.all(18),
@@ -677,7 +675,6 @@ class _GalleryTileState extends State<_GalleryTile> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final item = widget.item;
     return AnimatedScale(
       scale: _pressed ? .98 : 1,
@@ -791,7 +788,6 @@ class _FeaturedCardState extends State<_FeaturedCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final item = widget.item;
     return AnimatedScale(
       scale: _pressed ? .985 : 1,
@@ -890,7 +886,6 @@ class _GalleryViewerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: SafeArea(
@@ -1059,7 +1054,6 @@ class _IconBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Material(
       color: Colors.transparent,
       child: InkWell(

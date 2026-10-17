@@ -781,7 +781,6 @@ class _QuickActionsRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return AbsorbPointer(
       absorbing: isBusy,
       child: Opacity(
@@ -874,7 +873,6 @@ class _AdminModuleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -993,7 +991,6 @@ class _SectionIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1025,7 +1022,6 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1123,7 +1119,6 @@ class _TodayAppointmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackReservations;
     return Column(
       children: list
@@ -1276,7 +1271,6 @@ class _PerformanceList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackPerformance;
     return Column(
       children: list
@@ -1377,7 +1371,6 @@ class _TopServicesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackTopServices;
     return Column(
       children: list

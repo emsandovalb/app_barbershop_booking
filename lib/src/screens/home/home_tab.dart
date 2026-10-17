@@ -475,7 +475,6 @@ class _ServiceListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final state = controller.state;
 
     if (state.isLoading && !state.hasData) {
@@ -533,7 +532,6 @@ class _StateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 26,
       padding: const EdgeInsets.all(18),
@@ -719,7 +717,6 @@ class _BusinessInfoCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1271,7 +1268,6 @@ class _ServiceCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     if (isLoading && items.isEmpty) {
       return const SizedBox(
         height: 224,

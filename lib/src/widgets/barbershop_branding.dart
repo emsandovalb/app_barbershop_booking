@@ -63,9 +63,9 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF050505).withOpacity(.94),
-                    const Color(0xFF090909).withOpacity(.66),
-                    const Color(0xFF090909).withOpacity(.94),
+                    const Color(0xFF050505).withValues(alpha: .94),
+                    const Color(0xFF090909).withValues(alpha: .66),
+                    const Color(0xFF090909).withValues(alpha: .94),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -79,7 +79,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               left: -80,
               child: _GlowBlob(
                 size: 280,
-                color: theme.primary.withOpacity(.18),
+                color: theme.primary.withValues(alpha: .18),
               ),
             ),
           if (topGlow)
@@ -88,7 +88,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               right: -90,
               child: _GlowBlob(
                 size: 220,
-                color: const Color(0xFFB77A3E).withOpacity(.14),
+                color: const Color(0xFFB77A3E).withValues(alpha: .14),
               ),
             ),
           if (bottomGlow)
@@ -97,7 +97,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               left: -120,
               child: _GlowBlob(
                 size: 300,
-                color: Colors.white.withOpacity(.05),
+                color: Colors.white.withValues(alpha: .05),
               ),
             ),
           if (bottomGlow)
@@ -106,7 +106,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
               right: -100,
               child: _GlowBlob(
                 size: 240,
-                color: theme.primary.withOpacity(.12),
+                color: theme.primary.withValues(alpha: .12),
               ),
             ),
           Positioned.fill(
@@ -143,7 +143,6 @@ class BarbershopCinematicPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: Stack(
@@ -165,9 +164,9 @@ class BarbershopCinematicPanel extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    const Color(0xFF070707).withOpacity(.92),
-                    const Color(0xFF12100E).withOpacity(.82),
-                    const Color(0xFF070707).withOpacity(.92),
+                    const Color(0xFF070707).withValues(alpha: .92),
+                    const Color(0xFF12100E).withValues(alpha: .82),
+                    const Color(0xFF070707).withValues(alpha: .92),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -181,7 +180,7 @@ class BarbershopCinematicPanel extends StatelessWidget {
                 gradient: RadialGradient(
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(.40),
+                    Colors.black.withValues(alpha: .40),
                   ],
                   radius: .92,
                   center: Alignment.center,
@@ -239,7 +238,7 @@ class BarbershopLogoMark extends StatelessWidget {
           )
         : Icon(
             Icons.content_cut,
-            color: Colors.white.withOpacity(.92),
+            color: Colors.white.withValues(alpha: .92),
             size: size * .30,
           );
     final logo = assetPath.trim().isEmpty
@@ -267,7 +266,7 @@ class BarbershopLogoMark extends StatelessWidget {
                   opacity: .18,
                   child: ColorFiltered(
                     colorFilter: ColorFilter.mode(
-                      resolvedGlowColor.withOpacity(.65),
+                      resolvedGlowColor.withValues(alpha: .65),
                       BlendMode.srcIn,
                     ),
                     child: SizedBox(
@@ -310,17 +309,16 @@ class BarbershopPremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: padding,
       decoration: BoxDecoration(
         color: backgroundColor ?? const Color(0xFF120E0B),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor ?? Colors.white.withOpacity(.06)),
+        border: Border.all(color: borderColor ?? Colors.white.withValues(alpha: .06)),
         boxShadow: boxShadow ??
             [
               BoxShadow(
-                color: Colors.black.withOpacity(.28),
+                color: Colors.black.withValues(alpha: .28),
                 blurRadius: 28,
                 offset: const Offset(0, 12),
               ),
@@ -356,9 +354,9 @@ class PremiumBadge extends StatelessWidget {
         vertical: compact ? 3 : 5,
       ),
       decoration: BoxDecoration(
-        color: theme.primary.withOpacity(.16),
+        color: theme.primary.withValues(alpha: .16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: theme.primary.withOpacity(.30)),
+        border: Border.all(color: theme.primary.withValues(alpha: .30)),
       ),
       child: Text(
         label,
@@ -409,7 +407,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 actionLabel!,
                 style: TextStyle(
-                  color: theme.secondary.withOpacity(.95),
+                  color: theme.secondary.withValues(alpha: .95),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -428,7 +426,6 @@ class _GlowBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return ImageFiltered(
       imageFilter: ImageFilter.blur(sigmaX: 48, sigmaY: 48),
       child: Container(
@@ -447,7 +444,7 @@ class _PremiumTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(.025)
+      ..color = Colors.white.withValues(alpha: .025)
       ..strokeWidth = 1;
     const step = 34.0;
     for (double y = 0; y < size.height; y += step) {

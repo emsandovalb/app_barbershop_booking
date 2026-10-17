@@ -55,7 +55,7 @@ class GroundDetailPage extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(.45),
+                        color: Colors.black.withValues(alpha: .45),
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(color: Colors.white12),
                       ),
@@ -108,7 +108,7 @@ class GroundDetailPage extends StatelessWidget {
                     fallback:
                         'Reserve this service by choosing an available time slot.',
                   ),
-            style: TextStyle(color: Colors.white.withOpacity(.85)),
+            style: TextStyle(color: Colors.white.withValues(alpha: .85)),
           ),
           if (selectedStaffName.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -117,7 +117,7 @@ class GroundDetailPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF1D1712),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: theme.primary.withOpacity(.18)),
+                border: Border.all(color: theme.primary.withValues(alpha: .18)),
               ),
               child: Row(
                 children: [
@@ -212,7 +212,7 @@ class GroundDetailPage extends StatelessWidget {
               child: Text(
                 businessHours,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(.82),
+                  color: Colors.white.withValues(alpha: .82),
                   height: 1.35,
                 ),
               ),
@@ -358,6 +358,7 @@ class GroundDetailPage extends StatelessWidget {
               }
               return;
             }
+            if (!context.mounted) return;
             final result = await Navigator.of(context)
                 .push<Map<String, dynamic>>(
                   MaterialPageRoute(
@@ -394,7 +395,6 @@ class _AmenityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -426,7 +426,6 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
