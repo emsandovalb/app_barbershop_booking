@@ -88,9 +88,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
       animation: _controller,
       builder: (context, _) {
         final loc = context.watch<LocalizationService>();
-        final title =
-            widget.title ??
-            loc.t('filter_results_title', fallback: 'Filtered resources');
+        final title = widget.title ?? loc.t('filter_results_title');
         final state = _controller.state;
         final resources = _extractItems(state.data);
         final isLoading = state.isLoading && !state.hasData;
@@ -149,14 +147,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                     padding: const EdgeInsets.all(32),
                     children: [
                       const SizedBox(height: 120),
-                      Center(
-                        child: Text(
-                          loc.t(
-                            'filters_empty',
-                            fallback: 'No resources found',
-                          ),
-                        ),
-                      ),
+                      Center(child: Text(loc.t('filters_empty'))),
                     ],
                   ),
                 )
@@ -183,7 +174,13 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${loc.t('filters_showing', fallback: 'Showing')} ${resources.length} ${loc.t('filters_of', fallback: 'of')} $totalItems',
+                              loc.t(
+                                'filters_count',
+                                args: {
+                                  'count': resources.length,
+                                  'total': totalItems,
+                                },
+                              ),
                               style: const TextStyle(color: Colors.white70),
                             ),
                           ),

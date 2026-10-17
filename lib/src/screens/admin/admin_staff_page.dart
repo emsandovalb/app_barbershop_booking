@@ -77,16 +77,10 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
     if (!canManage) {
       return Scaffold(
         backgroundColor: theme.background,
-        appBar: buildAdminAppBar(
-          context,
-          title: loc.t('manage_staff', fallback: whiteLabel.staffPluralLabel),
-        ),
+        appBar: buildAdminAppBar(context, title: loc.t('manage_staff')),
         body: Center(
           child: Text(
-            loc.t(
-              'admin_only',
-              fallback: 'Only administrators can access this section',
-            ),
+            loc.t('admin_only'),
             style: const TextStyle(color: Colors.white70),
           ),
         ),
@@ -98,7 +92,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
         Scaffold(
           appBar: buildAdminAppBar(
             context,
-            title: loc.t('manage_staff', fallback: whiteLabel.staffPluralLabel),
+            title: loc.t('manage_staff'),
             actions: [
               IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
             ],
@@ -118,10 +112,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
             },
             icon: const Icon(Icons.add),
             label: Text(
-              loc.t(
-                'add_staff',
-                fallback: 'Agregar ${whiteLabel.staffDisplayName}',
-              ),
+              loc.t('add_staff', args: {'staff': whiteLabel.staffDisplayName}),
             ),
           ),
           body: LoadableCollectionView<List<Map<String, dynamic>>>(
@@ -172,10 +163,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            loc.t(
-                              'staff_empty_title',
-                              fallback: 'Aún no hay miembros del equipo.',
-                            ),
+                            loc.t('staff_empty_title'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -185,11 +173,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            loc.t(
-                              'staff_empty_hint',
-                              fallback:
-                                  'Agrega el primer miembro para comenzar.',
-                            ),
+                            loc.t('staff_empty_hint'),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: .72),
                             ),
@@ -259,11 +243,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                       children: [
                                         Text(
                                           staff['name']?.toString() ??
-                                              loc.t(
-                                                'staff_title',
-                                                fallback:
-                                                    whiteLabel.staffDisplayName,
-                                              ),
+                                              loc.t('staff_title'),
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w700,
@@ -274,14 +254,18 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                         Text(
                                           role['name']?.toString() ?? '',
                                           style: TextStyle(
-                                            color: Colors.white.withValues(alpha: .7),
+                                            color: Colors.white.withValues(
+                                              alpha: .7,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '${services.length} ${loc.t('staff_services', fallback: 'services')}',
+                                          '${services.length} ${loc.t('staff_services')}',
                                           style: TextStyle(
-                                            color: Colors.white.withValues(alpha: .7),
+                                            color: Colors.white.withValues(
+                                              alpha: .7,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -356,9 +340,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                       }
                                     },
                                     icon: const Icon(Icons.edit_outlined),
-                                    label: Text(
-                                      loc.t('edit', fallback: 'Edit'),
-                                    ),
+                                    label: Text(loc.t('edit')),
                                   ),
                                   OutlinedButton.icon(
                                     onPressed: () async {
@@ -375,9 +357,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                       }
                                     },
                                     icon: const Icon(Icons.link_outlined),
-                                    label: Text(
-                                      loc.t('assign', fallback: 'Assign'),
-                                    ),
+                                    label: Text(loc.t('assign')),
                                   ),
                                 ],
                               ),

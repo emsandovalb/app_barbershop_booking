@@ -31,20 +31,14 @@ class ProfileTab extends StatelessWidget {
     final isAdmin = auth.canManageBusiness;
     final currentLang = localization.locale.languageCode;
     final languageOptions = <Map<String, String>>[
-      {
-        'code': 'es',
-        'label': localization.t('language_es', fallback: 'Español'),
-      },
-      {
-        'code': 'en',
-        'label': localization.t('language_en', fallback: 'English'),
-      },
+      {'code': 'es', 'label': localization.t('language_es')},
+      {'code': 'en', 'label': localization.t('language_en')},
     ];
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          localization.t('profile_title', fallback: 'Profile'),
+          localization.t('profile_title'),
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -82,50 +76,35 @@ class ProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _ProfileTile(
-          title: localization.t('profile_my_profile', fallback: 'My profile'),
+          title: localization.t('profile_my_profile'),
           icon: Icons.person_outline,
           onTap: () => _go(context, const MyProfilePage()),
         ),
         _ProfileTile(
-          title: localization.t(
-            'profile_change_password',
-            fallback: 'Change password',
-          ),
+          title: localization.t('profile_change_password'),
           icon: Icons.lock_outline,
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.changePassword),
         ),
         _ProfileTile(
-          title: localization.t('profile_settings', fallback: 'Settings'),
+          title: localization.t('profile_settings'),
           icon: Icons.settings_outlined,
-          onTap: () => _coming(
-            context,
-            localization.t('profile_settings', fallback: 'Settings'),
-          ),
+          onTap: () => _coming(context, localization.t('profile_settings')),
         ),
         _ProfileTile(
-          title: localization.t('profile_privacy', fallback: 'Privacy policy'),
+          title: localization.t('profile_privacy'),
           icon: Icons.privacy_tip_outlined,
-          onTap: () => _coming(
-            context,
-            localization.t('profile_privacy', fallback: 'Privacy policy'),
-          ),
+          onTap: () => _coming(context, localization.t('profile_privacy')),
         ),
         _ProfileTile(
-          title: localization.t('profile_help', fallback: 'Help'),
+          title: localization.t('profile_help'),
           icon: Icons.help_outline,
-          onTap: () => _coming(
-            context,
-            localization.t('profile_help', fallback: 'Help'),
-          ),
+          onTap: () => _coming(context, localization.t('profile_help')),
         ),
         _ProfileTile(
-          title: localization.t('profile_about', fallback: 'About us'),
+          title: localization.t('profile_about'),
           icon: Icons.info_outline,
-          onTap: () => _coming(
-            context,
-            localization.t('profile_about', fallback: 'About us'),
-          ),
+          onTap: () => _coming(context, localization.t('profile_about')),
         ),
         if (whiteLabel.features.showBusinessProfile)
           _ProfileTile(
@@ -142,30 +121,24 @@ class ProfileTab extends StatelessWidget {
                 Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
           ),
         _ProfileTile(
-          title: localization.t('profile_rate_us', fallback: 'Rate us'),
+          title: localization.t('profile_rate_us'),
           icon: Icons.star_outline,
-          onTap: () => _coming(
-            context,
-            localization.t('profile_rate_us', fallback: 'Rate us'),
-          ),
+          onTap: () => _coming(context, localization.t('profile_rate_us')),
         ),
         _ProfileTile(
-          title: localization.t('nav_history', fallback: 'History'),
+          title: localization.t('nav_history'),
           icon: Icons.history,
           onTap: () => _go(context, const BookingsTab(initialIndex: 1)),
         ),
         if (config.features.showTeams)
           _ProfileTile(
-            title: localization.t('profile_my_teams', fallback: 'My teams'),
+            title: localization.t('profile_my_teams'),
             icon: Icons.groups_outlined,
             onTap: () => Navigator.of(context).pushNamed(AppRoutes.myTeams),
           ),
         if (isAdmin)
           _ProfileTile(
-            title: localization.t(
-              'profile_my_grounds',
-              fallback: whiteLabel.servicesLabel,
-            ),
+            title: localization.t('profile_my_grounds'),
             icon: Icons.content_cut_outlined,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoutes.myGrounds);
@@ -173,7 +146,7 @@ class ProfileTab extends StatelessWidget {
           ),
         const SizedBox(height: 12),
         Text(
-          localization.t('profile_language_label', fallback: 'Language'),
+          localization.t('profile_language_label'),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -181,11 +154,12 @@ class ProfileTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF282828),
-            borderRadius: BorderRadius.circular(16),
-          ),
+        // Material (not a decorated Container) so the radio tiles' ink
+        // splashes stay visible, same as _ProfileTile below.
+        Material(
+          color: const Color(0xFF282828),
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
           child: RadioGroup<String>(
             groupValue: currentLang,
             onChanged: (value) {
@@ -211,7 +185,7 @@ class ProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _ProfileTile(
-          title: localization.t('profile_logout', fallback: 'Log out'),
+          title: localization.t('profile_logout'),
           icon: Icons.logout,
           onTap: () async {
             final confirmed = await showDialog<bool>(
@@ -219,28 +193,21 @@ class ProfileTab extends StatelessWidget {
               builder: (ctx) => AlertDialog(
                 backgroundColor: const Color(0xFF1F1F1F),
                 title: Text(
-                  localization.t('profile_logout', fallback: 'Log out'),
+                  localization.t('profile_logout'),
                   style: const TextStyle(color: Colors.white),
                 ),
                 content: Text(
-                  localization.t(
-                    'profile_logout_confirm',
-                    fallback: 'Are you sure you want to log out?',
-                  ),
+                  localization.t('profile_logout_confirm'),
                   style: const TextStyle(color: Colors.white70),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(
-                      localization.t('btn_cancel', fallback: 'Cancel'),
-                    ),
+                    child: Text(localization.t('btn_cancel')),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(
-                      localization.t('profile_logout', fallback: 'Log out'),
-                    ),
+                    child: Text(localization.t('profile_logout')),
                   ),
                 ],
               ),

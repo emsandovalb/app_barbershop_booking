@@ -90,7 +90,7 @@ class _StaffResourceAssignmentPageState
     return Scaffold(
       appBar: buildAdminAppBar(
         context,
-        title: loc.t('staff_resources', fallback: 'Services'),
+        title: loc.t('staff_resources'),
         actions: [
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
@@ -104,11 +104,7 @@ class _StaffResourceAssignmentPageState
             return const Center(child: CircularProgressIndicator());
           }
           if (staffSnap.hasError || staffSnap.data == null) {
-            return Center(
-              child: Text(
-                loc.t('staff_load_failed', fallback: 'Failed to load staff'),
-              ),
-            );
+            return Center(child: Text(loc.t('staff_load_failed')));
           }
           final staff = staffSnap.data!;
           final assignedIds = _assignedIds(staff);
@@ -148,14 +144,7 @@ class _StaffResourceAssignmentPageState
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       const SizedBox(height: 160),
-                      Center(
-                        child: Text(
-                          loc.t(
-                            'staff_no_resources',
-                            fallback: 'No service assignments yet',
-                          ),
-                        ),
-                      ),
+                      Center(child: Text(loc.t('staff_no_resources'))),
                     ],
                   ),
                 );
@@ -187,7 +176,7 @@ class _StaffResourceAssignmentPageState
                         ),
                         title: Text(
                           resource['name']?.toString() ??
-                              loc.t('staff_resource', fallback: 'Service'),
+                              loc.t('staff_resource'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

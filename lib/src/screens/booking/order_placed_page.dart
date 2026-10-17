@@ -13,7 +13,8 @@ class OrderPlacedPage extends StatelessWidget {
   const OrderPlacedPage({
     super.key,
     this.title = 'Solicitud enviada',
-    this.subtitle = 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
+    this.subtitle =
+        'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
     this.buttonText = 'Volver al inicio',
     this.backRoute = AppRoutes.home,
   });
@@ -22,11 +23,7 @@ class OrderPlacedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          loc.t('booking_request_sent_title', fallback: 'Solicitud enviada'),
-        ),
-      ),
+      appBar: AppBar(title: Text(loc.t('booking_request_sent_title'))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -38,12 +35,7 @@ class OrderPlacedPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              title.isNotEmpty
-                  ? title
-                  : loc.t(
-                      'booking_request_sent_title',
-                      fallback: 'Solicitud enviada',
-                    ),
+              title.isNotEmpty ? title : loc.t('booking_request_sent_title'),
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
             const SizedBox(height: 8),
@@ -52,10 +44,7 @@ class OrderPlacedPage extends StatelessWidget {
               child: Text(
                 subtitle.isNotEmpty
                     ? subtitle
-                    : loc.t(
-                        'booking_request_sent_subtitle',
-                        fallback: 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
-                      ),
+                    : loc.t('booking_request_sent_subtitle'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
               ),
@@ -68,9 +57,7 @@ class OrderPlacedPage extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () => _handleAction(context),
           child: Text(
-            buttonText.isNotEmpty
-                ? buttonText
-                : loc.t('btn_back_home', fallback: 'Volver al inicio'),
+            buttonText.isNotEmpty ? buttonText : loc.t('btn_back_home'),
           ),
         ),
       ),

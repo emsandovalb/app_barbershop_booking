@@ -55,9 +55,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: theme.primary.withValues(alpha: .18),
-                ),
+                border: Border.all(color: theme.primary.withValues(alpha: .18)),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x59000000),
@@ -129,7 +127,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                                 : null,
                             child: Row(
                               children: [
-                                 Icon(
+                                Icon(
                                   Icons.content_cut_outlined,
                                   color: theme.secondary,
                                   size: 18,
@@ -275,15 +273,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     if (!canCancelAppointment(booking)) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t(
-              'booking_cancel_limit',
-              fallback:
-                  'No se puede cancelar dentro de las 4 horas previas al inicio.',
-            ),
-          ),
-        ),
+        SnackBar(content: Text(loc.t('booking_cancel_limit'))),
       );
       return;
     }
@@ -358,26 +348,16 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       navigator.pushReplacementNamed(
         AppRoutes.orderPlaced,
         arguments: {
-          'title': loc.t(
-            'booking_rebook_success_title',
-            fallback: 'Cita reprogramada',
-          ),
-          'subtitle': loc.t(
-            'booking_rebook_success_subtitle',
-            fallback: 'Tu cita fue reprogramada correctamente.',
-          ),
-          'buttonText': loc.t('btn_back_home', fallback: 'Volver al inicio'),
+          'title': loc.t('booking_rebook_success_title'),
+          'subtitle': loc.t('booking_rebook_success_subtitle'),
+          'buttonText': loc.t('btn_back_home'),
           'backRoute': AppRoutes.home,
         },
       );
     } catch (e) {
       if (mounted) {
         messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${loc.t('booking_rebook_failed', fallback: 'No se pudo reprogramar')}: $e',
-            ),
-          ),
+          SnackBar(content: Text('${loc.t('booking_rebook_failed')}: $e')),
         );
       }
     } finally {

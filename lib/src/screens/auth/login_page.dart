@@ -47,10 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          loc.t(
-            'feature_not_implemented',
-            fallback: '{feature} not implemented yet',
-          ).replaceFirst('{feature}', what),
+          loc.t('feature_not_implemented').replaceFirst('{feature}', what),
         ),
       ),
     );
@@ -103,7 +100,10 @@ class _LoginPageState extends State<LoginPage> {
           Positioned(
             top: -90,
             left: -90,
-            child: _GlowOrb(color: colors.primaryGold.withValues(alpha: .18), size: 240),
+            child: _GlowOrb(
+              color: colors.primaryGold.withValues(alpha: .18),
+              size: 240,
+            ),
           ),
           Positioned(
             top: 80,
@@ -116,7 +116,10 @@ class _LoginPageState extends State<LoginPage> {
           Positioned(
             bottom: -110,
             left: -110,
-            child: _GlowOrb(color: Colors.white.withValues(alpha: .05), size: 260),
+            child: _GlowOrb(
+              color: Colors.white.withValues(alpha: .05),
+              size: 260,
+            ),
           ),
           SafeArea(
             child: KeyboardAwareListView(
@@ -127,10 +130,15 @@ class _LoginPageState extends State<LoginPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pushReplacementNamed(AppRoutes.home),
                       style: TextButton.styleFrom(
                         foregroundColor: colors.primaryGoldLight,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
                       ),
                       child: const Text('Omitir'),
                     ),
@@ -151,7 +159,12 @@ class _LoginPageState extends State<LoginPage> {
                           child: BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                             child: Container(
-                              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                              padding: const EdgeInsets.fromLTRB(
+                                12,
+                                10,
+                                12,
+                                10,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
@@ -211,14 +224,18 @@ class _LoginPageState extends State<LoginPage> {
                                             gradient: LinearGradient(
                                               colors: [
                                                 Colors.transparent,
-                                                colors.primaryGold.withValues(alpha: .72),
+                                                colors.primaryGold.withValues(
+                                                  alpha: .72,
+                                                ),
                                               ],
                                             ),
                                           ),
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
                                         child: Text(
                                           whiteLabel.subtitle.toUpperCase(),
                                           textAlign: TextAlign.center,
@@ -236,7 +253,9 @@ class _LoginPageState extends State<LoginPage> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               colors: [
-                                                colors.primaryGold.withValues(alpha: .72),
+                                                colors.primaryGold.withValues(
+                                                  alpha: .72,
+                                                ),
                                                 Colors.transparent,
                                               ],
                                             ),
@@ -257,7 +276,9 @@ class _LoginPageState extends State<LoginPage> {
                   BarbershopPremiumCard(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                     radius: 30,
-                    backgroundColor: const Color(0xFF120E0B).withValues(alpha: .92),
+                    backgroundColor: const Color(
+                      0xFF120E0B,
+                    ).withValues(alpha: .92),
                     borderColor: colors.primaryGoldDark.withValues(alpha: .45),
                     boxShadow: [
                       BoxShadow(
@@ -296,7 +317,8 @@ class _LoginPageState extends State<LoginPage> {
                             hintText: 'Contraseña',
                             prefixIcon: Icons.lock_outline_rounded,
                             suffixIcon: IconButton(
-                              onPressed: () => setState(() => _obscure = !_obscure),
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
                               icon: Icon(
                                 _obscure
                                     ? Icons.visibility_off_outlined
@@ -309,7 +331,9 @@ class _LoginPageState extends State<LoginPage> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () => Navigator.of(context).pushNamed(AppRoutes.forgot),
+                            onPressed: () => Navigator.of(
+                              context,
+                            ).pushNamed(AppRoutes.forgot),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               foregroundColor: colors.primaryGoldLight,
@@ -325,17 +349,25 @@ class _LoginPageState extends State<LoginPage> {
                                 ? null
                                 : () async {
                                     setState(() => isBusy = true);
-                                    final ok = await context.read<AuthProvider>().login(
-                                      emailCtrl.text.trim(),
-                                      passCtrl.text,
-                                    );
+                                    final ok = await context
+                                        .read<AuthProvider>()
+                                        .login(
+                                          emailCtrl.text.trim(),
+                                          passCtrl.text,
+                                        );
                                     if (!context.mounted) return;
                                     if (ok) {
-                                      Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+                                      Navigator.of(
+                                        context,
+                                      ).pushReplacementNamed(AppRoutes.home);
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text('Correo o contraseña incorrectos'),
+                                          content: Text(
+                                            'Correo o contraseña incorrectos',
+                                          ),
                                         ),
                                       );
                                     }
@@ -354,7 +386,9 @@ class _LoginPageState extends State<LoginPage> {
                                 letterSpacing: .8,
                               ),
                             ),
-                            child: Text(isBusy ? 'INICIANDO...' : 'INICIAR SESIÓN'),
+                            child: Text(
+                              isBusy ? 'INICIANDO...' : 'INICIAR SESIÓN',
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -370,8 +404,11 @@ class _LoginPageState extends State<LoginPage> {
                               child: _SocialButton(
                                 label: 'Google',
                                 icon: const _GoogleBrandIcon(),
-                                borderColor: colors.primaryGold.withValues(alpha: .52),
-                                onTap: () => _notImplemented(context, 'Google Sign-In'),
+                                borderColor: colors.primaryGold.withValues(
+                                  alpha: .52,
+                                ),
+                                onTap: () =>
+                                    _notImplemented(context, 'Google Sign-In'),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -383,8 +420,11 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Color(0xFF1877F2),
                                   size: 20,
                                 ),
-                                borderColor: colors.primaryGold.withValues(alpha: .52),
-                                onTap: () => _notImplemented(context, 'Facebook Login'),
+                                borderColor: colors.primaryGold.withValues(
+                                  alpha: .52,
+                                ),
+                                onTap: () =>
+                                    _notImplemented(context, 'Facebook Login'),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -396,8 +436,11 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                borderColor: colors.primaryGold.withValues(alpha: .52),
-                                onTap: () => _notImplemented(context, 'Apple / Face ID'),
+                                borderColor: colors.primaryGold.withValues(
+                                  alpha: .52,
+                                ),
+                                onTap: () =>
+                                    _notImplemented(context, 'Apple / Face ID'),
                               ),
                             ),
                           ],
@@ -462,7 +505,9 @@ class _SocialButton extends StatelessWidget {
           foregroundColor: Colors.white,
           backgroundColor: const Color(0xFF15100D),
           side: BorderSide(color: borderColor, width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 10),
         ),
         child: Row(
@@ -511,10 +556,7 @@ class _SocialDivider extends StatelessWidget {
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  lineColor.withValues(alpha: .55),
-                ],
+                colors: [Colors.transparent, lineColor.withValues(alpha: .55)],
               ),
             ),
           ),
@@ -536,10 +578,7 @@ class _SocialDivider extends StatelessWidget {
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  lineColor.withValues(alpha: .55),
-                  Colors.transparent,
-                ],
+                colors: [lineColor.withValues(alpha: .55), Colors.transparent],
               ),
             ),
           ),
@@ -576,10 +615,7 @@ class _GlowOrb extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../support/i18n.dart';
 
 /// Regression test: the "Regístrate" text next to "¿No tienes cuenta?"
 /// used to be plain, non-interactive RichText — no onTap, no
@@ -36,7 +37,7 @@ void main() {
           Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
-            value: LocalizationService(translationsBaseUrl: 'http://localhost'),
+            value: testLocalization(),
           ),
         ],
         child: MaterialApp(

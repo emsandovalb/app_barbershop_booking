@@ -37,9 +37,7 @@ class _PaymentPageState extends State<PaymentPage> {
     final whiteLabel = context.watch<WhiteLabelConfig>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.t('payment_title', fallback: 'Confirmar cita')),
-      ),
+      appBar: AppBar(title: Text(loc.t('payment_title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -47,10 +45,7 @@ class _PaymentPageState extends State<PaymentPage> {
             title: whiteLabel.staffDisplayName,
             subtitle:
                 selectedBarber?['name']?.toString() ??
-                loc.t(
-                  'booking_barber_required',
-                  fallback: 'Profesional pendiente',
-                ),
+                loc.t('booking_barber_required'),
             actionLabel: '',
             onTap: null,
           ),
@@ -58,17 +53,14 @@ class _PaymentPageState extends State<PaymentPage> {
           ListTile(
             leading: const Icon(Icons.payments_outlined, color: Colors.white70),
             title: Text(
-              loc.t('booking_payment_pending', fallback: 'Pago pendiente'),
+              loc.t('booking_payment_pending'),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
             subtitle: Text(
-              loc.t(
-                'booking_payment_pending_hint',
-                fallback: 'El negocio registrará el pago cuando corresponda.',
-              ),
+              loc.t('booking_payment_pending_hint'),
               style: const TextStyle(color: Colors.white70),
             ),
           ),
@@ -79,9 +71,7 @@ class _PaymentPageState extends State<PaymentPage> {
         child: ElevatedButton(
           onPressed: loading ? null : _confirm,
           child: Text(
-            loading
-                ? loc.t('payment_processing', fallback: 'Procesando...')
-                : loc.t('btn_continue', fallback: 'Continuar'),
+            loading ? loc.t('payment_processing') : loc.t('btn_continue'),
           ),
         ),
       ),
@@ -94,14 +84,7 @@ class _PaymentPageState extends State<PaymentPage> {
     if (!auth.isLoggedIn) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              loc.t(
-                'payment_login_required',
-                fallback: 'Please log in to complete the appointment',
-              ),
-            ),
-          ),
+          SnackBar(content: Text(loc.t('payment_login_required'))),
         );
         Navigator.of(context).pushNamed(AppRoutes.login);
       }
@@ -128,15 +111,7 @@ class _PaymentPageState extends State<PaymentPage> {
       if (staffId == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                loc.t(
-                  'booking_barber_selection_invalid',
-                  fallback:
-                      'La selección de barbero no es válida. Elegí uno de nuevo.',
-                ),
-              ),
-            ),
+            SnackBar(content: Text(loc.t('booking_barber_selection_invalid'))),
           );
         }
         return;
@@ -173,15 +148,9 @@ class _PaymentPageState extends State<PaymentPage> {
         AppRoutes.orderPlaced,
         arguments: {
           // New bookings are pending until the business confirms them.
-          'title': loc.t(
-            'booking_request_sent_title',
-            fallback: 'Solicitud enviada',
-          ),
-          'subtitle': loc.t(
-            'booking_request_sent_subtitle',
-            fallback: 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
-          ),
-          'buttonText': loc.t('btn_back_home', fallback: 'Back to home'),
+          'title': loc.t('booking_request_sent_title'),
+          'subtitle': loc.t('booking_request_sent_subtitle'),
+          'buttonText': loc.t('btn_back_home'),
           'backRoute': AppRoutes.home,
           'reservationId': bookingId,
         },
@@ -189,11 +158,7 @@ class _PaymentPageState extends State<PaymentPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${loc.t('booking_failed', fallback: 'Appointment failed')}: $e',
-            ),
-          ),
+          SnackBar(content: Text('${loc.t('booking_failed')}: $e')),
         );
       }
     } finally {

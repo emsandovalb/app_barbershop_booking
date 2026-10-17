@@ -81,6 +81,8 @@ flutter:
     - assets/splash/
     - assets/branding/
     - assets/branding/barbershop_hero_bg.png
+    - assets/i18n/
+    - assets/i18n/brands/jc-studio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

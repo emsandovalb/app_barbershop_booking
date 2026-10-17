@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../support/i18n.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -53,9 +54,7 @@ void main() {
             ),
             ChangeNotifierProvider<AuthProvider>.value(value: auth),
             ChangeNotifierProvider<LocalizationService>.value(
-              value: LocalizationService(
-                translationsBaseUrl: 'http://localhost',
-              ),
+              value: testLocalization(),
             ),
           ],
           child: MaterialApp(
@@ -78,7 +77,7 @@ void main() {
       expect(find.byType(TextFormField), findsWidgets);
 
       await tester.enterText(find.byType(TextFormField).first, 'Owner Barber');
-      await tester.tap(find.text('Save'), warnIfMissed: false);
+      await tester.tap(find.text('Guardar'), warnIfMissed: false);
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Owner Barber'), findsOneWidget);
@@ -108,7 +107,7 @@ void main() {
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
-            value: LocalizationService(translationsBaseUrl: 'http://localhost'),
+            value: testLocalization(),
           ),
         ],
         child: MaterialApp(

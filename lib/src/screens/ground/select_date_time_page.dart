@@ -76,13 +76,9 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
     final loc = context.watch<LocalizationService>();
     final staffName =
         widget.preferredStaff['name']?.toString() ??
-        loc.t('booking_barber_label', fallback: 'Profesional');
+        loc.t('booking_barber_label');
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          loc.t('select_date_time_title', fallback: 'Elegí fecha y hora'),
-        ),
-      ),
+      appBar: AppBar(title: Text(loc.t('select_date_time_title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -105,7 +101,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
           ),
           const SizedBox(height: 12),
           Text(
-            loc.t('select_time', fallback: 'Horarios disponibles'),
+            loc.t('select_time'),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -123,10 +119,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
             _LoadState(message: _error!, onRetry: _loadAvailability),
           if (!_loading && _error == null && _slots.isEmpty)
             Text(
-              loc.t(
-                'select_no_slots',
-                fallback: 'No hay horarios disponibles este día.',
-              ),
+              loc.t('select_no_slots'),
               style: const TextStyle(color: Colors.white70),
             ),
           if (!_loading && _error == null)
@@ -154,7 +147,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
         minimum: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: _selected == null ? null : _continue,
-          child: Text(loc.t('btn_continue', fallback: 'Continuar')),
+          child: Text(loc.t('btn_continue')),
         ),
       ),
     );

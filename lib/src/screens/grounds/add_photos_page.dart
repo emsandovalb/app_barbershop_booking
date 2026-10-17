@@ -26,9 +26,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.t('grounds_add_photos_title', fallback: 'Add photos')),
-      ),
+      appBar: AppBar(title: Text(loc.t('grounds_add_photos_title'))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -56,12 +54,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
-                        child: Text(
-                          loc.t(
-                            'grounds_take_new_photo',
-                            fallback: 'Take New Photo',
-                          ),
-                        ),
+                        child: Text(loc.t('grounds_take_new_photo')),
                       ),
                     ),
                   ),
@@ -90,14 +83,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                         color: const Color(0xFF282828),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Center(
-                        child: Text(
-                          loc.t(
-                            'grounds_from_album',
-                            fallback: 'From Photo Album',
-                          ),
-                        ),
-                      ),
+                      child: Center(child: Text(loc.t('grounds_from_album'))),
                     ),
                   ),
                 ),
@@ -133,10 +119,10 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
           onPressed: loading || submitted ? null : _confirm,
           child: Text(
             submitted
-                ? loc.t('grounds_created_title', fallback: 'Service Created')
+                ? loc.t('grounds_created_title')
                 : loading
-                ? loc.t('btn_saving', fallback: 'Saving...')
-                : loc.t('btn_confirm', fallback: 'Confirm'),
+                ? loc.t('btn_saving')
+                : loc.t('btn_confirm'),
           ),
         ),
       ),
@@ -149,13 +135,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
     final auth = context.read<AuthProvider>();
     final form = context.read<GroundFormProvider>();
     if (!auth.isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t('grounds_admin_required', fallback: 'Please log in as admin'),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.t('grounds_admin_required'))));
       return;
     }
     // The payload still includes legacy sports field names until the backend generic contract is introduced.
@@ -164,16 +146,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
     final name = data['name']?.toString().trim() ?? '';
     final address = data['address']?.toString().trim() ?? '';
     if (name.isEmpty || address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t(
-              'grounds_name_required',
-              fallback: 'Please fill name and address first',
-            ),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.t('grounds_name_required'))));
       return;
     }
     setState(() => loading = true);
@@ -193,27 +168,16 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
       Navigator.of(context).pushNamed(
         AppRoutes.orderPlaced,
         arguments: {
-          'title': loc.t('grounds_created_title', fallback: 'Service created'),
-          'subtitle': loc.t(
-            'grounds_created_subtitle',
-            fallback:
-                'Your service has been created successfully and is now listed under My services.',
-          ),
-          'buttonText': loc.t(
-            'grounds_back_to_list',
-            fallback: 'Back to My services',
-          ),
+          'title': loc.t('grounds_created_title'),
+          'subtitle': loc.t('grounds_created_subtitle'),
+          'buttonText': loc.t('grounds_back_to_list'),
           'backRoute': AppRoutes.myGrounds,
         },
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${loc.t('grounds_create_failed', fallback: 'Failed to create service')}: $e',
-            ),
-          ),
+          SnackBar(content: Text('${loc.t('grounds_create_failed')}: $e')),
         );
       }
     } finally {

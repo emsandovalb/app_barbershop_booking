@@ -20,11 +20,7 @@ class GroundBookingDetailPage extends StatelessWidget {
     final slot = args['slot'] as String;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          loc.t('booking_details_title', fallback: 'Appointment details'),
-        ),
-      ),
+      appBar: AppBar(title: Text(loc.t('booking_details_title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -63,7 +59,7 @@ class GroundBookingDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            loc.t('common_facilities', fallback: 'Shop amenities'),
+            loc.t('common_facilities'),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -74,15 +70,9 @@ class GroundBookingDetailPage extends StatelessWidget {
           Wrap(
             spacing: 12,
             children: [
-              _AmenityChip(
-                label: loc.t('facility_parking', fallback: 'Parking'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_camera', fallback: 'Security'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_waiting', fallback: 'Waiting area'),
-              ),
+              _AmenityChip(label: loc.t('facility_parking')),
+              _AmenityChip(label: loc.t('facility_camera')),
+              _AmenityChip(label: loc.t('facility_waiting')),
             ],
           ),
           const SizedBox(height: 16),
@@ -95,21 +85,15 @@ class GroundBookingDetailPage extends StatelessWidget {
             child: Column(
               children: [
                 _kv(
-                  loc.t('booking_detail_ground_label', fallback: 'Service'),
+                  loc.t('booking_detail_ground_label'),
                   resource['name']?.toString() ?? 'Service',
                 ),
                 const SizedBox(height: 10),
-                _kv(
-                  loc.t('booking_detail_code', fallback: 'Appointment code'),
-                  '—',
-                ),
+                _kv(loc.t('booking_detail_code'), '—'),
                 const SizedBox(height: 10),
-                _kv(
-                  loc.t('booking_detail_date', fallback: 'Date'),
-                  iso.substring(0, 10),
-                ),
+                _kv(loc.t('booking_detail_date'), iso.substring(0, 10)),
                 const SizedBox(height: 10),
-                _kv(loc.t('booking_detail_time', fallback: 'Time'), slot),
+                _kv(loc.t('booking_detail_time'), slot),
               ],
             ),
           ),
@@ -121,9 +105,7 @@ class GroundBookingDetailPage extends StatelessWidget {
           onPressed: () => Navigator.of(
             context,
           ).pushNamed(AppRoutes.payment, arguments: args),
-          child: Text(
-            loc.t('booking_proceed_payment', fallback: 'Continue to payment'),
-          ),
+          child: Text(loc.t('booking_proceed_payment')),
         ),
       ),
     );

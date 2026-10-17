@@ -60,9 +60,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(loc.t('profile_my_profile', fallback: 'My profile')),
-      ),
+      appBar: AppBar(title: Text(loc.t('profile_my_profile'))),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -81,33 +79,25 @@ class _MyProfilePageState extends State<MyProfilePage> {
           const SizedBox(height: 16),
           TextField(
             controller: _firstName,
-            decoration: InputDecoration(
-              hintText: loc.t('profile_first_name', fallback: 'First name'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('profile_first_name')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _lastName,
-            decoration: InputDecoration(
-              hintText: loc.t('profile_last_name', fallback: 'Last name'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('profile_last_name')),
           ),
           const SizedBox(height: 12),
           TextField(
             readOnly: true,
             decoration: InputDecoration(
-              hintText: loc.t('profile_email', fallback: 'Email address'),
+              hintText: loc.t('profile_email'),
               helperText: _email,
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _saving ? null : () => _save(loc),
-            child: Text(
-              _saving
-                  ? loc.t('btn_saving', fallback: 'Saving...')
-                  : loc.t('btn_save', fallback: 'Save'),
-            ),
+            child: Text(_saving ? loc.t('btn_saving') : loc.t('btn_save')),
           ),
         ],
       ),
@@ -131,11 +121,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         () => _avatarDataUri = 'data:$mime;base64,${base64Encode(bytes)}',
       );
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t('profile_image_selected', fallback: 'Image selected'),
-          ),
-        ),
+        SnackBar(content: Text(loc.t('profile_image_selected'))),
       );
     }
   }
@@ -158,8 +144,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
         SnackBar(
           content: Text(
             ok
-                ? loc.t('profile_update_success', fallback: 'Profile updated')
-                : loc.t('profile_update_error', fallback: 'Failed to update'),
+                ? loc.t('profile_update_success')
+                : loc.t('profile_update_error'),
           ),
         ),
       );
@@ -170,11 +156,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
       if (!mounted) return;
       setState(() => _saving = false);
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t('profile_update_error', fallback: 'Failed to update'),
-          ),
-        ),
+        SnackBar(content: Text(loc.t('profile_update_error'))),
       );
     }
   }
@@ -191,9 +173,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
   //   setState(() => _saving = false);
   //   if (ok) {
   //     Navigator.pop(context);
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('profile_update_success', fallback: 'Profile updated'))));
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('profile_update_success'))));
   //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('profile_update_error', fallback: 'Failed to update'))));
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.t('profile_update_error'))));
   //   }
   // }
 }

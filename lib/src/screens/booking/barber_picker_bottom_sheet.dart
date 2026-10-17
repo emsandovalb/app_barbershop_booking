@@ -67,10 +67,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    loc.t(
-                      'booking_barber_picker_title',
-                      fallback: 'Select barber',
-                    ),
+                    loc.t('booking_barber_picker_title'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -79,11 +76,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    loc.t(
-                      'booking_barber_picker_hint',
-                      fallback:
-                          'Elegí el profesional que realizará tu servicio.',
-                    ),
+                    loc.t('booking_barber_picker_hint'),
                     style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 12),
@@ -100,10 +93,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                         if (snapshot.hasError) {
                           return Center(
                             child: Text(
-                              loc.t(
-                                'booking_barber_picker_error',
-                                fallback: 'Failed to load barbers',
-                              ),
+                              loc.t('booking_barber_picker_error'),
                               style: const TextStyle(color: Colors.white70),
                             ),
                           );
@@ -120,11 +110,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                                   vertical: 24,
                                 ),
                                 child: Text(
-                                  loc.t(
-                                    'booking_barber_none_available',
-                                    fallback:
-                                        'No barbers available for this service',
-                                  ),
+                                  loc.t('booking_barber_none_available'),
                                   style: const TextStyle(color: Colors.white70),
                                 ),
                               ),
@@ -144,10 +130,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                                   ),
                                   title: Text(
                                     barber['name']?.toString() ??
-                                        loc.t(
-                                          'booking_barber_label',
-                                          fallback: 'Barber',
-                                        ),
+                                        loc.t('booking_barber_label'),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../support/i18n.dart';
 
 /// Regression test for the stuck "Procesando..." bug: when a barber was
 /// selected but its id came back null, _confirm() showed an error and
@@ -50,7 +51,7 @@ void main() {
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
-            value: LocalizationService(translationsBaseUrl: 'http://localhost'),
+            value: testLocalization(),
           ),
         ],
         child: MaterialApp(

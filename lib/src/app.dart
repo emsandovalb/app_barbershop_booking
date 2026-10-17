@@ -11,7 +11,6 @@ import 'providers/auth_provider.dart';
 import 'services/api.dart';
 import 'providers/ground_form_provider.dart';
 import 'services/localization_service.dart';
-import 'services/salon_fallbacks.dart';
 import 'services/white_label_config_service.dart';
 import 'theme/brand_theme.dart';
 import 'widgets/inactivity_listener.dart';
@@ -52,7 +51,6 @@ class BarbershopBookingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = resolveApiBaseUrl();
-    final translationsBase = _translationsBase(base);
     final fallbackBrandTheme = _brandThemeForConfig(whiteLabelConfig);
 
     return MultiProvider(
@@ -87,10 +85,7 @@ class BarbershopBookingApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) {
             final service = LocalizationService(
-              translationsBaseUrl: translationsBase,
-              fallbackOverrides: whiteLabelConfig.slug == 'jc-studio'
-                  ? salonFallbacks
-                  : const {},
+              brandSlug: whiteLabelConfig.slug,
             );
             service.init(
               systemLocale: WidgetsBinding.instance.platformDispatcher.locale,
@@ -149,17 +144,6 @@ class BarbershopBookingApp extends StatelessWidget {
         },
       ),
     );
-  }
-
-  String _translationsBase(String apiBase) {
-    final uri = Uri.tryParse(apiBase);
-    if (uri == null) return apiBase;
-    final segments = List.of(uri.pathSegments);
-    if (segments.isNotEmpty && RegExp(r'^v\d+$').hasMatch(segments.last)) {
-      segments.removeLast();
-    }
-    final newUri = uri.replace(pathSegments: segments);
-    return newUri.toString().replaceAll(RegExp(r'\/+$'), '');
   }
 
   BrandTheme _brandThemeForConfig(WhiteLabelConfig whiteLabel) {

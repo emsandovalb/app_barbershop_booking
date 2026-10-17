@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../support/i18n.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,7 @@ void main() {
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
-            value: LocalizationService(translationsBaseUrl: 'http://localhost'),
+            value: testLocalization(),
           ),
         ],
         child: const MaterialApp(home: Scaffold(body: ProfileTab())),
@@ -65,7 +66,7 @@ void main() {
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
-            value: LocalizationService(translationsBaseUrl: 'http://localhost'),
+            value: testLocalization(),
           ),
         ],
         child: const MaterialApp(home: Scaffold(body: ProfileTab())),

@@ -30,38 +30,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(loc.t('reset_password_title', fallback: 'Reset password')),
-      ),
+      appBar: AppBar(title: Text(loc.t('reset_password_title'))),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                loc.t(
-                  'reset_password_subtitle',
-                  fallback:
-                      'Enter your email, the reset token from your email, and a new password.',
-                ),
-              ),
+              Text(loc.t('reset_password_subtitle')),
               const SizedBox(height: 12),
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: loc.t('form_email', fallback: 'Email address'),
-                ),
+                decoration: InputDecoration(hintText: loc.t('form_email')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: tokenCtrl,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'reset_password_token',
-                    fallback: 'Reset token',
-                  ),
+                  hintText: loc.t('reset_password_token'),
                 ),
               ),
               const SizedBox(height: 12),
@@ -69,10 +56,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 controller: passwordCtrl,
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'reset_password_new',
-                    fallback: 'New password',
-                  ),
+                  hintText: loc.t('reset_password_new'),
                   suffixIcon: IconButton(
                     onPressed: () =>
                         setState(() => obscurePassword = !obscurePassword),
@@ -87,10 +71,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 controller: confirmCtrl,
                 obscureText: obscureConfirm,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'reset_password_confirm',
-                    fallback: 'Confirm new password',
-                  ),
+                  hintText: loc.t('reset_password_confirm'),
                   suffixIcon: IconButton(
                     onPressed: () =>
                         setState(() => obscureConfirm = !obscureConfirm),
@@ -114,11 +95,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                loc.t(
-                                  'reset_password_invalid_email',
-                                  fallback:
-                                      'Please enter a valid email address.',
-                                ),
+                                loc.t('reset_password_invalid_email'),
                               ),
                             ),
                           );
@@ -129,10 +106,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                loc.t(
-                                  'reset_password_token_required',
-                                  fallback: 'Reset token is required.',
-                                ),
+                                loc.t('reset_password_token_required'),
                               ),
                             ),
                           );
@@ -142,13 +116,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         if (password.length < 6) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'reset_password_too_short',
-                                  fallback:
-                                      'Password must be at least 6 characters.',
-                                ),
-                              ),
+                              content: Text(loc.t('reset_password_too_short')),
                             ),
                           );
                           return;
@@ -157,12 +125,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         if (password != confirm) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'reset_password_mismatch',
-                                  fallback: 'Passwords do not match.',
-                                ),
-                              ),
+                              content: Text(loc.t('reset_password_mismatch')),
                             ),
                           );
                           return;
@@ -179,13 +142,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'reset_password_success',
-                                  fallback:
-                                      'Password reset successfully. You can now log in with your new password.',
-                                ),
-                              ),
+                              content: Text(loc.t('reset_password_success')),
                             ),
                           );
                           Navigator.of(context).pushNamedAndRemoveUntil(
@@ -197,7 +154,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${loc.t('reset_password_failed', fallback: 'Failed to reset password')}: ${e.message}',
+                                '${loc.t('reset_password_failed')}: ${e.message}',
                               ),
                             ),
                           );
@@ -206,7 +163,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${loc.t('reset_password_failed', fallback: 'Failed to reset password')}: $e',
+                                '${loc.t('reset_password_failed')}: $e',
                               ),
                             ),
                           );
@@ -218,14 +175,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       },
                 child: Text(
                   loading
-                      ? loc.t(
-                          'reset_password_submitting',
-                          fallback: 'Resetting...',
-                        )
-                      : loc.t(
-                          'reset_password_submit',
-                          fallback: 'Reset password',
-                        ),
+                      ? loc.t('reset_password_submitting')
+                      : loc.t('reset_password_submit'),
                 ),
               ),
             ],

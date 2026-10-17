@@ -2,7 +2,6 @@ import 'package:app_barbershop_booking/src/config/white_label_config.dart';
 import 'package:app_barbershop_booking/src/screens/admin/admin_page_scaffold.dart';
 import 'package:app_barbershop_booking/src/theme/brand_theme.dart';
 import 'package:app_barbershop_booking/src/widgets/barbershop_branding.dart';
-import 'package:app_barbershop_booking/src/services/salon_fallbacks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +27,6 @@ void main() {
         WhiteLabelConfig.jcStudio.businessProfileLabel,
         'perfil del salón',
       );
-      expect(salonFallbacks['booking_barber_choose'], 'Elegir estilista');
     },
   );
 

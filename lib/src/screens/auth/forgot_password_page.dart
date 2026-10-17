@@ -22,28 +22,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(loc.t('forgot_title', fallback: 'Forgot password')),
-      ),
+      appBar: AppBar(title: Text(loc.t('forgot_title'))),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                loc.t(
-                  'forgot_subtitle',
-                  fallback: 'Enter your email to receive reset instructions',
-                ),
-              ),
+              Text(loc.t('forgot_subtitle')),
               const SizedBox(height: 12),
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: loc.t('form_email', fallback: 'Email address'),
-                ),
+                decoration: InputDecoration(hintText: loc.t('form_email')),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -59,23 +50,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           );
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'forgot_success',
-                                  fallback: 'Check your email for instructions',
-                                ),
-                              ),
-                            ),
+                            SnackBar(content: Text(loc.t('forgot_success'))),
                           );
                           Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  '${loc.t('forgot_failed', fallback: 'Failed')}: $e',
-                                ),
+                                content: Text('${loc.t('forgot_failed')}: $e'),
                               ),
                             );
                           }
@@ -84,9 +66,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         }
                       },
                 child: Text(
-                  loading
-                      ? loc.t('forgot_sending', fallback: 'Sending...')
-                      : loc.t('forgot_button', fallback: 'Send reset link'),
+                  loading ? loc.t('forgot_sending') : loc.t('forgot_button'),
                 ),
               ),
               TextButton(

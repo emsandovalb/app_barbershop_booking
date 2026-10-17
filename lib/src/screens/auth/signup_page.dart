@@ -40,7 +40,7 @@ class _SignUpPageState extends State<SignUpPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  loc.t('signup_title', fallback: 'Sign up'),
+                  loc.t('signup_title'),
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
@@ -48,11 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  loc.t(
-                    'signup_subtitle',
-                    fallback:
-                        'Please enter your name, email address and password details to sign up',
-                  ),
+                  loc.t('signup_subtitle'),
                   style: TextStyle(color: Colors.white.withValues(alpha: .75)),
                 ),
                 const SizedBox(height: 24),
@@ -61,10 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: firstNameCtrl,
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
-                    hintText: loc.t(
-                      'profile_first_name',
-                      fallback: 'First name',
-                    ),
+                    hintText: loc.t('profile_first_name'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
@@ -75,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide:  BorderSide(color: theme.primary),
+                      borderSide: BorderSide(color: theme.primary),
                     ),
                   ),
                 ),
@@ -84,7 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: lastNameCtrl,
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
-                    hintText: loc.t('profile_last_name', fallback: 'Last name'),
+                    hintText: loc.t('profile_last_name'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
@@ -95,7 +88,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide:  BorderSide(color: theme.primary),
+                      borderSide: BorderSide(color: theme.primary),
                     ),
                   ),
                 ),
@@ -106,7 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   autocorrect: false,
                   enableSuggestions: false,
                   decoration: InputDecoration(
-                    hintText: loc.t('login_email', fallback: 'Email'),
+                    hintText: loc.t('login_email'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
@@ -117,7 +110,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide:  BorderSide(color: theme.primary),
+                      borderSide: BorderSide(color: theme.primary),
                     ),
                   ),
                 ),
@@ -126,7 +119,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: passCtrl,
                   obscureText: _obscure,
                   decoration: InputDecoration(
-                    hintText: loc.t('login_password', fallback: 'Password'),
+                    hintText: loc.t('login_password'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
@@ -143,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide:  BorderSide(color: theme.primary),
+                      borderSide: BorderSide(color: theme.primary),
                     ),
                   ),
                 ),
@@ -152,10 +145,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: confirmCtrl,
                   obscureText: _confirmObscure,
                   decoration: InputDecoration(
-                    hintText: loc.t(
-                      'signup_confirm_password',
-                      fallback: 'Confirm password',
-                    ),
+                    hintText: loc.t('signup_confirm_password'),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 16,
@@ -175,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
-                      borderSide:  BorderSide(color: theme.primary),
+                      borderSide: BorderSide(color: theme.primary),
                     ),
                   ),
                 ),
@@ -196,12 +186,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               passCtrl.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  loc.t(
-                                    'signup_complete_fields',
-                                    fallback: 'Please complete all fields',
-                                  ),
-                                ),
+                                content: Text(loc.t('signup_complete_fields')),
                               ),
                             );
                             return;
@@ -222,11 +207,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  loc.t(
-                                    'change_password_requirements',
-                                    fallback:
-                                        'Password must be at least 8 characters, include an uppercase letter and a number',
-                                  ),
+                                  loc.t('change_password_requirements'),
                                 ),
                               ),
                             );
@@ -236,10 +217,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  loc.t(
-                                    'change_password_mismatch',
-                                    fallback: 'Passwords do not match',
-                                  ),
+                                  loc.t('change_password_mismatch'),
                                 ),
                               ),
                             );
@@ -271,7 +249,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           }
                           setState(() => isBusy = false);
                         },
-                  child: Text(loc.t('signup_button', fallback: 'Sign up')),
+                  child: Text(loc.t('signup_button')),
                 ),
 
                 const SizedBox(height: 16),
@@ -280,12 +258,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     onPressed: () => Navigator.of(
                       context,
                     ).pushReplacementNamed(AppRoutes.login),
-                    child: Text(
-                      loc.t(
-                        'signup_have_account',
-                        fallback: 'Already have an account? Log in',
-                      ),
-                    ),
+                    child: Text(loc.t('signup_have_account')),
                   ),
                 ),
               ],
@@ -308,5 +281,5 @@ String _signupErrorMessage(String? error, LocalizationService loc) {
     return 'Ya existe una cuenta con este correo electrónico';
   }
   if (text.isNotEmpty) return text;
-  return loc.t('signup_failed', fallback: 'Sign up failed');
+  return loc.t('signup_failed');
 }

@@ -1,0 +1,11 @@
+{
+  "booking_barber_label": "Stylist",
+  "booking_barber_none_available": "No stylists available for this service",
+  "booking_barber_picker_error": "Couldn't load stylists",
+  "booking_barber_picker_hint": "Choose the stylist who will perform your service.",
+  "booking_barber_picker_title": "Choose your stylist",
+  "booking_barber_selection_invalid": "That stylist selection is no longer valid. Please choose again.",
+  "manage_staff": "Manage stylists",
+  "staff_load_failed": "Couldn't load stylists",
+  "staff_title": "Stylist"
+}

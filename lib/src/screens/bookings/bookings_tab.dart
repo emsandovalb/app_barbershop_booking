@@ -49,7 +49,7 @@ class _BookingsTabState extends State<BookingsTab> {
       initialIndex: _currentIndex,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(loc.t('bookings_title', fallback: 'Mis citas')),
+          title: Text(loc.t('bookings_title')),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(70),
             child: Padding(
@@ -86,24 +86,9 @@ class _BookingsTabState extends State<BookingsTab> {
                     letterSpacing: .1,
                   ),
                   tabs: [
-                    Tab(
-                      text: loc.t(
-                        'bookings_tab_upcoming',
-                        fallback: 'Próximas',
-                      ),
-                    ),
-                    Tab(
-                      text: loc.t(
-                        'bookings_tab_completed',
-                        fallback: 'Completadas',
-                      ),
-                    ),
-                    Tab(
-                      text: loc.t(
-                        'bookings_tab_cancelled',
-                        fallback: 'Canceladas',
-                      ),
-                    ),
+                    Tab(text: loc.t('bookings_tab_upcoming')),
+                    Tab(text: loc.t('bookings_tab_completed')),
+                    Tab(text: loc.t('bookings_tab_cancelled')),
                   ],
                 ),
               ),
@@ -190,11 +175,7 @@ class _AppointmentList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Icon(
-                Icons.lock_outline,
-                color: theme.primary,
-                size: 44,
-              ),
+              Icon(Icons.lock_outline, color: theme.primary, size: 44),
               const SizedBox(height: 14),
               const Text(
                 'Iniciá sesión para ver tus citas',
@@ -204,7 +185,7 @@ class _AppointmentList extends StatelessWidget {
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pushNamed('/login'),
-                child: Text(loc.t('login_button', fallback: 'Iniciar sesión')),
+                child: Text(loc.t('login_button')),
               ),
             ],
           ),
@@ -332,7 +313,7 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                           Icon(
+                          Icon(
                             Icons.content_cut_outlined,
                             size: 16,
                             color: theme.secondary,
@@ -422,15 +403,7 @@ class _AppointmentCard extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     if (!canCancelAppointment(booking)) {
       messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            loc.t(
-              'booking_cancel_limit',
-              fallback:
-                  'No se puede cancelar dentro de las 4 horas previas al inicio.',
-            ),
-          ),
-        ),
+        SnackBar(content: Text(loc.t('booking_cancel_limit'))),
       );
       return;
     }
@@ -593,10 +566,7 @@ class _PriceChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style:  TextStyle(
-          color: theme.primary,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: theme.primary, fontWeight: FontWeight.w800),
       ),
     );
   }

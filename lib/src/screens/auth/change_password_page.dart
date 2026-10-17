@@ -27,11 +27,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     bool isValid(String p) => RegExp(r'^(?=.*[A-Z])(?=.*\d).{8,}$').hasMatch(p);
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(
-          loc.t('change_password_title', fallback: 'Change password'),
-        ),
-      ),
+      appBar: AppBar(title: Text(loc.t('change_password_title'))),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -42,10 +38,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: currentCtrl,
                 obscureText: obscure1,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'change_password_current',
-                    fallback: 'Current password',
-                  ),
+                  hintText: loc.t('change_password_current'),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => obscure1 = !obscure1),
                     icon: Icon(
@@ -59,10 +52,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: newCtrl,
                 obscureText: obscure2,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'change_password_new',
-                    fallback: 'New password',
-                  ),
+                  hintText: loc.t('change_password_new'),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => obscure2 = !obscure2),
                     icon: Icon(
@@ -76,10 +66,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: confirmCtrl,
                 obscureText: obscure3,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'change_password_confirm',
-                    fallback: 'Confirm new password',
-                  ),
+                  hintText: loc.t('change_password_confirm'),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => obscure3 = !obscure3),
                     icon: Icon(
@@ -96,12 +83,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         if (newCtrl.text != confirmCtrl.text) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'change_password_mismatch',
-                                  fallback: 'Passwords do not match',
-                                ),
-                              ),
+                              content: Text(loc.t('change_password_mismatch')),
                             ),
                           );
                           return;
@@ -110,11 +92,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                loc.t(
-                                  'change_password_requirements',
-                                  fallback:
-                                      'Password must be at least 8 characters, include an uppercase letter and a number',
-                                ),
+                                loc.t('change_password_requirements'),
                               ),
                             ),
                           );
@@ -129,12 +107,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                loc.t(
-                                  'change_password_success',
-                                  fallback: 'Password updated',
-                                ),
-                              ),
+                              content: Text(loc.t('change_password_success')),
                             ),
                           );
                           Navigator.pop(context);
@@ -143,7 +116,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${loc.t('change_password_failed', fallback: 'Failed')}: $e',
+                                  '${loc.t('change_password_failed')}: $e',
                                 ),
                               ),
                             );
@@ -154,14 +127,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       },
                 child: Text(
                   loading
-                      ? loc.t(
-                          'change_password_updating',
-                          fallback: 'Updating...',
-                        )
-                      : loc.t(
-                          'change_password_submit',
-                          fallback: 'Update password',
-                        ),
+                      ? loc.t('change_password_updating')
+                      : loc.t('change_password_submit'),
                 ),
               ),
             ],

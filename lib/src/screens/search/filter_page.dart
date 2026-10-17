@@ -45,40 +45,32 @@ class _FilterPageState extends State<FilterPage> {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: Text(loc.t('filter_title', fallback: 'Filter'))),
+      appBar: AppBar(title: Text(loc.t('filter_title'))),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(loc.t('filter_ground_name', fallback: 'Service name')),
+              Text(loc.t('filter_ground_name')),
               const SizedBox(height: 6),
               TextField(
                 controller: nameCtrl,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'filter_name_hint',
-                    fallback: 'Search by name',
-                  ),
+                  hintText: loc.t('filter_name_hint'),
                 ),
               ),
               const SizedBox(height: 12),
-              Text(
-                loc.t('filter_address_label', fallback: 'Location / Address'),
-              ),
+              Text(loc.t('filter_address_label')),
               const SizedBox(height: 6),
               TextField(
                 controller: addressCtrl,
                 decoration: InputDecoration(
-                  hintText: loc.t(
-                    'filter_address_hint',
-                    fallback: 'City, area or address',
-                  ),
+                  hintText: loc.t('filter_address_hint'),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(loc.t('filter_price_range', fallback: 'Price range')),
+              Text(loc.t('filter_price_range')),
               RangeSlider(
                 values: RangeValues(priceMin, priceMax),
                 onChanged: (v) => setState(() {
@@ -89,57 +81,45 @@ class _FilterPageState extends State<FilterPage> {
                 max: _priceSliderMax,
               ),
               const SizedBox(height: 12),
-              Text(
-                loc.t('filter_duration', fallback: 'Duration per appointment'),
-              ),
+              Text(loc.t('filter_duration')),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: Text(
-                      loc.t('filter_duration_one', fallback: '1 hour'),
-                    ),
+                    label: Text(loc.t('filter_duration_one')),
                     selected: duration == 1,
                     onSelected: (_) => setState(() => duration = 1),
                   ),
                   ChoiceChip(
-                    label: Text(
-                      loc.t('filter_duration_two', fallback: '2 hours'),
-                    ),
+                    label: Text(loc.t('filter_duration_two')),
                     selected: duration == 2,
                     onSelected: (_) => setState(() => duration = 2),
                   ),
                   ChoiceChip(
-                    label: Text(loc.t('filter_duration_any', fallback: 'Any')),
+                    label: Text(loc.t('filter_duration_any')),
                     selected: duration == null,
                     onSelected: (_) => setState(() => duration = null),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              Text(loc.t('filter_sort_by', fallback: 'Sort by')),
+              Text(loc.t('filter_sort_by')),
               Wrap(
                 spacing: 8,
                 children: [
                   ChoiceChip(
-                    label: Text(
-                      loc.t('filter_sort_rating', fallback: 'Rating'),
-                    ),
+                    label: Text(loc.t('filter_sort_rating')),
                     selected: sort == 'rating',
                     onSelected: (_) => setState(() => sort = 'rating'),
                   ),
                   ChoiceChip(
-                    label: Text(
-                      loc.t('filter_sort_price_asc', fallback: 'Price ↑'),
-                    ),
+                    label: Text(loc.t('filter_sort_price_asc')),
                     selected: sort == 'price_asc',
                     onSelected: (_) => setState(() => sort = 'price_asc'),
                   ),
                   ChoiceChip(
-                    label: Text(
-                      loc.t('filter_sort_price_desc', fallback: 'Price ↓'),
-                    ),
+                    label: Text(loc.t('filter_sort_price_desc')),
                     selected: sort == 'price_desc',
                     onSelected: (_) => setState(() => sort = 'price_desc'),
                   ),
@@ -151,7 +131,7 @@ class _FilterPageState extends State<FilterPage> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _reset,
-                      child: Text(loc.t('btn_reset', fallback: 'Reset')),
+                      child: Text(loc.t('btn_reset')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -164,7 +144,7 @@ class _FilterPageState extends State<FilterPage> {
                         'sort': sort,
                         'duration': duration,
                       }),
-                      child: Text(loc.t('btn_apply', fallback: 'Apply')),
+                      child: Text(loc.t('btn_apply')),
                     ),
                   ),
                 ],

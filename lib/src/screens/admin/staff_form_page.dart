@@ -140,11 +140,8 @@ class _StaffFormPageState extends State<StaffFormPage> {
     final loc = context.watch<LocalizationService>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     final title = _isCreating
-        ? loc.t('add_staff', fallback: 'Agregar ${whiteLabel.staffDisplayName}')
-        : loc.t(
-            'edit_staff',
-            fallback: 'Editar ${whiteLabel.staffDisplayName}',
-          );
+        ? loc.t('add_staff', args: {'staff': whiteLabel.staffDisplayName})
+        : loc.t('edit_staff', args: {'staff': whiteLabel.staffDisplayName});
 
     return Scaffold(
       appBar: buildAdminAppBar(context, title: title),
@@ -162,15 +159,10 @@ class _StaffFormPageState extends State<StaffFormPage> {
                       children: [
                         TextFormField(
                           controller: _nameController,
-                          decoration: InputDecoration(
-                            labelText: loc.t(
-                              'name',
-                              fallback: whiteLabel.staffDisplayName,
-                            ),
-                          ),
+                          decoration: InputDecoration(labelText: loc.t('name')),
                           validator: (value) =>
                               (value == null || value.trim().isEmpty)
-                              ? loc.t('required', fallback: 'Required')
+                              ? loc.t('required')
                               : null,
                         ),
                         const SizedBox(height: 12),
@@ -178,7 +170,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
-                            labelText: loc.t('email', fallback: 'Email'),
+                            labelText: loc.t('email'),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -186,25 +178,20 @@ class _StaffFormPageState extends State<StaffFormPage> {
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                            labelText: loc.t('phone', fallback: 'Phone'),
+                            labelText: loc.t('phone'),
                           ),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _bioController,
                           maxLines: 4,
-                          decoration: InputDecoration(
-                            labelText: loc.t('bio', fallback: 'Bio'),
-                          ),
+                          decoration: InputDecoration(labelText: loc.t('bio')),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _avatarController,
                           decoration: InputDecoration(
-                            labelText: loc.t(
-                              'avatar',
-                              fallback: 'Avatar URL or path',
-                            ),
+                            labelText: loc.t('avatar'),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -221,21 +208,17 @@ class _StaffFormPageState extends State<StaffFormPage> {
                           onChanged: (value) =>
                               setState(() => _selectedRoleId = value),
                           decoration: InputDecoration(
-                            labelText: loc.t(
-                              'staff_role',
-                              fallback: 'Staff role',
-                            ),
+                            labelText: loc.t('staff_role'),
                           ),
-                          validator: (value) => value == null
-                              ? loc.t('required', fallback: 'Required')
-                              : null,
+                          validator: (value) =>
+                              value == null ? loc.t('required') : null,
                         ),
                         const SizedBox(height: 12),
                         SwitchListTile(
                           value: _isActive,
                           onChanged: (value) =>
                               setState(() => _isActive = value),
-                          title: Text(loc.t('active', fallback: 'Active')),
+                          title: Text(loc.t('active')),
                           contentPadding: EdgeInsets.zero,
                         ),
                         const SizedBox(height: 24),
@@ -251,7 +234,7 @@ class _StaffFormPageState extends State<StaffFormPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : Text(loc.t('save', fallback: 'Save')),
+                                : Text(loc.t('save')),
                           ),
                         ),
                       ],

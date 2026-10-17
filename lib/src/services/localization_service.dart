@@ -2,37 +2,44 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'barbershop_fallbacks.dart';
-import 'app_translations.dart';
-
-/// Handles downloading and caching UI translations from the backend.
-/// Flow:
-/// 1. Detect system locale on first run.
-/// 2. Fetch strings from `/api/translations?lang=xx`.
-/// 3. Allow the user to override the language (Profile screen) and persist it.
+/// UI strings bundled with the app as JSON, one file per language:
+///
+/// * `assets/i18n/<lang>.json` holds every key the app uses.
+/// * `assets/i18n/brands/<slug>/<lang>.json` optionally overrides some keys
+///   for one brand (e.g. "estilista" instead of "barbero").
+///
+/// Strings load from the app bundle, so changing language is instant and
+/// works offline. The chosen language is remembered across launches.
 class LocalizationService extends ChangeNotifier {
-  LocalizationService({
-    required this.translationsBaseUrl,
-    Map<String, String> fallbackOverrides = const {},
-  }) : _fallbackOverrides = fallbackOverrides;
+  LocalizationService({this.brandSlug, AssetBundle? bundle})
+    : _bundle = bundle ?? rootBundle;
 
-  final String translationsBaseUrl;
-  final Map<String, String> _fallbackOverrides;
+  /// Starts with [strings] already loaded, for tests and previews.
+  @visibleForTesting
+  LocalizationService.withStrings(
+    Map<String, String> strings, {
+    Locale locale = const Locale('es'),
+    this.brandSlug,
+  }) : _bundle = rootBundle,
+       _strings = Map.of(strings),
+       _locale = locale,
+       _isLoading = false;
 
+  static const supportedLanguages = ['es', 'en'];
+  static const defaultLanguage = 'es';
   static const _prefsLanguageKey = 'language_code';
-  static const _prefsStringsPrefix = 'translation_strings_';
-  static const _prefsVersionPrefix = 'translation_version_';
-  static const _supported = ['es', 'en'];
 
-  Locale _locale = const Locale('es');
-  AppTranslations _translations = const AppTranslations({});
+  final String? brandSlug;
+  final AssetBundle _bundle;
+
+  Locale _locale = const Locale(defaultLanguage);
+  Map<String, String> _strings = const {};
   bool _isLoading = true;
 
   Locale get locale => _locale;
-  AppTranslations get tr => _translations;
   bool get isLoading => _isLoading;
 
   Future<void> init({Locale? systemLocale}) async {
@@ -41,84 +48,81 @@ class LocalizationService extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       saved = prefs.getString(_prefsLanguageKey);
     } catch (_) {
-      // Continue with the detected locale when storage is unavailable.
+      // Fall back to the device language when storage is unavailable.
     }
-    final normalizedSaved = _normalize(saved);
-    final detected = _normalize(systemLocale?.languageCode);
-    await load(normalizedSaved ?? detected ?? 'es');
+    await _load(
+      _normalize(saved) ??
+          _normalize(systemLocale?.languageCode) ??
+          defaultLanguage,
+      remember: false,
+    );
   }
 
-  Future<void> load(String languageCode) async {
-    final normalized = _normalize(languageCode) ?? 'es';
+  Future<void> changeLanguage(String languageCode) =>
+      _load(_normalize(languageCode) ?? defaultLanguage, remember: true);
+
+  /// The string for [key] in the current language. `{name}` placeholders are
+  /// replaced from [args]. A missing key returns [fallback] or the key itself
+  /// (a test keeps every key used in code present in every language file).
+  String t(
+    String key, {
+    String? fallback,
+    Map<String, Object?> args = const {},
+  }) {
+    var value = _strings[key] ?? fallback ?? key;
+    args.forEach((name, replacement) {
+      value = value.replaceAll('{$name}', '${replacement ?? ''}');
+    });
+    return value;
+  }
+
+  Future<void> _load(String language, {required bool remember}) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final cached = prefs.getString('$_prefsStringsPrefix$normalized');
-      if (cached != null) {
-        _translations = AppTranslations(_decodeStrings(cached));
-        _locale = Locale(normalized);
-        notifyListeners();
-      }
-      final uri = Uri.parse(
-        '$translationsBaseUrl/translations',
-      ).replace(queryParameters: {'lang': normalized});
-      final res = await http.get(uri);
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        throw Exception('Failed to load translations ${res.statusCode}');
-      }
-      final data = json.decode(res.body) as Map<String, dynamic>;
-      final lang = _normalize(data['lang']?.toString()) ?? normalized;
-      final strings =
-          (data['strings'] as Map?)?.map(
-            (key, value) => MapEntry(key.toString(), value.toString()),
-          ) ??
-          <String, String>{};
-      _translations = AppTranslations(strings);
-      _locale = Locale(lang);
-      await prefs.setString(_prefsLanguageKey, lang);
-      await prefs.setString('$_prefsStringsPrefix$lang', json.encode(strings));
-      if (data['version'] != null) {
-        await prefs.setInt(
-          '$_prefsVersionPrefix$lang',
-          int.tryParse(data['version'].toString()) ?? 0,
+      final strings = await _readStrings('assets/i18n/$language.json');
+      final slug = brandSlug?.trim();
+      if (slug != null && slug.isNotEmpty) {
+        strings.addAll(
+          await _readStrings(
+            'assets/i18n/brands/$slug/$language.json',
+            optional: true,
+          ),
         );
       }
-    } catch (_) {
-      // Keep previously loaded translations if request fails.
+      _strings = strings;
+      _locale = Locale(language);
+      if (remember) {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_prefsLanguageKey, language);
+        } catch (_) {
+          // The language still changes for this session.
+        }
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> changeLanguage(String languageCode) => load(languageCode);
-
-  String t(String key, {String? fallback}) => _translations.t(
-    key,
-    fallback:
-        fallback ??
-        _fallbackOverrides[key] ??
-        (_locale.languageCode == 'es' ? barbershopFallbacks[key] : null),
-  );
-
-  Map<String, String> _decodeStrings(String raw) {
+  Future<Map<String, String>> _readStrings(
+    String path, {
+    bool optional = false,
+  }) async {
+    final String raw;
     try {
-      final decoded = json.decode(raw);
-      if (decoded is Map) {
-        return decoded.map(
-          (key, value) => MapEntry(key.toString(), value.toString()),
-        );
-      }
+      raw = await _bundle.loadString(path);
     } catch (_) {
-      // A corrupt cache is ignored; the network response or fallback map wins.
+      if (optional) return <String, String>{};
+      rethrow;
     }
-    return const <String, String>{};
+    final decoded = json.decode(raw) as Map<String, dynamic>;
+    return decoded.map((key, value) => MapEntry(key, value.toString()));
   }
 
   String? _normalize(String? code) {
-    if (code == null) return null;
-    final trimmed = code.trim().toLowerCase();
-    return _supported.contains(trimmed) ? trimmed : null;
+    final trimmed = code?.trim().toLowerCase();
+    return supportedLanguages.contains(trimmed) ? trimmed : null;
   }
 }

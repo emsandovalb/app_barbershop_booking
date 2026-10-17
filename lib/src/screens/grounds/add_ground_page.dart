@@ -31,41 +31,33 @@ class _AddGroundPageState extends State<AddGroundPage> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(loc.t('grounds_add_title', fallback: 'Add service')),
+        title: Text(loc.t('grounds_add_title')),
       ),
       body: KeyboardAwareListView(
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
             controller: nameCtrl,
-            decoration: InputDecoration(
-              hintText: loc.t('form_name', fallback: 'Name'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('form_name')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: emailCtrl,
-            decoration: InputDecoration(
-              hintText: loc.t('form_email', fallback: 'Email address'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('form_email')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: phoneCtrl,
-            decoration: InputDecoration(
-              hintText: loc.t('form_phone', fallback: 'Phone'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('form_phone')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: addressCtrl,
-            decoration: InputDecoration(
-              hintText: loc.t('form_address', fallback: 'Address'),
-            ),
+            decoration: InputDecoration(hintText: loc.t('form_address')),
           ),
           const SizedBox(height: 24),
           Text(
-            loc.t('grounds_operating_hours', fallback: 'Shop hours'),
+            loc.t('grounds_operating_hours'),
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               color: Colors.white,
@@ -76,7 +68,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
             children: [
               Expanded(
                 child: _TimeTile(
-                  label: loc.t('grounds_opens', fallback: 'Opens'),
+                  label: loc.t('grounds_opens'),
                   value: _fmt(openTime),
                   onTap: () async {
                     final picked = await showTimePicker(
@@ -90,7 +82,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: _TimeTile(
-                  label: loc.t('grounds_closes', fallback: 'Closes'),
+                  label: loc.t('grounds_closes'),
                   value: _fmt(closeTime),
                   onTap: () async {
                     final picked = await showTimePicker(
@@ -105,10 +97,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            loc.t(
-              'grounds_duration_label',
-              fallback: 'Duration per appointment',
-            ),
+            loc.t('grounds_duration_label'),
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               color: Colors.white,
@@ -118,13 +107,13 @@ class _AddGroundPageState extends State<AddGroundPage> {
           Row(
             children: [
               _DurationPill(
-                label: loc.t('grounds_duration_one', fallback: '1 Hour'),
+                label: loc.t('grounds_duration_one'),
                 selected: durationHours == 1,
                 onTap: () => setState(() => durationHours = 1),
               ),
               const SizedBox(width: 8),
               _DurationPill(
-                label: loc.t('grounds_duration_two', fallback: '2 Hours'),
+                label: loc.t('grounds_duration_two'),
                 selected: durationHours == 2,
                 onTap: () => setState(() => durationHours = 2),
               ),
@@ -139,14 +128,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
             if (nameCtrl.text.trim().isEmpty ||
                 addressCtrl.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    loc.t(
-                      'grounds_name_required',
-                      fallback: 'Name and Address are required',
-                    ),
-                  ),
-                ),
+                SnackBar(content: Text(loc.t('grounds_name_required'))),
               );
               return;
             }
@@ -166,7 +148,7 @@ class _AddGroundPageState extends State<AddGroundPage> {
               Navigator.of(context).pushNamed(AppRoutes.addPhotos);
             }
           },
-          child: Text(loc.t('btn_continue', fallback: 'Continue')),
+          child: Text(loc.t('btn_continue')),
         ),
       ),
     );

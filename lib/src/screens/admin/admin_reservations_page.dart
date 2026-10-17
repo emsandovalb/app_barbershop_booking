@@ -47,23 +47,16 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
       return Scaffold(
         appBar: buildAdminAppBar(
           context,
-          title: loc.t('admin_reservations_title', fallback: 'Appointments'),
+          title: loc.t('admin_reservations_title'),
         ),
-        body: Center(
-          child: Text(
-            loc.t(
-              'grounds_admin_only',
-              fallback: 'Only administrators can access this section',
-            ),
-          ),
-        ),
+        body: Center(child: Text(loc.t('grounds_admin_only'))),
       );
     }
 
     return Scaffold(
       appBar: buildAdminAppBar(
         context,
-        title: loc.t('admin_reservations_title', fallback: 'Agenda'),
+        title: loc.t('admin_reservations_title'),
         subtitle: DateFormat('EEEE, MMM d').format(_selectedDay),
         actions: [
           IconButton(

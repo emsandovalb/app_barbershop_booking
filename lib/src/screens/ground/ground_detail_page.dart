@@ -34,9 +34,7 @@ class GroundDetailPage extends StatelessWidget {
     final selectedStaffName = preferredStaff?['name']?.toString() ?? '';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.t('booking_detail_ground_label', fallback: 'Service')),
-      ),
+      appBar: AppBar(title: Text(loc.t('booking_detail_ground_label'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -60,7 +58,7 @@ class GroundDetailPage extends StatelessWidget {
                         border: Border.all(color: Colors.white12),
                       ),
                       child: Text(
-                        loc.t('home_premium_badge', fallback: 'Premium'),
+                        loc.t('home_premium_badge'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -77,7 +75,7 @@ class GroundDetailPage extends StatelessWidget {
               const Icon(Icons.star, color: Colors.amber, size: 18),
               const SizedBox(width: 4),
               Text(
-                loc.t('ground_rating_sample', fallback: '4.9 (212 Reviews)'),
+                loc.t('ground_rating_sample'),
                 style: const TextStyle(color: Colors.white70),
               ),
               const Spacer(),
@@ -103,11 +101,7 @@ class GroundDetailPage extends StatelessWidget {
           Text(
             description.isNotEmpty
                 ? description
-                : loc.t(
-                    'ground_description_placeholder',
-                    fallback:
-                        'Reserve this service by choosing an available time slot.',
-                  ),
+                : loc.t('ground_description_placeholder'),
             style: TextStyle(color: Colors.white.withValues(alpha: .85)),
           ),
           if (selectedStaffName.isNotEmpty) ...[
@@ -121,11 +115,7 @@ class GroundDetailPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                   Icon(
-                    Icons.person_outline,
-                    color: theme.primary,
-                    size: 18,
-                  ),
+                  Icon(Icons.person_outline, color: theme.primary, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -145,13 +135,13 @@ class GroundDetailPage extends StatelessWidget {
             children: [
               _MiniStat(
                 icon: Icons.schedule_outlined,
-                label: loc.t('booking_detail_duration', fallback: 'Duration'),
+                label: loc.t('booking_detail_duration'),
                 value: duration,
               ),
               const SizedBox(width: 12),
               _MiniStat(
                 icon: Icons.payments_outlined,
-                label: loc.t('booking_detail_price', fallback: 'Price'),
+                label: loc.t('booking_detail_price'),
                 value: price,
               ),
             ],
@@ -170,30 +160,16 @@ class GroundDetailPage extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
-              _AmenityChip(
-                label: loc.t('facility_parking', fallback: 'Parking'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_camera', fallback: 'Security'),
-              ),
-              _AmenityChip(
-                label: loc.t('facility_waiting', fallback: 'Waiting area'),
-              ),
-              _AmenityChip(
-                label: loc.t(
-                  'facility_changing',
-                  fallback: 'Private prep room',
-                ),
-              ),
+              _AmenityChip(label: loc.t('facility_parking')),
+              _AmenityChip(label: loc.t('facility_camera')),
+              _AmenityChip(label: loc.t('facility_waiting')),
+              _AmenityChip(label: loc.t('facility_changing')),
             ],
           ),
           const SizedBox(height: 16),
           if (businessHours.isNotEmpty) ...[
             Text(
-              loc.t(
-                'home_business_hours_title',
-                fallback: 'Horario de atención',
-              ),
+              loc.t('home_business_hours_title'),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -221,7 +197,7 @@ class GroundDetailPage extends StatelessWidget {
           ],
           if (barbers.isNotEmpty) ...[
             Text(
-              loc.t('booking_barber_picker_title', fallback: 'Select barber'),
+              loc.t('booking_barber_picker_title'),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -250,7 +226,7 @@ class GroundDetailPage extends StatelessWidget {
                       ),
                       child: Text(
                         barber['name']?.toString() ??
-                            loc.t('booking_barber_label', fallback: 'Barber'),
+                            loc.t('booking_barber_label'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -263,7 +239,7 @@ class GroundDetailPage extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           Text(
-            loc.t('ground_list_title', fallback: 'Available services'),
+            loc.t('ground_list_title'),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -295,7 +271,7 @@ class GroundDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      loc.t('ground_main_label', fallback: 'Signature option'),
+                      loc.t('ground_main_label'),
                       style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 2),
@@ -322,14 +298,7 @@ class GroundDetailPage extends StatelessWidget {
             final auth = context.read<AuthProvider>();
             if (!auth.isLoggedIn) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    loc.t(
-                      'ground_login_required',
-                      fallback: 'Please log in to continue',
-                    ),
-                  ),
-                ),
+                SnackBar(content: Text(loc.t('ground_login_required'))),
               );
               Navigator.of(context).pushNamed(AppRoutes.login);
               return;
@@ -346,14 +315,7 @@ class GroundDetailPage extends StatelessWidget {
             if (staff == null) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      loc.t(
-                        'booking_barber_required',
-                        fallback: 'Elegí un profesional para continuar.',
-                      ),
-                    ),
-                  ),
+                  SnackBar(content: Text(loc.t('booking_barber_required'))),
                 );
               }
               return;
@@ -382,7 +344,7 @@ class GroundDetailPage extends StatelessWidget {
               },
             );
           },
-          child: Text(loc.t('ground_book_now', fallback: 'Reservar cita')),
+          child: Text(loc.t('ground_book_now')),
         ),
       ),
     );
