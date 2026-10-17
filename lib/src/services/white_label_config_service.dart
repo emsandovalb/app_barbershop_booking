@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/white_label_config.dart';
 import '../theme/brand_theme.dart';
+import 'resilient_http_client.dart';
 
 class WhiteLabelConfigService extends ChangeNotifier {
   WhiteLabelConfigService({
@@ -15,7 +16,14 @@ class WhiteLabelConfigService extends ChangeNotifier {
     http.Client? client,
   }) : _baseUrl = _cleanBase(baseUrl),
        _businessSlug = _cleanBusinessSlug(businessSlug),
-       _client = client ?? http.Client(),
+       // Short deadline: the app waits for this on startup and falls back
+       // to the cached config, so a slow network must not block launch.
+       _client =
+           client ??
+           ResilientHttpClient(
+             timeout: const Duration(seconds: 8),
+             getRetries: 0,
+           ),
        _fallback = fallback ?? WhiteLabelConfig.generic,
        _config = fallback ?? WhiteLabelConfig.generic,
        _brandTheme = BrandTheme.generic();

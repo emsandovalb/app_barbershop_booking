@@ -63,7 +63,7 @@ class LocalizationService extends ChangeNotifier {
       final uri = Uri.parse(
         '$translationsBaseUrl/translations',
       ).replace(queryParameters: {'lang': normalized});
-      final res = await http.get(uri);
+      final res = await http.get(uri).timeout(const Duration(seconds: 15));
       if (res.statusCode < 200 || res.statusCode >= 300) {
         throw Exception('Failed to load translations ${res.statusCode}');
       }

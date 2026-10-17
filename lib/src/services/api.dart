@@ -4,6 +4,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
+import 'resilient_http_client.dart';
+
 /// Removes only whitespace and invisible separators around an address. It
 /// deliberately does not alter the address itself: malformed email remains a
 /// validation error rather than being silently rewritten.
@@ -17,6 +19,7 @@ class ApiClient {
   final String reservationEndpoint;
   final String myResourcesEndpoint;
   final String? businessSlug;
+  final http.Client _http;
   String? _token;
 
   ApiClient({
@@ -25,7 +28,9 @@ class ApiClient {
     String reservationEndpointValue = 'reservations',
     String myResourcesEndpointValue = 'my/resources',
     String? businessSlug,
+    http.Client? httpClient,
   }) : baseUrl = _cleanBase(baseUrl),
+       _http = httpClient ?? ResilientHttpClient(),
        resourceEndpoint = resourceEndpointValue,
        reservationEndpoint = reservationEndpointValue,
        myResourcesEndpoint = myResourcesEndpointValue,
@@ -220,7 +225,7 @@ class ApiClient {
     Uri uri, {
     bool reservation = false,
   }) async {
-    final res = await http.get(uri, headers: _headers);
+    final res = await _http.get(uri, headers: _headers);
     _ensureOk(res);
     final decoded = json.decode(res.body) as Map<String, dynamic>;
     return _normalizeResponse(decoded, reservation: reservation);
@@ -233,7 +238,7 @@ class ApiClient {
     bool reservation = false,
   }) async {
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.post(uri, headers: headers, body: json.encode(body));
+    final res = await _http.post(uri, headers: headers, body: json.encode(body));
     _ensureOk(res, expectCreated: expectCreated);
     return _normalizeResponse(
       json.decode(res.body) as Map<String, dynamic>,
@@ -247,7 +252,7 @@ class ApiClient {
     bool reservation = false,
   }) async {
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.put(uri, headers: headers, body: json.encode(body));
+    final res = await _http.put(uri, headers: headers, body: json.encode(body));
     _ensureOk(res);
     return _normalizeResponse(
       json.decode(res.body) as Map<String, dynamic>,
@@ -261,7 +266,7 @@ class ApiClient {
     bool reservation = false,
   }) async {
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.patch(
+    final res = await _http.patch(
       uri,
       headers: headers,
       body: json.encode(body),
@@ -277,7 +282,7 @@ class ApiClient {
     Uri uri, {
     bool reservation = false,
   }) async {
-    final res = await http.delete(uri, headers: _headers);
+    final res = await _http.delete(uri, headers: _headers);
     _ensureOk(res);
     return _normalizeResponse(
       json.decode(res.body) as Map<String, dynamic>,
@@ -286,7 +291,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/login'),
       headers: _headers,
       body: {'email': email, 'password': password},
@@ -301,7 +306,7 @@ class ApiClient {
     String password,
   ) async {
     final normalizedEmail = normalizeEmailInput(email);
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: _headers,
       body: {
@@ -315,7 +320,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> me() async {
-    final res = await http.get(
+    final res = await _http.get(
       Uri.parse('$baseUrl/auth/me'),
       headers: _headers,
     );
@@ -328,7 +333,7 @@ class ApiClient {
   }
 
   Future<void> logout() async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/logout'),
       headers: _headers,
     );
@@ -360,7 +365,7 @@ class ApiClient {
         req.files.add(avatarFile);
       }
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -641,7 +646,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> getEvents() async {
-    final res = await http.get(Uri.parse('$baseUrl/events'), headers: _headers);
+    final res = await _http.get(Uri.parse('$baseUrl/events'), headers: _headers);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
@@ -656,13 +661,13 @@ class ApiClient {
         if (perPage != null) 'per_page': '$perPage',
       },
     );
-    final res = await http.get(uri, headers: _headers);
+    final res = await _http.get(uri, headers: _headers);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> getTournament(int id) async {
-    final res = await http.get(
+    final res = await _http.get(
       Uri.parse('$baseUrl/tournaments/$id'),
       headers: _headers,
     );
@@ -671,7 +676,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> getTournamentTeams(int tournamentId) async {
-    final res = await http.get(
+    final res = await _http.get(
       Uri.parse('$baseUrl/tournaments/$tournamentId/teams'),
       headers: _headers,
     );
@@ -680,7 +685,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> getMyTeams() async {
-    final res = await http.get(
+    final res = await _http.get(
       Uri.parse('$baseUrl/my/teams'),
       headers: _headers,
     );
@@ -696,7 +701,7 @@ class ApiClient {
       return _createTournamentMultipart(data, coverImagePath: coverImagePath);
     }
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/tournaments'),
       headers: headers,
       body: json.encode(data),
@@ -718,7 +723,7 @@ class ApiClient {
       );
     }
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.put(
+    final res = await _http.put(
       Uri.parse('$baseUrl/tournaments/$id'),
       headers: headers,
       body: json.encode(data),
@@ -731,7 +736,7 @@ class ApiClient {
     required int tournamentId,
     required int teamId,
   }) async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/tournaments/$tournamentId/teams'),
       headers: _headers,
       body: {'team_id': '$teamId'},
@@ -748,7 +753,7 @@ class ApiClient {
       return _createTeamMultipart(data, logoPath: logoPath);
     }
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/my/teams'),
       headers: headers,
       body: json.encode(data),
@@ -766,7 +771,7 @@ class ApiClient {
       return _updateTeamMultipart(id, data, logoPath: logoPath);
     }
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await http.put(
+    final res = await _http.put(
       Uri.parse('$baseUrl/my/teams/$id'),
       headers: headers,
       body: json.encode(data),
@@ -792,7 +797,7 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res, expectCreated: true);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -816,7 +821,7 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res, expectCreated: true);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -842,7 +847,7 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -867,7 +872,7 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -884,7 +889,7 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res, expectCreated: true);
     return json.decode(res.body) as Map<String, dynamic>;
@@ -906,14 +911,14 @@ class ApiClient {
     if (imageFile != null) {
       req.files.add(imageFile);
     }
-    final streamed = await req.send();
+    final streamed = await _http.send(req);
     final res = await http.Response.fromStream(streamed);
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> closeTournament(int id) async {
-    final res = await http.delete(
+    final res = await _http.delete(
       Uri.parse('$baseUrl/tournaments/$id'),
       headers: _headers,
     );
@@ -976,7 +981,7 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> getReservationsForDay(String day) async {
-    final res = await http.get(
+    final res = await _http.get(
       Uri.parse('$baseUrl/admin/reservations?day=$day'),
       headers: _headers,
     );
@@ -985,7 +990,7 @@ class ApiClient {
   }
 
   Future<void> forgotPassword(String email) async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/password/forgot'),
       headers: _headers,
       body: {'email': email},
@@ -999,7 +1004,7 @@ class ApiClient {
     required String password,
     required String passwordConfirmation,
   }) async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/password/reset'),
       headers: _headers,
       body: {
@@ -1016,7 +1021,7 @@ class ApiClient {
     required String currentPassword,
     required String newPassword,
   }) async {
-    final res = await http.post(
+    final res = await _http.post(
       Uri.parse('$baseUrl/auth/password/change'),
       headers: _headers,
       body: {'current_password': currentPassword, 'new_password': newPassword},
@@ -1212,7 +1217,7 @@ class ApiClient {
       return value;
     }
     if (value.startsWith('http://') || value.startsWith('https://')) {
-      final response = await http.get(
+      final response = await _http.get(
         Uri.parse(value),
         headers: const {'Accept': 'image/*'},
       );
