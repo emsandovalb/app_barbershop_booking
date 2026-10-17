@@ -43,8 +43,7 @@ void main() {
         child: MaterialApp(
           home: const LoginPage(),
           routes: {
-            AppRoutes.signup: (_) =>
-                const Scaffold(body: Text('Signup Probe')),
+            AppRoutes.signup: (_) => const Scaffold(body: Text('Signup Probe')),
           },
         ),
       ),
@@ -58,7 +57,9 @@ void main() {
     // find the specific TextSpan and invoke its recognizer directly —
     // the standard pattern for testing tappable RichText spans.
     final signupTextFinder = find.byWidgetPredicate(
-      (widget) => widget is RichText && widget.text.toPlainText().contains('Registrate'),
+      (widget) =>
+          widget is RichText &&
+          widget.text.toPlainText().contains('Registrate'),
     );
     expect(signupTextFinder, findsOneWidget);
 

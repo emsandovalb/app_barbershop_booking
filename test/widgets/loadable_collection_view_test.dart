@@ -4,11 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:app_barbershop_booking/src/widgets/loadable_collection_view.dart';
 
 Widget _wrap(Widget child) {
-  return MaterialApp(
-    home: Scaffold(
-      body: child,
-    ),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -39,11 +35,10 @@ void main() {
     expect(find.text('error'), findsNothing);
   });
 
-  testWidgets('shows the empty state when the request succeeds without items',
-      (tester) async {
-    final controller = LoadableController<List<String>>(
-      () async => <String>[],
-    );
+  testWidgets('shows the empty state when the request succeeds without items', (
+    tester,
+  ) async {
+    final controller = LoadableController<List<String>>(() async => <String>[]);
 
     await tester.pumpWidget(
       _wrap(
@@ -66,11 +61,9 @@ void main() {
   });
 
   testWidgets('shows the error state when the request fails', (tester) async {
-    final controller = LoadableController<List<String>>(
-      () async {
-        throw Exception('network');
-      },
-    );
+    final controller = LoadableController<List<String>>(() async {
+      throw Exception('network');
+    });
 
     await tester.pumpWidget(
       _wrap(
@@ -94,15 +87,13 @@ void main() {
 
   testWidgets('retries successfully after an initial error', (tester) async {
     var attempts = 0;
-    final controller = LoadableController<List<String>>(
-      () async {
-        attempts += 1;
-        if (attempts == 1) {
-          throw Exception('network');
-        }
-        return ['recovered'];
-      },
-    );
+    final controller = LoadableController<List<String>>(() async {
+      attempts += 1;
+      if (attempts == 1) {
+        throw Exception('network');
+      }
+      return ['recovered'];
+    });
 
     await tester.pumpWidget(
       _wrap(

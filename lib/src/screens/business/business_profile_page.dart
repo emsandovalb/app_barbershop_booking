@@ -9,7 +9,6 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
-import '../reviews/reviews_page.dart';
 import '../../services/localization_service.dart';
 
 part 'business_profile/hero.dart';
@@ -213,21 +212,6 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       ),
                       const SizedBox(height: 12),
                       const _GalleryGrid(),
-                      const SizedBox(height: 20),
-                      SectionHeader(title: tr('reviews_title')),
-                      const SizedBox(height: 12),
-                      const _ReviewsList(),
-                      const SizedBox(height: 12),
-                      _ReviewsCta(
-                        whiteLabel: whiteLabel,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ReviewsPage(),
-                            ),
-                          );
-                        },
-                      ),
                       const SizedBox(height: 20),
                       BarbershopPremiumCard(
                         padding: const EdgeInsets.all(18),

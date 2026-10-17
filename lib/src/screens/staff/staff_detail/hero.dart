@@ -4,7 +4,6 @@ class _HeroCard extends StatelessWidget {
   final String avatarUrl;
   final String name;
   final String title;
-  final String rating;
   final int servicesCount;
   final bool isActive;
 
@@ -12,7 +11,6 @@ class _HeroCard extends StatelessWidget {
     required this.avatarUrl,
     required this.name,
     required this.title,
-    required this.rating,
     required this.servicesCount,
     required this.isActive,
   });
@@ -136,40 +134,15 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.primary.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: theme.primary.withValues(alpha: .26),
-                      ),
-                    ),
-                    child: Text(
-                      tr('staff_premium_experience'),
-                      style: TextStyle(
-                        color: theme.secondary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: .2,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _MiniStat(
-                        icon: Icons.star_rounded,
-                        label: rating,
-                        iconColor: theme.primary,
-                      ),
-                      const SizedBox(width: 10),
-                      _MiniStat(
                         icon: Icons.content_cut_rounded,
-                        label: '$servicesCount servicios',
+                        label: tr(
+                          'staff_services_count',
+                          args: {'count': servicesCount},
+                        ),
                         iconColor: Colors.white70,
                       ),
                       const SizedBox(width: 10),

@@ -14,24 +14,11 @@ class _GalleryTileData {
   const _GalleryTileData(this.asset, this.label);
 }
 
-class _ReviewData {
-  final String name;
-  final String text;
-
-  const _ReviewData(this.name, this.text);
-}
-
 const List<_GalleryTileData> _galleryTiles = [
   _GalleryTileData('', 'Ambiente premium'),
   _GalleryTileData('', 'Identidad del negocio'),
   _GalleryTileData('', 'Profesionales expertos'),
   _GalleryTileData('', 'Detalles de precisión'),
-];
-
-const List<_ReviewData> _reviews = [
-  _ReviewData('Cliente frecuente', 'Excelente atención y muy buen ambiente.'),
-  _ReviewData('Reserva reciente', 'El corte quedó justo como lo quería.'),
-  _ReviewData('Visita premium', 'Muy recomendado, servicio premium.'),
 ];
 
 String _stringValue(
@@ -48,20 +35,6 @@ String _stringValue(
   return fallback;
 }
 
-double _doubleValue(
-  Map<String, dynamic> map,
-  List<String> keys, {
-  required double fallback,
-}) {
-  for (final key in keys) {
-    final value = map[key];
-    if (value is num) return value.toDouble();
-    final parsed = double.tryParse(value?.toString() ?? '');
-    if (parsed != null) return parsed;
-  }
-  return fallback;
-}
-
 List<String> _splitSpecialties(String raw) {
   final normalized = raw
       .replaceAll('\n', ' · ')
@@ -71,8 +44,7 @@ List<String> _splitSpecialties(String raw) {
       .map((item) => item.trim())
       .where((item) => item.isNotEmpty)
       .toList(growable: false);
-  if (normalized.isNotEmpty) return normalized;
-  return const ['Fade', 'Barba'];
+  return normalized;
 }
 
 String _formatCrc(dynamic value) {

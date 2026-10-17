@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/brand_theme.dart';
-import '../reviews/reviews_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../../services/localization_service.dart';
 
@@ -100,13 +99,12 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
               'specialty',
               'headline',
             ], fallback: _roleName(staff));
-            final rating = _rating(staff);
             final isActive = _isActive(staff);
             final bio = _text(staff, [
               'bio',
               'about',
               'description',
-            ], fallback: tr('staff_bio_fallback'));
+            ], fallback: '');
             final specialties = _specialties(staff, services);
             final schedule = _scheduleText(staff);
             final contacts = _contacts(staff);
@@ -118,41 +116,38 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                   avatarUrl: avatar,
                   name: name,
                   title: title,
-                  rating: rating,
                   servicesCount: services.length,
                   isActive: isActive,
                 ),
-                const SizedBox(height: 16),
-                _ReviewsPreviewCard(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ReviewsPage()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _SectionCard(
-                  title: tr('staff_about_me'),
-                  child: Text(
-                    bio,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: .82),
-                      height: 1.45,
-                      fontSize: 14,
+                if (bio.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: tr('staff_about_me'),
+                    child: Text(
+                      bio,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: .82),
+                        height: 1.45,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _SectionCard(
-                  title: tr('staff_specialties'),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: specialties
-                        .map((item) => _TagChip(label: item, highlighted: true))
-                        .toList(growable: false),
+                ],
+                if (specialties.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _SectionCard(
+                    title: tr('staff_specialties'),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: specialties
+                          .map(
+                            (item) => _TagChip(label: item, highlighted: true),
+                          )
+                          .toList(growable: false),
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: tr('ground_list_title'),
@@ -380,7 +375,6 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
     for (final service in services.take(4)) {
       specialties.add(service.name);
     }
-    if (specialties.isEmpty) specialties.add(tr('staff_premium_experience'));
     return specialties.toList(growable: false);
   }
 
@@ -432,15 +426,6 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
   }
 
   bool _isActive(Map<String, dynamic> staff) => staff['is_active'] != false;
-
-  String _rating(Map<String, dynamic> staff) {
-    final raw = staff['rating'] ?? staff['score'] ?? staff['average_rating'];
-    final parsed = raw is num
-        ? raw.toDouble()
-        : double.tryParse(raw?.toString() ?? '');
-    final value = parsed ?? 4.8;
-    return value.toStringAsFixed(1);
-  }
 
   String _roleName(Map<String, dynamic> staff) {
     final role = _asMap(staff['role']);

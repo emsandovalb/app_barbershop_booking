@@ -16,7 +16,9 @@ Map<String, String> readLanguageFile(String path) {
 LocalizationService testLocalization({String language = 'es', String? brand}) {
   final strings = readLanguageFile('assets/i18n/$language.json');
   if (brand != null) {
-    strings.addAll(readLanguageFile('assets/i18n/brands/$brand/$language.json'));
+    strings.addAll(
+      readLanguageFile('assets/i18n/brands/$brand/$language.json'),
+    );
   }
   return LocalizationService.withStrings(
     strings,

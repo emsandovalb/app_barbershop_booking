@@ -103,9 +103,11 @@ class _PerformanceList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = items.isNotEmpty ? items : _fallbackPerformance;
+    if (items.isEmpty) {
+      return _DashboardEmptyCard(message: tr('admin_no_team_yet'));
+    }
     return Column(
-      children: list
+      children: items
           .take(4)
           .map(
             (item) => Padding(
@@ -203,9 +205,11 @@ class _TopServicesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = items.isNotEmpty ? items : _fallbackTopServices;
+    if (items.isEmpty) {
+      return _DashboardEmptyCard(message: tr('admin_no_bookings_for_ranking'));
+    }
     return Column(
-      children: list
+      children: items
           .take(4)
           .map(
             (item) => Padding(

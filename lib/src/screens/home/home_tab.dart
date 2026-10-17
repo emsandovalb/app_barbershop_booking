@@ -13,7 +13,6 @@ import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../grounds/filtered_courts_page.dart';
-import '../reviews/reviews_page.dart';
 import '../../services/localization_service.dart';
 import '../../services/business_clock.dart';
 
@@ -273,13 +272,6 @@ class _HomeTabState extends State<HomeTab> {
                       ).pushNamed(AppRoutes.adminDashboard),
                     ),
                   ],
-                  const SizedBox(height: 10),
-                  _ReviewsPromoCard(
-                    whiteLabel: whiteLabel,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ReviewsPage()),
-                    ),
-                  ),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,

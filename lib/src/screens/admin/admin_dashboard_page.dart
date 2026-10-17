@@ -14,7 +14,6 @@ import '../../widgets/barbershop_branding.dart';
 import 'admin_page_scaffold.dart';
 import '../bookings/booking_detail_page.dart';
 import '../gallery/gallery_page.dart';
-import '../reviews/reviews_page.dart';
 import '../../services/business_clock.dart';
 import '../../services/localization_service.dart';
 
@@ -48,19 +47,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final api = auth.api;
     final today = DateFormat('yyyy-MM-dd').format(BusinessClock.today());
 
+    // A failed request surfaces as an error state; the dashboard never
+    // substitutes sample data for the business's real numbers.
     final responses = await Future.wait([
-      _safeFetch(
-        () => api.getReservationsForDay(today),
-        fallback: _fallbackReservationsResponse,
-      ),
-      _safeFetch(
-        () => api.getStaff(perPage: 100),
-        fallback: _fallbackStaffResponse,
-      ),
-      _safeFetch(
-        () => api.getResources(page: 1, perPage: 100, sort: 'rating'),
-        fallback: _fallbackResourcesResponse,
-      ),
+      api.getReservationsForDay(today),
+      api.getStaff(perPage: 100),
+      api.getResources(page: 1, perPage: 100, sort: 'rating'),
     ]);
     final reservationsResponse = responses[0];
     final staffResponse = responses[1];
@@ -71,23 +63,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final resources = _extractItems(resourcesResponse);
 
     return _AdminDashboardData(
-      reservations: reservations.isNotEmpty
-          ? reservations
-          : _fallbackReservations,
-      staff: staff.isNotEmpty ? staff : _fallbackStaff,
-      resources: resources.isNotEmpty ? resources : _fallbackResources,
+      reservations: reservations,
+      staff: staff,
+      resources: resources,
     );
-  }
-
-  Future<Map<String, dynamic>> _safeFetch(
-    Future<Map<String, dynamic>> Function() loader, {
-    required Map<String, dynamic> fallback,
-  }) async {
-    try {
-      return await loader();
-    } catch (_) {
-      return fallback;
-    }
   }
 
   List<Map<String, dynamic>> _extractItems(Map<String, dynamic> response) {
@@ -105,11 +84,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Future<void> _refresh() async {
-    final next = await _loadData();
-    if (!mounted) return;
-    setState(() {
-      _future = Future.value(next);
-    });
+    final next = _loadData();
+    setState(() => _future = next);
+    try {
+      await next;
+    } catch (_) {
+      // The FutureBuilder shows the error state with a retry button.
+    }
   }
 
   void _showPlaceholder(String message) {
@@ -228,6 +209,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             child: FutureBuilder<_AdminDashboardData>(
               future: _future,
               builder: (context, snapshot) {
+                if (snapshot.hasError &&
+                    snapshot.connectionState != ConnectionState.waiting) {
+                  return _DashboardLoadError(onRetry: _refresh);
+                }
                 final data = snapshot.data ?? _AdminDashboardData.empty;
                 final isLoading =
                     snapshot.connectionState == ConnectionState.waiting &&
@@ -321,13 +306,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                       ),
                                     );
                                     return;
-                                  case 'reviews':
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const ReviewsPage(),
-                                      ),
-                                    );
-                                    return;
                                 }
                               },
                             ),
@@ -408,13 +386,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         title: tr('admin_module_gallery'),
         subtitle: tr('admin_module_gallery_body'),
         badge: tr('admin_badge_new'),
-      ),
-      _AdminModuleData(
-        id: 'reviews',
-        icon: Icons.rate_review_rounded,
-        title: tr('reviews_title'),
-        subtitle: tr('admin_module_reviews_body'),
-        badge: tr('active'),
       ),
     ];
   }
@@ -507,19 +478,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             return b.revenue.compareTo(a.revenue);
           });
 
-    if (items.isNotEmpty) return items;
-
-    return _fallbackStaff
-        .map(
-          (item) => _PerformanceData(
-            avatar: _staffAvatar(item),
-            name: _staffName(item),
-            appointments: appointmentsByStaff[_staffName(item)] ?? 0,
-            revenue: revenueByStaff[_staffName(item)] ?? 0,
-            active: true,
-          ),
-        )
-        .toList(growable: false);
+    return items;
   }
 
   List<_TopServiceData> _buildTopServices(_AdminDashboardData data) {
@@ -566,18 +525,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             return b.revenue.compareTo(a.revenue);
           });
 
-    if (items.isNotEmpty) return items;
-
-    return _fallbackResources
-        .take(4)
-        .map(
-          (resource) => _TopServiceData(
-            name: _serviceName(resource),
-            reservations: 2,
-            revenue: _servicePrice(resource) * 2,
-            progress: .65,
-          ),
-        )
-        .toList(growable: false);
+    return items;
   }
 }

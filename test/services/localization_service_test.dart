@@ -67,6 +67,24 @@ void main() {
       }
     });
 
+    test('every key in the language files is used somewhere in lib/', () {
+      final source = StringBuffer();
+      for (final file in Directory('lib').listSync(recursive: true)) {
+        if (file is File && file.path.endsWith('.dart')) {
+          source.write(file.readAsStringSync());
+        }
+      }
+      final used = RegExp(
+        r"(?:\.t|\btr)\(\s*'([a-z0-9_]+)'",
+      ).allMatches(source.toString()).map((m) => m.group(1)!).toSet();
+      // The appointments board builds these as 'ops_<kind>_<status>'.
+      final dynamicKey = RegExp(r'^ops_(title|question|button|done|failed)_');
+      final unused = base['es']!.keys
+          .where((key) => !used.contains(key) && !dynamicKey.hasMatch(key))
+          .toList();
+      expect(unused, isEmpty, reason: 'unused keys in es.json');
+    });
+
     test('translations keep the same placeholders', () {
       for (final key in base['es']!.keys) {
         final expected = _placeholders(base['es']![key]!);

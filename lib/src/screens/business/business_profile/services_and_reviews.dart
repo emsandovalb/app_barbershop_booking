@@ -36,7 +36,7 @@ class _ServiceCard extends StatelessWidget {
     final name = _stringValue(resource, [
       'name',
       'title',
-    ], fallback: 'Servicio premium');
+    ], fallback: tr('appointment_default_service'));
     final price = _formatCrc(resource['price_per_hour'] ?? resource['price']);
     final duration = _durationLabel(
       resource['duration_hours'],
@@ -213,135 +213,6 @@ class _GalleryGrid extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ReviewsList extends StatelessWidget {
-  const _ReviewsList();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    return Column(
-      children: _reviews
-          .map(
-            (review) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: BarbershopPremiumCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const _AvatarMark(),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                review.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => Padding(
-                                    padding: const EdgeInsets.only(right: 2),
-                                    child: Icon(
-                                      Icons.star_rounded,
-                                      color: theme.primary,
-                                      size: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '“${review.text}”',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: .82),
-                        height: 1.45,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-          .toList(growable: false),
-    );
-  }
-}
-
-class _ReviewsCta extends StatelessWidget {
-  final WhiteLabelConfig whiteLabel;
-  final VoidCallback onTap;
-
-  const _ReviewsCta({required this.whiteLabel, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF14100E),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: theme.primary.withValues(alpha: .18)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.primary.withValues(alpha: .12),
-              ),
-              child: Icon(Icons.rate_review_rounded, color: theme.primary),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr('business_all_reviews'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr('business_all_reviews_body'),
-                    style: const TextStyle(color: Colors.white70, height: 1.3),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Icon(Icons.chevron_right_rounded, color: theme.primary),
-          ],
-        ),
-      ),
     );
   }
 }

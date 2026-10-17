@@ -25,7 +25,7 @@ void main() {
       MultiProvider(
         providers: [
           Provider<AppConfig>.value(value: AppConfig.barbershop),
-            Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
+          Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
@@ -43,10 +43,64 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('a failed load shows an error with retry, never sample data', (
+    tester,
+  ) async {
+    await _pumpDashboard(
+      tester,
+      _authWithCapability(canManageBusiness: true, failRequests: true),
+    );
+
+    expect(find.text('No se pudo cargar el panel'), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+    expect(find.text('Resumen de hoy'), findsNothing);
+  });
+
+  testWidgets('an empty day shows empty states, not sample appointments', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await _pumpDashboard(tester, _authWithCapability(canManageBusiness: true));
+
+    expect(find.text('No hay citas para hoy.'), findsOneWidget);
+    expect(
+      find.text('Todavía no hay profesionales en el equipo.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Todavía no hay citas para armar el ranking.'),
+      findsOneWidget,
+    );
+  });
 }
 
-AuthProvider _authWithCapability({required bool canManageBusiness}) {
-  final auth = AuthProvider(_FakeAdminApiClient());
+Future<void> _pumpDashboard(WidgetTester tester, AuthProvider auth) async {
+  await tester.pumpWidget(
+    MultiProvider(
+      providers: [
+        Provider<AppConfig>.value(value: AppConfig.barbershop),
+        Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
+        Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
+        ChangeNotifierProvider<AuthProvider>.value(value: auth),
+        ChangeNotifierProvider<LocalizationService>.value(
+          value: testLocalization(),
+        ),
+      ],
+      child: const MaterialApp(home: AdminDashboardPage()),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+AuthProvider _authWithCapability({
+  required bool canManageBusiness,
+  bool failRequests = false,
+}) {
+  final auth = AuthProvider(_FakeAdminApiClient(fail: failRequests));
   auth.user = {
     'id': 7,
     'name': 'Member Demo',
@@ -70,10 +124,14 @@ AuthProvider _authWithCapability({required bool canManageBusiness}) {
 }
 
 class _FakeAdminApiClient extends ApiClient {
-  _FakeAdminApiClient() : super(baseUrl: 'http://localhost/api/v1');
+  _FakeAdminApiClient({this.fail = false})
+    : super(baseUrl: 'http://localhost/api/v1');
+
+  final bool fail;
 
   @override
   Future<Map<String, dynamic>> getReservationsForDay(String day) async {
+    if (fail) throw ApiException('offline');
     return const {'data': []};
   }
 

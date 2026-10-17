@@ -154,7 +154,6 @@ class _StaffCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final api = context.read<AuthProvider>().api;
     final rawAvatar = _stringValue(staff, [
       'avatar_url',
@@ -167,23 +166,15 @@ class _StaffCard extends StatelessWidget {
     final name = _stringValue(staff, [
       'name',
       'full_name',
-    ], fallback: 'Profesional premium');
+    ], fallback: tr('staff_title'));
     final title = _stringValue(staff, [
       'title',
       'role_name',
       'specialty',
       'headline',
-    ], fallback: 'Estilista senior');
-    final rating = _doubleValue(staff, [
-      'rating',
-      'average_rating',
-    ], fallback: 4.9);
+    ], fallback: '');
     final specialties = _splitSpecialties(
-      _stringValue(staff, [
-        'specialties',
-        'bio',
-        'description',
-      ], fallback: 'Fade · Barba · Corte clásico'),
+      _stringValue(staff, ['specialties', 'bio', 'description'], fallback: ''),
     );
 
     return SizedBox(
@@ -237,48 +228,30 @@ class _StaffCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: .70),
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
+            if (title.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: .70),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.star_rounded, color: theme.primary, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  rating.toStringAsFixed(1),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'premium',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: .55),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: specialties
-                  .take(2)
-                  .map((item) => _MiniChip(label: item))
-                  .toList(growable: false),
-            ),
+            ],
+            if (specialties.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: specialties
+                    .take(2)
+                    .map((item) => _MiniChip(label: item))
+                    .toList(growable: false),
+              ),
+            ],
           ],
         ),
       ),

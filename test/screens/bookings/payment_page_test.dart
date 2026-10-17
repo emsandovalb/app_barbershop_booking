@@ -47,7 +47,7 @@ void main() {
       MultiProvider(
         providers: [
           Provider<AppConfig>.value(value: AppConfig.barbershop),
-            Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
+          Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(

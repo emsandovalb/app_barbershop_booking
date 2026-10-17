@@ -70,12 +70,6 @@ class GroundDetailPage extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.star, color: Colors.amber, size: 18),
-              const SizedBox(width: 4),
-              Text(
-                loc.t('ground_rating_sample'),
-                style: const TextStyle(color: Colors.white70),
-              ),
               const Spacer(),
               Text(
                 price,

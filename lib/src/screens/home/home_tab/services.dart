@@ -282,11 +282,6 @@ String _formatCrc(dynamic value) {
   ).format(number);
 }
 
-String _capitalize(String value) {
-  if (value.isEmpty) return value;
-  return value[0].toUpperCase() + value.substring(1);
-}
-
 String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
   final minutes = durationMinutes is num
       ? durationMinutes.toInt()

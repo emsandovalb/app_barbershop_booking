@@ -103,10 +103,6 @@ class _HeroSection extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       _HeroInfoPill(
-                        icon: Icons.star_rounded,
-                        text: whiteLabel.rating.toStringAsFixed(1),
-                      ),
-                      _HeroInfoPill(
                         icon: Icons.cut_rounded,
                         text: whiteLabel.subtitle,
                       ),
@@ -364,30 +360,6 @@ class _ActionButton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AvatarMark extends StatelessWidget {
-  const _AvatarMark();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    return Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            theme.primary.withValues(alpha: .26),
-            theme.primary.withValues(alpha: .10),
-          ],
-        ),
-        border: Border.all(color: theme.primary.withValues(alpha: .18)),
-      ),
-      child: const Icon(Icons.person_rounded, color: Colors.white, size: 21),
     );
   }
 }

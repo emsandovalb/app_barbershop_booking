@@ -8,9 +8,11 @@ class _TodayAppointmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = items.isNotEmpty ? items : _fallbackReservations;
+    if (items.isEmpty) {
+      return _DashboardEmptyCard(message: tr('admin_no_appointments_today'));
+    }
     return Column(
-      children: list
+      children: items
           .take(5)
           .map(
             (booking) => Padding(

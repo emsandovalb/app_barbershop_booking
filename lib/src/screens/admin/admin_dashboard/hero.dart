@@ -15,7 +15,6 @@ class _TopHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
     return Container(
-      height: 288,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         gradient: const LinearGradient(
@@ -32,8 +31,10 @@ class _TopHero extends StatelessWidget {
           ),
         ],
       ),
-      child: SizedBox(
-        height: 288,
+      // Minimum, not fixed, height so longer texts or larger font settings
+      // grow the card instead of overflowing it.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 288),
         child: Stack(
           children: [
             Positioned(
@@ -41,101 +42,95 @@ class _TopHero extends StatelessWidget {
               right: 0,
               child: PremiumBadge(label: tr('admin_center_caps')),
             ),
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 36, 0, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        BarbershopLogoMark(
-                          assetPath: whiteLabel.logoTransparent,
-                          size: 96,
-                          glowColor: theme.primary,
-                          showGlow: false,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 36, 0, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      BarbershopLogoMark(
+                        assetPath: whiteLabel.logoTransparent,
+                        size: 96,
+                        glowColor: theme.primary,
+                        showGlow: false,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        whiteLabel.displayName,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                          letterSpacing: .3,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          whiteLabel.displayName,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            height: 1,
-                            letterSpacing: .3,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        tr('admin_center'),
+                        style: TextStyle(
+                          color: theme.secondary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        tr('admin_hero_body'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .72),
+                          fontSize: 12.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 10,
+                    spacing: 10,
+                    children: [
+                      _HeroMetaChip(
+                        icon: Icons.event_available_rounded,
+                        label: tr('admin_today'),
+                        value: formatDate('d MMM', BusinessClock.today()),
+                      ),
+                      _HeroMetaChip(
+                        icon: Icons.shield_rounded,
+                        label: tr('booking_status'),
+                        value: isLoading
+                            ? tr('admin_syncing')
+                            : tr('admin_ready'),
+                      ),
+                      TextButton.icon(
+                        onPressed: onRefresh,
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.primary,
+                          backgroundColor: theme.primary.withValues(alpha: .10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          tr('admin_center'),
-                          style: TextStyle(
-                            color: theme.secondary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: Text(
+                          tr('btn_refresh'),
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          tr('admin_hero_body'),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: .72),
-                            fontSize: 12.5,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      runSpacing: 10,
-                      spacing: 10,
-                      children: [
-                        _HeroMetaChip(
-                          icon: Icons.event_available_rounded,
-                          label: tr('admin_today'),
-                          value: DateFormat(
-                            'd MMM',
-                            LocalizationService.activeLanguage,
-                          ).format(BusinessClock.today()),
-                        ),
-                        _HeroMetaChip(
-                          icon: Icons.shield_rounded,
-                          label: tr('booking_status'),
-                          value: isLoading
-                              ? tr('admin_syncing')
-                              : tr('admin_ready'),
-                        ),
-                        TextButton.icon(
-                          onPressed: onRefresh,
-                          style: TextButton.styleFrom(
-                            foregroundColor: theme.primary,
-                            backgroundColor: theme.primary.withValues(
-                              alpha: .10,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label: Text(
-                            tr('btn_refresh'),
-                            style: TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -246,7 +241,9 @@ class _QuickActionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       child: Container(
         width: 156,
-        height: 120,
+        // A minimum, not a fixed height: longer labels (other languages,
+        // larger text settings) must not overflow the card.
+        constraints: const BoxConstraints(minHeight: 120),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: const Color(0xFF130F0C).withValues(alpha: .94),
@@ -269,6 +266,8 @@ class _QuickActionCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               action.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13.5,

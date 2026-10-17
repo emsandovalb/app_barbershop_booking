@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Translates [key] with the active [LocalizationService], for code that has
@@ -11,6 +12,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// when the language changes.
 String tr(String key, {Map<String, Object?> args = const {}}) =>
     LocalizationService._active?.t(key, args: args) ?? key;
+
+/// Formats [date] with an intl [pattern] or skeleton (e.g. 'yMMMMd') in the
+/// active language. Date symbols are loaded by the app's localization
+/// delegates; without them (plain widget tests) it falls back to d/m/y.
+String formatDate(String pattern, DateTime date) {
+  try {
+    return DateFormat(pattern, LocalizationService.activeLanguage).format(date);
+  } catch (_) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
 
 /// UI strings bundled with the app as JSON, one file per language:
 ///

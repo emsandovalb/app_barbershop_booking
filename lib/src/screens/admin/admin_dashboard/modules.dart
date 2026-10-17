@@ -237,3 +237,61 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
+
+class _DashboardEmptyCard extends StatelessWidget {
+  final String message;
+
+  const _DashboardEmptyCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return BarbershopPremiumCard(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        message,
+        style: TextStyle(color: Colors.white.withValues(alpha: .72)),
+      ),
+    );
+  }
+}
+
+class _DashboardLoadError extends StatelessWidget {
+  final Future<void> Function() onRetry;
+
+  const _DashboardLoadError({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    // A ListView keeps pull-to-refresh working in the error state.
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(24, 120, 24, 24),
+      children: [
+        const Icon(Icons.cloud_off_rounded, color: Colors.white54, size: 40),
+        const SizedBox(height: 14),
+        Text(
+          tr('admin_dashboard_load_failed'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          tr('common_check_connection'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white70),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: OutlinedButton(
+            onPressed: onRetry,
+            child: Text(tr('btn_retry')),
+          ),
+        ),
+      ],
+    );
+  }
+}

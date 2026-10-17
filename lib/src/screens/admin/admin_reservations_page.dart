@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
@@ -57,7 +56,7 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
       appBar: buildAdminAppBar(
         context,
         title: loc.t('admin_reservations_title'),
-        subtitle: _formatDay('EEEE, MMM d', _selectedDay),
+        subtitle: formatDate('EEEE, MMM d', _selectedDay),
         actions: [
           IconButton(
             onPressed: _pickDay,
@@ -72,18 +71,9 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
         backgroundColor: const Color(0xFF141110),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.event_rounded),
-        label: Text(_formatDay('MM/dd', _selectedDay)),
+        label: Text(formatDate('MM/dd', _selectedDay)),
       ),
     );
-  }
-}
-
-/// Formats [day] in the selected language; numeric fallback without locale data.
-String _formatDay(String pattern, DateTime day) {
-  try {
-    return DateFormat(pattern, LocalizationService.activeLanguage).format(day);
-  } catch (_) {
-    return '${day.day}/${day.month}';
   }
 }
 

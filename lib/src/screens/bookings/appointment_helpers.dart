@@ -42,7 +42,8 @@ String appointmentCode(Map<String, dynamic> booking) {
 String appointmentDateLabel(Map<String, dynamic> booking) {
   final date = appointmentDate(booking);
   if (date == null) return tr('appointment_date_tbd');
-  return _longDate(date);
+  // "20 de octubre de 2026" / "October 20, 2026".
+  return formatDate('yMMMMd', date);
 }
 
 String appointmentTimeLabel(Map<String, dynamic> booking) {
@@ -202,15 +203,4 @@ List<Map<String, dynamic>> filterAppointments(
       .map((item) => Map<String, dynamic>.from(item))
       .where((booking) => appointmentStatusBucket(booking) == bucket)
       .toList(growable: false);
-}
-
-/// "20 de octubre de 2026" / "October 20, 2026" in the active language.
-String _longDate(DateTime date) {
-  try {
-    return DateFormat.yMMMMd(LocalizationService.activeLanguage).format(date);
-  } catch (_) {
-    // Date symbols are loaded by the app's localization delegates; without
-    // them (plain widget tests) fall back to a numeric date.
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }
