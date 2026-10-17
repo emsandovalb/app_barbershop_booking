@@ -35,9 +35,9 @@ class _GalleryTopBar extends StatelessWidget {
             foregroundColor: theme.secondary,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
-          child: const Text(
-            'Reservar',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          child: Text(
+            tr('gallery_book'),
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -127,9 +127,9 @@ class _GalleryHero extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  const Text(
-                    'Conocé nuestro trabajo',
-                    style: TextStyle(
+                  Text(
+                    tr('gallery_hero_title'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
@@ -139,7 +139,7 @@ class _GalleryHero extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Cortes, barba y experiencias premium.',
+                    tr('gallery_hero_subtitle'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .80),
                       fontSize: 15.5,
@@ -149,7 +149,7 @@ class _GalleryHero extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Cada foto está pensada para transmitir confianza, detalle y el estándar visual del negocio.',
+                    tr('gallery_hero_body'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .68),
                       height: 1.45,
@@ -160,7 +160,7 @@ class _GalleryHero extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _SocialActionButton(
-                          label: 'Reservar cita',
+                          label: tr('ground_book_now'),
                           icon: Icons.calendar_month_rounded,
                           filled: true,
                           onTap: onReserve,

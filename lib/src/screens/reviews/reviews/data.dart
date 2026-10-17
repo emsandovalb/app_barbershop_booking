@@ -6,15 +6,15 @@ extension on ReviewFilter {
   String get label {
     switch (this) {
       case ReviewFilter.all:
-        return 'Todas';
+        return tr('reviews_filter_all');
       case ReviewFilter.fiveStars:
-        return '5 estrellas';
+        return tr('reviews_filter_five_stars');
       case ReviewFilter.premium:
-        return 'Premium';
+        return tr('home_premium_badge');
       case ReviewFilter.corte:
-        return 'Corte';
+        return tr('reviews_filter_cut');
       case ReviewFilter.barba:
-        return 'Barba';
+        return tr('reviews_filter_beard');
     }
   }
 }

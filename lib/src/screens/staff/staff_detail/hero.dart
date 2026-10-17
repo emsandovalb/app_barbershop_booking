@@ -149,7 +149,7 @@ class _HeroCard extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Experiencia premium',
+                      tr('staff_premium_experience'),
                       style: TextStyle(
                         color: theme.secondary,
                         fontWeight: FontWeight.w800,
@@ -283,7 +283,7 @@ class _StatusPill extends StatelessWidget {
         ),
       ),
       child: Text(
-        isActive ? 'Activo' : 'Inactivo',
+        isActive ? tr('active') : tr('inactive'),
         style: TextStyle(
           color: isActive ? const Color(0xFF8EE0B8) : Colors.white70,
           fontWeight: FontWeight.w800,

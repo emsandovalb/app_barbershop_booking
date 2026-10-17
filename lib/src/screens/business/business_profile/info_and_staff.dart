@@ -17,14 +17,14 @@ class _BusinessInfoSection extends StatelessWidget {
         const SizedBox(height: 12),
         _BusinessInfoCard(
           icon: Icons.event_busy_rounded,
-          title: 'Política de cancelación',
+          title: tr('business_cancellation_policy'),
           body:
-              '${whiteLabel.cancellationPolicyText} (${whiteLabel.cancellationWindowHours} horas)',
+              '${whiteLabel.cancellationPolicyText} (${tr('duration_hours', args: {'hours': whiteLabel.cancellationWindowHours})})',
         ),
         const SizedBox(height: 12),
         _BusinessInfoCard(
           icon: Icons.location_on_rounded,
-          title: 'Ubicación y contacto',
+          title: tr('home_location_contact'),
           body:
               '${whiteLabel.locationFull}\n\n${whiteLabel.phone}\n${whiteLabel.email}',
         ),

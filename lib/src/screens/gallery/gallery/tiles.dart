@@ -13,7 +13,7 @@ class _MasonryGalleryGrid extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         radius: 24,
         child: Text(
-          'No hay fotos para esta categoría todavía.',
+          tr('gallery_empty_category'),
           style: TextStyle(color: Colors.white.withValues(alpha: .72)),
         ),
       );

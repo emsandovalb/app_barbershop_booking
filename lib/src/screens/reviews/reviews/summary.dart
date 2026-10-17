@@ -12,7 +12,7 @@ class _HeaderSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          whiteLabel.reviewsLabel.toUpperCase(),
+          tr('reviews_title').toUpperCase(),
           style: TextStyle(
             color: theme.primary,
             fontSize: 12,
@@ -20,20 +20,24 @@ class _HeaderSection extends StatelessWidget {
             letterSpacing: 2,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
-          'Lo que dicen nuestros ${whiteLabel.reviewsLabel}',
-          style: TextStyle(
+          tr('reviews_header_title'),
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 28,
             fontWeight: FontWeight.w900,
             height: 1.02,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
-          'Una experiencia más confiable, más premium y más comercial para elegir con seguridad.',
-          style: TextStyle(color: Colors.white70, height: 1.45, fontSize: 14),
+          tr('reviews_header_body'),
+          style: const TextStyle(
+            color: Colors.white70,
+            height: 1.45,
+            fontSize: 14,
+          ),
         ),
       ],
     );
@@ -103,8 +107,8 @@ class _RatingSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Basado en $totalReviews ${Provider.of<WhiteLabelConfig>(context, listen: false).reviewsLabel}',
-                      style: TextStyle(
+                      tr('reviews_based_on', args: {'count': totalReviews}),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -112,7 +116,7 @@ class _RatingSummaryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'El negocio mantiene una reputación consistente con una valoración alta y estable.',
+                      tr('reviews_summary_body'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: .72),
                         height: 1.35,
@@ -249,9 +253,9 @@ class _FeaturedReviewCard extends StatelessWidget {
                         label: review.barberName!,
                       ),
                     if (review.isPremium)
-                      const _HighlightedMetaChip(
+                      _HighlightedMetaChip(
                         icon: Icons.workspace_premium_rounded,
-                        label: 'Experiencia premium',
+                        label: tr('staff_premium_experience'),
                       ),
                   ],
                 ),

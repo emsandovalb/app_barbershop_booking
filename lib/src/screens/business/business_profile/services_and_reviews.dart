@@ -322,17 +322,17 @@ class _ReviewsCta extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ver todas las ${whiteLabel.reviewsLabel}',
-                    style: TextStyle(
+                    tr('business_all_reviews'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Abrí la experiencia premium de ${whiteLabel.reviewsLabel} y testimonios.',
-                    style: TextStyle(color: Colors.white70, height: 1.3),
+                    tr('business_all_reviews_body'),
+                    style: const TextStyle(color: Colors.white70, height: 1.3),
                   ),
                 ],
               ),

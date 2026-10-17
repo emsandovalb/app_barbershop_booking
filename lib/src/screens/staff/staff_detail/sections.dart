@@ -86,22 +86,25 @@ class _ReviewsPreviewCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Opiniones de clientes',
-                    style: TextStyle(
+                  Text(
+                    tr('staff_customer_reviews'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    '4.9 basado en 128 opiniones',
-                    style: TextStyle(color: Colors.white70, height: 1.3),
+                    tr(
+                      'home_reviews_summary',
+                      args: {'rating': '4.9', 'count': 128},
+                    ),
+                    style: const TextStyle(color: Colors.white70, height: 1.3),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Ver opiniones',
+                    tr('home_view_reviews'),
                     style: TextStyle(
                       color: theme.secondary,
                       fontWeight: FontWeight.w700,
@@ -386,7 +389,7 @@ class _AssignedService {
       resource['name'],
       entry['name'],
       resource['title'],
-    ], fallback: 'Servicio');
+    ], fallback: tr('appointment_default_service'));
     final durationLabel = _durationLabel(
       resource['duration_hours'] ??
           entry['duration_hours'] ??

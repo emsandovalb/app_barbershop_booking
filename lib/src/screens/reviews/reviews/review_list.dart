@@ -190,9 +190,9 @@ class _EmptyState extends StatelessWidget {
             size: 36,
           ),
           const SizedBox(height: 10),
-          const Text(
-            'No hay opiniones para este filtro',
-            style: TextStyle(
+          Text(
+            tr('reviews_empty_filter'),
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
               fontSize: 15,
@@ -200,7 +200,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Probá otro grupo para seguir explorando reseñas.',
+            tr('reviews_try_other_filter'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: .68),

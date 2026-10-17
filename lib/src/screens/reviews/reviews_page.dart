@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../config/white_label_config.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
+import '../../services/localization_service.dart';
 
 part 'reviews/summary.dart';
 part 'reviews/review_list.dart';
@@ -67,11 +68,14 @@ class _ReviewsPageState extends State<ReviewsPage> {
               const SizedBox(height: 12),
               _SectionTitle(
                 title: visibleReviews.isEmpty
-                    ? 'Sin resultados'
-                    : 'Reseñas destacadas',
+                    ? tr('reviews_no_results')
+                    : tr('reviews_featured'),
                 subtitle: visibleReviews.isEmpty
-                    ? 'Probá otro filtro para ver más opiniones.'
-                    : '${visibleReviews.length} ${whiteLabel.reviewsLabel} visibles',
+                    ? tr('reviews_try_other_filter')
+                    : tr(
+                        'reviews_visible_count',
+                        args: {'count': visibleReviews.length},
+                      ),
               ),
               const SizedBox(height: 12),
               if (visibleReviews.isEmpty)

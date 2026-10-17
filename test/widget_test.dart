@@ -7,6 +7,7 @@ import 'package:app_barbershop_booking/src/config/app_config.dart';
 import 'package:app_barbershop_booking/src/config/white_label_config.dart';
 import 'package:app_barbershop_booking/src/screens/gallery/gallery_page.dart';
 import 'package:app_barbershop_booking/src/theme/brand_theme.dart';
+import 'support/i18n.dart';
 
 void main() {
   testWidgets('App bootstrap smoke test', (WidgetTester tester) async {
@@ -21,6 +22,7 @@ void main() {
   });
 
   testWidgets('Gallery page renders hero content', (WidgetTester tester) async {
+    testLocalization();
     await tester.pumpWidget(
       MultiProvider(
         providers: [
@@ -32,6 +34,6 @@ void main() {
     );
 
     expect(find.text('Conocé nuestro trabajo'), findsOneWidget);
-    expect(find.text('Featured Work'), findsOneWidget);
+    expect(find.text('Trabajos destacados'), findsOneWidget);
   });
 }

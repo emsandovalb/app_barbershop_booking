@@ -128,7 +128,7 @@ class _HeroSection extends StatelessWidget {
                   Expanded(
                     child: _CounterTile(
                       icon: Icons.people_alt_rounded,
-                      label: 'Equipo',
+                      label: tr('business_team_count'),
                       value: '$staffCount',
                     ),
                   ),
@@ -136,7 +136,7 @@ class _HeroSection extends StatelessWidget {
                   Expanded(
                     child: _CounterTile(
                       icon: Icons.content_cut_rounded,
-                      label: 'Servicios',
+                      label: tr('nav_services'),
                       value: '$serviceCount',
                     ),
                   ),
@@ -273,7 +273,7 @@ class _QuickActionsRow extends StatelessWidget {
         Expanded(
           child: _ActionButton(
             icon: Icons.call_rounded,
-            label: 'Llamar',
+            label: tr('business_action_call'),
             onTap: onCall,
           ),
         ),
@@ -281,7 +281,7 @@ class _QuickActionsRow extends StatelessWidget {
         Expanded(
           child: _ActionButton(
             icon: Icons.place_rounded,
-            label: 'Ubicación',
+            label: tr('business_action_location'),
             onTap: onLocation,
           ),
         ),

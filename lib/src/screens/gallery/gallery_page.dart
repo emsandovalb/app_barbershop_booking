@@ -5,6 +5,7 @@ import '../../navigation/app_router.dart';
 import '../../config/white_label_config.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
+import '../../services/localization_service.dart';
 
 part 'gallery/header.dart';
 part 'gallery/tiles.dart';
@@ -18,13 +19,13 @@ class GalleryPage extends StatefulWidget {
 }
 
 class _GalleryPageState extends State<GalleryPage> {
-  static const _categories = <_GalleryCategory>[
-    _GalleryCategory(id: 'all', label: 'Todos'),
-    _GalleryCategory(id: 'cortes', label: 'Cortes'),
-    _GalleryCategory(id: 'barbas', label: 'Barbas'),
-    _GalleryCategory(id: 'premium', label: 'Premium'),
-    _GalleryCategory(id: 'spa', label: 'Spa Facial'),
-    _GalleryCategory(id: 'instalaciones', label: 'Instalaciones'),
+  List<_GalleryCategory> get _categories => [
+    _GalleryCategory(id: 'all', label: tr('gallery_cat_all')),
+    _GalleryCategory(id: 'cortes', label: tr('gallery_cat_cuts')),
+    _GalleryCategory(id: 'barbas', label: tr('gallery_cat_beards')),
+    _GalleryCategory(id: 'premium', label: tr('home_premium_badge')),
+    _GalleryCategory(id: 'spa', label: tr('gallery_cat_spa')),
+    _GalleryCategory(id: 'instalaciones', label: tr('gallery_cat_space')),
   ];
 
   static const _featuredWork = <_GalleryItem>[
@@ -236,8 +237,8 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                   child: SectionHeader(
-                    title: 'Featured Work',
-                    actionLabel: 'Ver toda la ${whiteLabel.galleryLabel}',
+                    title: tr('gallery_featured_work'),
+                    actionLabel: tr('gallery_view_all'),
                     onTap: () => setState(() => _selectedCategory = 'all'),
                   ),
                 ),
@@ -269,8 +270,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 22, 16, 12),
                   child: SectionHeader(
-                    title: 'Portfolio',
-                    actionLabel: '${items.length} fotos',
+                    title: tr('gallery_portfolio'),
+                    actionLabel: tr(
+                      'gallery_photo_count',
+                      args: {'count': items.length},
+                    ),
                   ),
                 ),
               ),
@@ -293,11 +297,11 @@ class _GalleryPageState extends State<GalleryPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const PremiumBadge(label: 'CONFIRMA TU VISITA'),
+                        PremiumBadge(label: tr('gallery_cta_badge')),
                         const SizedBox(height: 12),
-                        const Text(
-                          '¿Te gustó nuestro trabajo?',
-                          style: TextStyle(
+                        Text(
+                          tr('gallery_cta_title'),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 21,
                             fontWeight: FontWeight.w900,
@@ -306,7 +310,7 @@ class _GalleryPageState extends State<GalleryPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Reservá, seguinos o escribinos para coordinar tu próxima experiencia premium.',
+                          tr('gallery_cta_body'),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: .74),
                             height: 1.45,
@@ -318,7 +322,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           runSpacing: 10,
                           children: [
                             _SocialActionButton(
-                              label: 'Reservar cita',
+                              label: tr('ground_book_now'),
                               icon: Icons.calendar_month_rounded,
                               filled: true,
                               onTap: () => Navigator.of(

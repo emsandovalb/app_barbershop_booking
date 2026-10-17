@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/brand_theme.dart';
 import '../reviews/reviews_page.dart';
 import '../ground/ground_detail_page.dart';
+import '../../services/localization_service.dart';
 
 part 'staff_detail/hero.dart';
 part 'staff_detail/sections.dart';
@@ -101,12 +102,11 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
             ], fallback: _roleName(staff));
             final rating = _rating(staff);
             final isActive = _isActive(staff);
-            final bio = _text(
-              staff,
-              ['bio', 'about', 'description'],
-              fallback:
-                  'Especialista en acabados limpios, atención precisa y una experiencia premium.',
-            );
+            final bio = _text(staff, [
+              'bio',
+              'about',
+              'description',
+            ], fallback: tr('staff_bio_fallback'));
             final specialties = _specialties(staff, services);
             final schedule = _scheduleText(staff);
             final contacts = _contacts(staff);
@@ -132,7 +132,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 ),
                 const SizedBox(height: 12),
                 _SectionCard(
-                  title: 'Sobre mí',
+                  title: tr('staff_about_me'),
                   child: Text(
                     bio,
                     style: TextStyle(
@@ -144,7 +144,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 ),
                 const SizedBox(height: 12),
                 _SectionCard(
-                  title: 'Especialidades',
+                  title: tr('staff_specialties'),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -155,13 +155,16 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 ),
                 const SizedBox(height: 12),
                 _SectionCard(
-                  title: 'Servicios disponibles',
+                  title: tr('ground_list_title'),
                   subtitle: services.isEmpty
-                      ? 'Este perfil todavía no tiene servicios asignados.'
-                      : '${services.length} servicios listos para reservar',
+                      ? tr('staff_no_services_assigned')
+                      : tr(
+                          'staff_services_ready',
+                          args: {'count': services.length},
+                        ),
                   child: services.isEmpty
                       ? Text(
-                          'En breve se mostrarán los servicios asignados.',
+                          tr('staff_services_coming'),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: .72),
                           ),
@@ -185,7 +188,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 if (schedule.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _SectionCard(
-                    title: 'Horario general',
+                    title: tr('staff_schedule'),
                     child: Text(
                       schedule,
                       style: TextStyle(
@@ -198,7 +201,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 if (contacts.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _SectionCard(
-                    title: 'Contacto',
+                    title: tr('staff_contact'),
                     child: Column(
                       children: [
                         for (var i = 0; i < contacts.length; i++) ...[
@@ -229,7 +232,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                   ? () => _openReservationFlow(staff, services)
                   : null,
               icon: const Icon(Icons.calendar_month_outlined),
-              label: const Text('Reservar con este perfil'),
+              label: Text(tr('staff_book_with')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primary,
                 foregroundColor: const Color(0xFF090909),
@@ -252,7 +255,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
     List<_AssignedService> services,
   ) async {
     if (services.isEmpty) {
-      _showMessage(context, 'No hay servicios asignados a este perfil.');
+      _showMessage(context, tr('staff_no_services_assigned'));
       return;
     }
 
@@ -290,9 +293,9 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Elegí un servicio',
-                  style: TextStyle(
+                Text(
+                  tr('staff_choose_service'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -300,7 +303,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Reservá desde el servicio que mejor te convenga.',
+                  tr('staff_choose_service_hint'),
                   style: TextStyle(color: Colors.white.withValues(alpha: .72)),
                 ),
                 const SizedBox(height: 12),
@@ -377,7 +380,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
     for (final service in services.take(4)) {
       specialties.add(service.name);
     }
-    if (specialties.isEmpty) specialties.add('Experiencia premium');
+    if (specialties.isEmpty) specialties.add(tr('staff_premium_experience'));
     return specialties.toList(growable: false);
   }
 
@@ -389,18 +392,18 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
 
     if (phone.isNotEmpty) {
       contacts.add(
-        const _ContactItem(
+        _ContactItem(
           icon: Icons.phone_outlined,
-          label: 'Teléfono',
+          label: tr('form_phone'),
           value: '',
         ).withValue(phone),
       );
     }
     if (email.isNotEmpty) {
       contacts.add(
-        const _ContactItem(
+        _ContactItem(
           icon: Icons.mail_outline,
-          label: 'Correo',
+          label: tr('email'),
           value: '',
         ).withValue(email),
       );
@@ -447,7 +450,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
       staff['title'],
       staff['specialty'],
     ]);
-    return value.isEmpty ? 'Barbero' : value;
+    return value.isEmpty ? tr('staff_title') : value;
   }
 
   String _avatarUrl(BuildContext context, Map<String, dynamic> staff) {

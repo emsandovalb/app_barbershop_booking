@@ -10,6 +10,7 @@ import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../gallery/gallery_page.dart';
 import '../reviews/reviews_page.dart';
+import '../../services/localization_service.dart';
 
 part 'business_profile/hero.dart';
 part 'business_profile/info_and_staff.dart';
@@ -115,21 +116,21 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       Center(
                         child: Column(
                           children: [
-                            const Text(
-                              'No fue posible cargar los servicios.',
-                              style: TextStyle(color: Colors.white70),
+                            Text(
+                              tr('home_services_load_failed'),
+                              style: const TextStyle(color: Colors.white70),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Revisa tu conexión e intenta nuevamente.',
-                              style: TextStyle(color: Colors.white54),
+                            Text(
+                              tr('common_check_connection'),
+                              style: const TextStyle(color: Colors.white54),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 12),
                             OutlinedButton(
                               onPressed: _refresh,
-                              child: const Text('Reintentar'),
+                              child: Text(tr('btn_retry')),
                             ),
                           ],
                         ),
@@ -165,43 +166,45 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 14),
                       _QuickActionsRow(
                         onWhatsApp: () => _showPlaceholderAction('WhatsApp'),
-                        onCall: () => _showPlaceholderAction('Llamar'),
-                        onLocation: () => _showPlaceholderAction('Ubicación'),
+                        onCall: () =>
+                            _showPlaceholderAction(tr('business_action_call')),
+                        onLocation: () => _showPlaceholderAction(
+                          tr('business_action_location'),
+                        ),
                         onInstagram: () => _showPlaceholderAction('Instagram'),
                       ),
                       const SizedBox(height: 14),
                       _BusinessInfoSection(whiteLabel: whiteLabel),
                       const SizedBox(height: 18),
                       SectionHeader(
-                        title: 'Nuestro equipo',
+                        title: tr('business_our_team'),
                         actionLabel: whiteLabel.appointmentLabel,
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
                       staff.isEmpty
-                          ? const _EmptySectionCard(
-                              title: 'Nuestro equipo',
-                              body: 'No quedan profesionales disponibles.',
+                          ? _EmptySectionCard(
+                              title: tr('business_our_team'),
+                              body: tr('business_team_empty'),
                             )
                           : _StaffScroller(staff: staff),
                       const SizedBox(height: 20),
                       SectionHeader(
-                        title: 'Servicios destacados',
+                        title: tr('home_featured_services'),
                         actionLabel: whiteLabel.businessProfileLabel,
                         onTap: _openBookingFlow,
                       ),
                       const SizedBox(height: 12),
                       resources.isEmpty
-                          ? const _EmptySectionCard(
-                              title: 'Servicios destacados',
-                              body:
-                                  'No hay servicios disponibles por el momento.',
+                          ? _EmptySectionCard(
+                              title: tr('home_featured_services'),
+                              body: tr('business_services_empty'),
                             )
                           : _ServiceGrid(resources: resources),
                       const SizedBox(height: 20),
                       SectionHeader(
                         title: whiteLabel.galleryLabel,
-                        actionLabel: 'Ver ${whiteLabel.galleryLabel}',
+                        actionLabel: tr('home_view_gallery'),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const GalleryPage(),
@@ -211,7 +214,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       const SizedBox(height: 12),
                       const _GalleryGrid(),
                       const SizedBox(height: 20),
-                      const SectionHeader(title: 'Opiniones'),
+                      SectionHeader(title: tr('reviews_title')),
                       const SizedBox(height: 12),
                       const _ReviewsList(),
                       const SizedBox(height: 12),
@@ -231,10 +234,10 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const PremiumBadge(label: 'RESERVÁ AHORA'),
+                            PremiumBadge(label: tr('business_book_now_badge')),
                             const SizedBox(height: 12),
                             Text(
-                              'Reservá tu próxima cita con una experiencia premium.',
+                              tr('business_book_cta_title'),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -244,7 +247,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Volvé al inicio o seguí con la reserva desde el listado de servicios.',
+                              tr('business_book_cta_body'),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: .74),
                                 height: 1.45,
@@ -256,7 +259,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                               child: ElevatedButton.icon(
                                 onPressed: _openBookingFlow,
                                 icon: const Icon(Icons.calendar_month_rounded),
-                                label: const Text('Reservar cita'),
+                                label: Text(tr('ground_book_now')),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.primary,
                                   foregroundColor: const Color(0xFF090909),
