@@ -14,10 +14,11 @@ import '../gallery/gallery_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../grounds/filtered_courts_page.dart';
 import '../reviews/reviews_page.dart';
+import '../../services/localization_service.dart';
+import '../../services/business_clock.dart';
 
 part 'home_tab/hero_and_teasers.dart';
 part 'home_tab/services.dart';
-
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -85,9 +86,9 @@ class _HomeTabState extends State<HomeTab> {
     final brand = config.brand;
     final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final auth = context.watch<AuthProvider>();
-    final name =
-        (auth.user?['first_name'] ?? auth.user?['name'] ?? 'Admin Demo')
-            .toString();
+    final name = (auth.user?['first_name'] ?? auth.user?['name'] ?? '')
+        .toString()
+        .trim();
 
     final popular =
         _popularController.state.data ?? const <Map<String, dynamic>>[];
@@ -111,17 +112,19 @@ class _HomeTabState extends State<HomeTab> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Hola, $name',
-                  style:  TextStyle(
+                  name.isEmpty
+                      ? tr('home_greeting_anonymous')
+                      : tr('home_greeting', args: {'name': name}),
+                  style: TextStyle(
                     fontSize: 13,
                     color: theme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Buenos dias',
-                  style: TextStyle(
+                Text(
+                  _greetingForNow(),
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -167,8 +170,7 @@ class _HomeTabState extends State<HomeTab> {
                               if (query.isEmpty) return;
                               _openFilteredResults(
                                 filters: {'q': query},
-                                title:
-                                    'Resultados de ${whiteLabel.servicesLabel}',
+                                title: tr('home_search_results'),
                               );
                             },
                             style: const TextStyle(
@@ -177,8 +179,7 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                             cursorColor: theme.primary,
                             decoration: InputDecoration(
-                              hintText:
-                                  'Buscar ${whiteLabel.servicesLabel}, ${whiteLabel.staffPluralLabel}...',
+                              hintText: tr('home_search_hint'),
                               hintStyle: TextStyle(
                                 color: Colors.white.withValues(alpha: .50),
                                 fontSize: 14,
@@ -245,7 +246,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                         child: IconButton(
                           onPressed: () => _openFilteredResults(
-                            title: 'Servicios filtrados',
+                            title: tr('filter_results_title'),
                           ),
                           icon: const Icon(
                             Icons.tune_rounded,
@@ -287,7 +288,7 @@ class _HomeTabState extends State<HomeTab> {
                         MaterialPageRoute(builder: (_) => const GalleryPage()),
                       ),
                       icon: const Icon(Icons.photo_library_outlined, size: 18),
-                      label: Text('Ver ${whiteLabel.galleryLabel}'),
+                      label: Text(tr('home_view_gallery')),
                       style: TextButton.styleFrom(
                         foregroundColor: theme.secondary,
                         padding: const EdgeInsets.symmetric(
@@ -299,13 +300,11 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   const SizedBox(height: 16),
                   SectionHeader(
-                    title:
-                        '${_capitalize(whiteLabel.servicesLabel)} destacados',
-                    actionLabel: 'Ver todos',
+                    title: tr('home_featured_services'),
+                    actionLabel: tr('btn_view_all'),
                     onTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title:
-                          '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                      title: tr('home_featured_services'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -313,11 +312,9 @@ class _HomeTabState extends State<HomeTab> {
                       _premiumController.state.hasError)
                     if (featuredServices.isEmpty)
                       _StateCard(
-                        title:
-                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
-                        body:
-                            'No fue posible cargar los ${whiteLabel.servicesLabel}.',
-                        actionLabel: 'Reintentar',
+                        title: tr('home_featured_services'),
+                        body: tr('home_services_load_failed'),
+                        actionLabel: tr('btn_retry'),
                         onAction: _refreshAll,
                         leading: const Icon(
                           Icons.error_outline,
@@ -330,27 +327,22 @@ class _HomeTabState extends State<HomeTab> {
                             _popularController.state.isLoading ||
                             _premiumController.state.isLoading,
                         items: featuredServices,
-                        emptyMessage:
-                            'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
+                        emptyMessage: tr('home_featured_empty'),
                         onEmptyTap: () => _openFilteredResults(
                           filters: const {'sort': 'rating'},
-                          title:
-                              '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                          title: tr('home_featured_services'),
                         ),
                         itemBuilder: (index, data) =>
                             _ServiceCard(index: index, data: data),
                       )
                   else if (featuredServices.isEmpty)
                     _StateCard(
-                      title:
-                          '${_capitalize(whiteLabel.servicesLabel)} destacados',
-                      body:
-                          'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
-                      actionLabel: 'Ver todos',
+                      title: tr('home_featured_services'),
+                      body: tr('home_featured_empty'),
+                      actionLabel: tr('btn_view_all'),
                       onAction: () => _openFilteredResults(
                         filters: const {'sort': 'rating'},
-                        title:
-                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                        title: tr('home_featured_services'),
                       ),
                       leading: const Icon(
                         Icons.inbox_outlined,
@@ -363,40 +355,34 @@ class _HomeTabState extends State<HomeTab> {
                           _popularController.state.isLoading ||
                           _premiumController.state.isLoading,
                       items: featuredServices,
-                      emptyMessage:
-                          'No hay ${whiteLabel.servicesLabel} destacados disponibles.',
+                      emptyMessage: tr('home_featured_empty'),
                       onEmptyTap: () => _openFilteredResults(
                         filters: const {'sort': 'rating'},
-                        title:
-                            '${_capitalize(whiteLabel.servicesLabel)} destacados',
+                        title: tr('home_featured_services'),
                       ),
                       itemBuilder: (index, data) =>
                           _ServiceCard(index: index, data: data),
                     ),
                   const SizedBox(height: 20),
                   SectionHeader(
-                    title: '${_capitalize(whiteLabel.servicesLabel)} populares',
-                    actionLabel: 'Ver todos',
+                    title: tr('home_popular_services'),
+                    actionLabel: tr('btn_view_all'),
                     onTap: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title:
-                          '${_capitalize(whiteLabel.servicesLabel)} populares',
+                      title: tr('home_popular_services'),
                     ),
                   ),
                   const SizedBox(height: 12),
                   _ServiceListSection(
                     controller: _popularController,
-                    title: '${_capitalize(whiteLabel.servicesLabel)} populares',
-                    emptyMessage:
-                        'No hay ${whiteLabel.servicesLabel} populares disponibles.',
-                    loadingMessage: 'Cargando ${whiteLabel.servicesLabel}...',
-                    errorMessage:
-                        'No fue posible cargar los ${whiteLabel.servicesLabel}.',
-                    retryLabel: 'Reintentar',
+                    title: tr('home_popular_services'),
+                    emptyMessage: tr('home_popular_empty'),
+                    loadingMessage: tr('home_services_loading'),
+                    errorMessage: tr('home_services_load_failed'),
+                    retryLabel: tr('btn_retry'),
                     onViewAll: () => _openFilteredResults(
                       filters: const {'sort': 'rating'},
-                      title:
-                          '${_capitalize(whiteLabel.servicesLabel)} populares',
+                      title: tr('home_popular_services'),
                     ),
                     items: popular,
                     itemBuilder: (index, data) =>
@@ -405,26 +391,24 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   const SizedBox(height: 20),
                   SectionHeader(
-                    title: '${_capitalize(whiteLabel.servicesLabel)} premium',
-                    actionLabel: 'Ver todos',
+                    title: tr('home_premium_services'),
+                    actionLabel: tr('btn_view_all'),
                     onTap: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
-                      title: '${_capitalize(whiteLabel.servicesLabel)} premium',
+                      title: tr('home_premium_services'),
                     ),
                   ),
                   const SizedBox(height: 12),
                   _ServiceListSection(
                     controller: _premiumController,
-                    title: '${_capitalize(whiteLabel.servicesLabel)} premium',
-                    emptyMessage:
-                        'No hay ${whiteLabel.servicesLabel} premium disponibles.',
-                    loadingMessage: 'Cargando ${whiteLabel.servicesLabel}...',
-                    errorMessage:
-                        'No fue posible cargar los ${whiteLabel.servicesLabel}.',
-                    retryLabel: 'Reintentar',
+                    title: tr('home_premium_services'),
+                    emptyMessage: tr('home_premium_empty'),
+                    loadingMessage: tr('home_services_loading'),
+                    errorMessage: tr('home_services_load_failed'),
+                    retryLabel: tr('btn_retry'),
                     onViewAll: () => _openFilteredResults(
                       filters: const {'category': 'premium', 'sort': 'rating'},
-                      title: '${_capitalize(whiteLabel.servicesLabel)} premium',
+                      title: tr('home_premium_services'),
                     ),
                     items: premium,
                     itemBuilder: (index, data) =>
@@ -450,4 +434,12 @@ class _HomeTabState extends State<HomeTab> {
     }
     return const [];
   }
+}
+
+/// Time-of-day greeting on the business's clock.
+String _greetingForNow() {
+  final hour = BusinessClock.now().hour;
+  if (hour < 12) return tr('home_good_morning');
+  if (hour < 19) return tr('home_good_afternoon');
+  return tr('home_good_evening');
 }

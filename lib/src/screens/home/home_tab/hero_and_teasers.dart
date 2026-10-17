@@ -102,7 +102,7 @@ class _HeroCard extends StatelessWidget {
                     Text(
                       whiteLabel.displayName.split(' ').first.toUpperCase(),
                       textAlign: TextAlign.center,
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.primary,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -155,7 +155,7 @@ class _BusinessInfoCards extends StatelessWidget {
         Expanded(
           child: _InfoCard(
             icon: Icons.location_on_rounded,
-            title: 'Ubicación y contacto',
+            title: tr('home_location_contact'),
             body:
                 '${whiteLabel.locationFull}\n\n${whiteLabel.phone}\n\n${whiteLabel.email}',
           ),
@@ -207,10 +207,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.storefront_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.storefront_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -218,7 +215,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Conocé ${whiteLabel.businessProfileLabel}',
+                    tr('home_business_teaser_title'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -227,14 +224,17 @@ class _BusinessProfileTeaser extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Entrá al ${whiteLabel.businessProfileLabel} premium de ${whiteLabel.displayName}.',
+                    tr(
+                      'home_business_teaser_body',
+                      args: {'business': whiteLabel.displayName},
+                    ),
                     style: TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -283,34 +283,31 @@ class _AdminDashboardTeaser extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.dashboard_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.dashboard_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Centro administrativo',
-                    style: TextStyle(
+                    tr('admin_center'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Gestioná tu salón desde un solo lugar.',
-                    style: TextStyle(color: Colors.white70, height: 1.35),
+                    tr('admin_center_teaser_body'),
+                    style: const TextStyle(color: Colors.white70, height: 1.35),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -360,10 +357,7 @@ class _ReviewsPromoCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.favorite_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.favorite_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -380,13 +374,19 @@ class _ReviewsPromoCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${whiteLabel.rating.toStringAsFixed(1)} basado en ${whiteLabel.reviewCount} ${whiteLabel.reviewsLabel}',
+                    tr(
+                      'home_reviews_summary',
+                      args: {
+                        'rating': whiteLabel.rating.toStringAsFixed(1),
+                        'count': whiteLabel.reviewCount,
+                      },
+                    ),
                     style: const TextStyle(color: Colors.white70, height: 1.35),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Ver ${whiteLabel.reviewsLabel}',
-                    style:  TextStyle(
+                    tr('home_view_reviews'),
+                    style: TextStyle(
                       color: theme.secondary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -395,7 +395,7 @@ class _ReviewsPromoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),

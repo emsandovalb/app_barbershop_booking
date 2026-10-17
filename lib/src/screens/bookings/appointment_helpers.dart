@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/business_clock.dart';
+import '../../services/localization_service.dart';
 
 enum AppointmentStatusBucket { upcoming, completed, cancelled }
 
@@ -25,13 +26,13 @@ String appointmentServiceName(Map<String, dynamic> booking) {
   final resource = appointmentResource(booking);
   return resource['name']?.toString().trim().isNotEmpty == true
       ? resource['name'].toString()
-      : 'Servicio';
+      : tr('appointment_default_service');
 }
 
 String appointmentBarberName(Map<String, dynamic> booking) {
   final barber = appointmentBarber(booking);
   final name = barber['name']?.toString().trim() ?? '';
-  return name.isNotEmpty ? name : 'Sin asignar';
+  return name.isNotEmpty ? name : tr('appointment_unassigned');
 }
 
 String appointmentCode(Map<String, dynamic> booking) {
@@ -40,13 +41,13 @@ String appointmentCode(Map<String, dynamic> booking) {
 
 String appointmentDateLabel(Map<String, dynamic> booking) {
   final date = appointmentDate(booking);
-  if (date == null) return 'Fecha por confirmar';
-  return '${date.day} ${_monthNameEs(date.month)} ${date.year}';
+  if (date == null) return tr('appointment_date_tbd');
+  return _longDate(date);
 }
 
 String appointmentTimeLabel(Map<String, dynamic> booking) {
   final raw = (booking['time_slot'] ?? '').toString().trim();
-  if (raw.isEmpty) return 'Hora por confirmar';
+  if (raw.isEmpty) return tr('appointment_time_tbd');
   final parsed = DateTime.tryParse(raw);
   if (parsed != null && raw.contains('T')) {
     final hour = parsed.hour.toString().padLeft(2, '0');
@@ -117,26 +118,26 @@ AppointmentStatusBucket appointmentStatusBucket(Map<String, dynamic> booking) {
 String appointmentStatusLabel(AppointmentStatusBucket bucket) {
   switch (bucket) {
     case AppointmentStatusBucket.upcoming:
-      return 'Próxima';
+      return tr('status_upcoming');
     case AppointmentStatusBucket.completed:
-      return 'Completada';
+      return tr('status_completed');
     case AppointmentStatusBucket.cancelled:
-      return 'Cancelada';
+      return tr('status_cancelled');
   }
 }
 
 String appointmentStatusLabelForBooking(Map<String, dynamic> booking) {
   switch ((booking['status'] ?? '').toString().trim().toLowerCase()) {
     case 'pending':
-      return 'Pendiente';
+      return tr('status_pending');
     case 'confirmed':
-      return 'Confirmada';
+      return tr('status_confirmed');
     case 'completed':
-      return 'Completada';
+      return tr('status_completed');
     case 'rejected':
-      return 'Rechazada';
+      return tr('status_rejected');
     case 'cancelled':
-      return 'Cancelada';
+      return tr('status_cancelled');
     default:
       return appointmentStatusLabel(appointmentStatusBucket(booking));
   }
@@ -144,17 +145,17 @@ String appointmentStatusLabelForBooking(Map<String, dynamic> booking) {
 
 String appointmentPaymentLabel(Map<String, dynamic> booking) =>
     (booking['payment_status'] ?? '').toString().toLowerCase() == 'paid'
-    ? 'Pagado'
-    : 'Pendiente de pago';
+    ? tr('payment_paid')
+    : tr('payment_unpaid');
 
 String appointmentTabLabel(AppointmentStatusBucket bucket) {
   switch (bucket) {
     case AppointmentStatusBucket.upcoming:
-      return 'Próximas';
+      return tr('bookings_tab_upcoming');
     case AppointmentStatusBucket.completed:
-      return 'Completadas';
+      return tr('bookings_tab_completed');
     case AppointmentStatusBucket.cancelled:
-      return 'Canceladas';
+      return tr('bookings_tab_cancelled');
   }
 }
 
@@ -203,21 +204,13 @@ List<Map<String, dynamic>> filterAppointments(
       .toList(growable: false);
 }
 
-String _monthNameEs(int month) {
-  const months = <String>[
-    'enero',
-    'febrero',
-    'marzo',
-    'abril',
-    'mayo',
-    'junio',
-    'julio',
-    'agosto',
-    'septiembre',
-    'octubre',
-    'noviembre',
-    'diciembre',
-  ];
-  if (month < 1 || month > months.length) return '';
-  return months[month - 1];
+/// "20 de octubre de 2026" / "October 20, 2026" in the active language.
+String _longDate(DateTime date) {
+  try {
+    return DateFormat.yMMMMd(LocalizationService.activeLanguage).format(date);
+  } catch (_) {
+    // Date symbols are loaded by the app's localization delegates; without
+    // them (plain widget tests) fall back to a numeric date.
+    return '${date.day}/${date.month}/${date.year}';
+  }
 }

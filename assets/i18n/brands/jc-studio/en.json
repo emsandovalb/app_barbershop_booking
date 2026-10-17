@@ -5,6 +5,7 @@
   "booking_barber_picker_hint": "Choose the stylist who will perform your service.",
   "booking_barber_picker_title": "Choose your stylist",
   "booking_barber_selection_invalid": "That stylist selection is no longer valid. Please choose again.",
+  "home_search_hint": "Search services, stylists...",
   "manage_staff": "Manage stylists",
   "staff_load_failed": "Couldn't load stylists",
   "staff_title": "Stylist"

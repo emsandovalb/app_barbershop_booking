@@ -100,10 +100,10 @@ class _BookingsTabState extends State<BookingsTab> {
           builder: (context, snap) {
             if (snap.hasError) {
               return _StatePanel(
-                title: 'No fue posible cargar tus citas',
-                subtitle: 'Revisá tu conexión e intentá de nuevo.',
+                title: tr('bookings_load_failed'),
+                subtitle: tr('common_check_connection'),
                 icon: Icons.error_outline,
-                actionLabel: 'Reintentar',
+                actionLabel: tr('btn_retry'),
                 onAction: _refresh,
               );
             }
@@ -128,17 +128,17 @@ class _BookingsTabState extends State<BookingsTab> {
             return TabBarView(
               children: [
                 _AppointmentList(
-                  title: 'No tienes citas próximas',
+                  title: tr('bookings_empty_upcoming'),
                   items: upcoming,
                   onRefresh: _refresh,
                 ),
                 _AppointmentList(
-                  title: 'No tienes citas completadas',
+                  title: tr('bookings_empty_completed'),
                   items: completed,
                   onRefresh: _refresh,
                 ),
                 _AppointmentList(
-                  title: 'No tienes citas canceladas',
+                  title: tr('bookings_empty_cancelled'),
                   items: cancelled,
                   onRefresh: _refresh,
                 ),
@@ -177,9 +177,9 @@ class _AppointmentList extends StatelessWidget {
             children: [
               Icon(Icons.lock_outline, color: theme.primary, size: 44),
               const SizedBox(height: 14),
-              const Text(
-                'Iniciá sesión para ver tus citas',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+              Text(
+                tr('bookings_login_required'),
+                style: const TextStyle(fontSize: 16, color: Colors.white),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
@@ -199,9 +199,9 @@ class _AppointmentList extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           child: _StatePanel(
             title: title,
-            subtitle: 'Deslizá para refrescar cuando tengas nuevas citas.',
+            subtitle: tr('bookings_pull_to_refresh'),
             icon: Icons.event_busy_outlined,
-            actionLabel: 'Actualizar',
+            actionLabel: tr('btn_refresh'),
             onAction: onRefresh,
           ),
         ),
@@ -363,7 +363,7 @@ class _AppointmentCard extends StatelessWidget {
               runSpacing: 10,
               children: [
                 _ActionButton(
-                  label: 'Ver detalle',
+                  label: tr('booking_view_detail'),
                   icon: Icons.visibility_outlined,
                   onPressed: () async {
                     final result = await Navigator.of(context).pushNamed(
@@ -377,14 +377,14 @@ class _AppointmentCard extends StatelessWidget {
                 ),
                 if (canRebook)
                   _ActionButton(
-                    label: 'Reagendar',
+                    label: tr('booking_reschedule'),
                     icon: Icons.autorenew_outlined,
                     highlight: true,
                     onPressed: () => _rebook(context),
                   ),
                 if (canCancel)
                   _ActionButton(
-                    label: 'Cancelar',
+                    label: tr('btn_cancel'),
                     icon: Icons.close_outlined,
                     danger: true,
                     onPressed: () => _cancel(context),
@@ -412,22 +412,25 @@ class _AppointmentCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF161110),
-        title: const Text(
-          'Cancelar cita',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        title: Text(
+          tr('booking_cancel_title'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        content: const Text(
-          '¿Seguro que querés cancelar esta cita?',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          tr('booking_cancel_confirm'),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('No'),
+            child: Text(tr('btn_no')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sí, cancelar'),
+            child: Text(tr('booking_cancel_yes')),
           ),
         ],
       ),
@@ -437,12 +440,12 @@ class _AppointmentCard extends StatelessWidget {
     try {
       await auth.api.cancelReservation(_bookingId());
       if (!messenger.mounted) return;
-      messenger.showSnackBar(const SnackBar(content: Text('Cita cancelada')));
+      messenger.showSnackBar(SnackBar(content: Text(tr('booking_cancelled'))));
       await onRefresh();
     } catch (e) {
       if (!messenger.mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('No se pudo cancelar: $e')),
+        SnackBar(content: Text('${tr('booking_cancel_failed')}: $e')),
       );
     }
   }
@@ -470,13 +473,13 @@ class _AppointmentCard extends StatelessWidget {
       });
       if (!messenger.mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Cita reprogramada')),
+        SnackBar(content: Text(tr('booking_rebook_success_title'))),
       );
       await onRefresh();
     } catch (e) {
       if (!messenger.mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('No se pudo reprogramar: $e')),
+        SnackBar(content: Text('${tr('booking_rebook_failed')}: $e')),
       );
     }
   }

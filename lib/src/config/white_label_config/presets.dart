@@ -52,7 +52,7 @@ const _genericPreset = WhiteLabelConfig(
   ),
   policies: BusinessPolicies(
     cancellationPolicyText:
-        'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+        'Las políticas de cancelación dependen del negocio.',
     cancellationWindowHours: 0,
   ),
   terminology: Terminology(
@@ -65,8 +65,8 @@ const _genericPreset = WhiteLabelConfig(
     staffDisplayName: 'personal',
     manager: 'administrador',
     businessProfile: 'perfil del negocio',
-    gallery: 'galerÃ­a',
-    reviews: 'reseÃ±as',
+    gallery: 'galería',
+    reviews: 'reseñas',
   ),
   features: FeatureConfig(
     showStaff: true,
@@ -81,9 +81,9 @@ const _genericPreset = WhiteLabelConfig(
 
 const _barbershopPreset = WhiteLabelConfig(
   identity: BusinessIdentity(
-    appName: 'BarberÃ­a',
-    displayName: 'BARBERÃA',
-    shortName: 'BarberÃ­a',
+    appName: 'Barbería',
+    displayName: 'BARBERÍA',
+    shortName: 'Barbería',
     tagline: 'Cortes, barba y cuidado personal',
     subtitle: 'Tu estilo, tu experiencia',
     locationShort: '',
@@ -125,13 +125,13 @@ const _barbershopPreset = WhiteLabelConfig(
     address: '',
   ),
   hours: BusinessHours(
-    label: 'Horario de atenciÃ³n',
+    label: 'Horario de atención',
     weeklySummary: 'Horario configurable por tenant',
     detailedHours: ['Horario configurable por tenant'],
   ),
   policies: BusinessPolicies(
     cancellationPolicyText:
-        'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+        'Las políticas de cancelación dependen del negocio.',
     cancellationWindowHours: 0,
   ),
   terminology: Terminology(
@@ -143,9 +143,9 @@ const _barbershopPreset = WhiteLabelConfig(
     staffPlural: 'barberos',
     staffDisplayName: 'barbero',
     manager: 'administrador',
-    businessProfile: 'perfil de la barberÃ­a',
-    gallery: 'galerÃ­a',
-    reviews: 'reseÃ±as',
+    businessProfile: 'perfil de la barbería',
+    gallery: 'galería',
+    reviews: 'reseñas',
   ),
   features: FeatureConfig(
     showStaff: true,
@@ -160,9 +160,9 @@ const _barbershopPreset = WhiteLabelConfig(
 
 const _salonPreset = WhiteLabelConfig(
   identity: BusinessIdentity(
-    appName: 'SalÃ³n',
-    displayName: 'SALÃN',
-    shortName: 'SalÃ³n',
+    appName: 'Salón',
+    displayName: 'SALÓN',
+    shortName: 'Salón',
     tagline: 'Belleza y cuidado personal',
     subtitle: 'Tu momento, tu estilo',
     locationShort: '',
@@ -204,13 +204,13 @@ const _salonPreset = WhiteLabelConfig(
     address: '',
   ),
   hours: BusinessHours(
-    label: 'Horario de atenciÃ³n',
+    label: 'Horario de atención',
     weeklySummary: 'Horario configurable por tenant',
     detailedHours: ['Horario configurable por tenant'],
   ),
   policies: BusinessPolicies(
     cancellationPolicyText:
-        'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+        'Las políticas de cancelación dependen del negocio.',
     cancellationWindowHours: 0,
   ),
   terminology: Terminology(
@@ -222,9 +222,9 @@ const _salonPreset = WhiteLabelConfig(
     staffPlural: 'estilistas',
     staffDisplayName: 'estilista',
     manager: 'administradora',
-    businessProfile: 'perfil del salÃ³n',
-    gallery: 'galerÃ­a',
-    reviews: 'reseÃ±as',
+    businessProfile: 'perfil del salón',
+    gallery: 'galería',
+    reviews: 'reseñas',
   ),
   features: FeatureConfig(
     showStaff: true,
@@ -322,7 +322,7 @@ const _spaPreset = WhiteLabelConfig(
     appName: 'Spa',
     displayName: 'SPA',
     shortName: 'Spa',
-    tagline: 'Bienestar, pausa y renovaciÃ³n',
+    tagline: 'Bienestar, pausa y renovación',
     subtitle: 'Tu espacio de descanso',
     locationShort: '',
     locationFull: '',
@@ -363,27 +363,27 @@ const _spaPreset = WhiteLabelConfig(
     address: '',
   ),
   hours: BusinessHours(
-    label: 'Horario de atenciÃ³n',
+    label: 'Horario de atención',
     weeklySummary: 'Horario configurable por tenant',
     detailedHours: ['Horario configurable por tenant'],
   ),
   policies: BusinessPolicies(
     cancellationPolicyText:
-        'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+        'Las políticas de cancelación dependen del negocio.',
     cancellationWindowHours: 0,
   ),
   terminology: Terminology(
     service: 'tratamiento',
     services: 'tratamientos',
-    appointment: 'sesiÃ³n',
+    appointment: 'sesión',
     appointments: 'sesiones',
     staff: 'terapeuta',
     staffPlural: 'terapeutas',
     staffDisplayName: 'terapeuta',
     manager: 'administrador',
     businessProfile: 'perfil del spa',
-    gallery: 'galerÃ­a',
-    reviews: 'reseÃ±as',
+    gallery: 'galería',
+    reviews: 'reseñas',
   ),
   features: FeatureConfig(
     showStaff: true,
@@ -398,10 +398,10 @@ const _spaPreset = WhiteLabelConfig(
 
 const _clinicPreset = WhiteLabelConfig(
   identity: BusinessIdentity(
-    appName: 'ClÃ­nica',
-    displayName: 'CLÃNICA',
-    shortName: 'ClÃ­nica',
-    tagline: 'AtenciÃ³n profesional y confiable',
+    appName: 'Clínica',
+    displayName: 'CLÍNICA',
+    shortName: 'Clínica',
+    tagline: 'Atención profesional y confiable',
     subtitle: 'Cuidado con respaldo',
     locationShort: '',
     locationFull: '',
@@ -442,13 +442,13 @@ const _clinicPreset = WhiteLabelConfig(
     address: '',
   ),
   hours: BusinessHours(
-    label: 'Horario de atenciÃ³n',
+    label: 'Horario de atención',
     weeklySummary: 'Horario configurable por tenant',
     detailedHours: ['Horario configurable por tenant'],
   ),
   policies: BusinessPolicies(
     cancellationPolicyText:
-        'Las polÃ­ticas de cancelaciÃ³n dependen del negocio.',
+        'Las políticas de cancelación dependen del negocio.',
     cancellationWindowHours: 0,
   ),
   terminology: Terminology(
@@ -460,9 +460,9 @@ const _clinicPreset = WhiteLabelConfig(
     staffPlural: 'profesionales',
     staffDisplayName: 'profesional',
     manager: 'coordinador',
-    businessProfile: 'perfil de la clÃ­nica',
-    gallery: 'galerÃ­a',
-    reviews: 'reseÃ±as',
+    businessProfile: 'perfil de la clínica',
+    gallery: 'galería',
+    reviews: 'reseñas',
   ),
   features: FeatureConfig(
     showStaff: true,

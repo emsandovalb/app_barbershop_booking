@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/localization_service.dart';
 import '../admin/admin_reservations_page.dart';
 import '../bookings/bookings_tab.dart';
 import '../grounds/filtered_courts_page.dart';
@@ -47,6 +48,8 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final config = context.watch<AppConfig>();
     final auth = context.watch<AuthProvider>();
+    // Rebuild the tab labels when the language changes.
+    context.watch<LocalizationService>();
     final isLoggedIn = auth.isLoggedIn;
     final canManageBusiness = auth.canManageBusiness;
     final tabs = _buildTabs(
@@ -103,7 +106,9 @@ class _HomeShellState extends State<HomeShell> {
         // disappears against a light background — pick the unselected
         // icon color from the background's own brightness instead.
         unselectedItemColor:
-            ThemeData.estimateBrightnessForColor(config.brand.backgroundColor) ==
+            ThemeData.estimateBrightnessForColor(
+                  config.brand.backgroundColor,
+                ) ==
                 Brightness.light
             ? Colors.black.withValues(alpha: .45)
             : Colors.white.withValues(alpha: .58),
@@ -143,29 +148,29 @@ List<_TabConfig> _buildTabs({
   final tabs = <_TabConfig>[
     _TabConfig(
       page: const HomeTab(),
-      item: const BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined),
-        activeIcon: Icon(Icons.home),
-        label: 'Inicio',
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.home_outlined),
+        activeIcon: const Icon(Icons.home),
+        label: tr('nav_home'),
       ),
       type: _TabType.home,
     ),
     _TabConfig(
-      page: const FilteredCourtsPage(title: 'Servicios'),
-      item: const BottomNavigationBarItem(
-        icon: Icon(Icons.content_cut_outlined),
-        activeIcon: Icon(Icons.content_cut),
-        label: 'Servicios',
+      page: FilteredCourtsPage(title: tr('nav_services')),
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.content_cut_outlined),
+        activeIcon: const Icon(Icons.content_cut),
+        label: tr('nav_services'),
       ),
       type: _TabType.services,
     ),
     if (config.features.showReservations)
       _TabConfig(
         page: BookingsTab(key: ValueKey('bookings-$bookingsRefreshVersion')),
-        item: const BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_month_outlined),
-          activeIcon: Icon(Icons.calendar_month),
-          label: 'Reservas',
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.calendar_month_outlined),
+          activeIcon: const Icon(Icons.calendar_month),
+          label: tr('nav_bookings'),
         ),
         type: _TabType.bookings,
       ),
@@ -174,19 +179,19 @@ List<_TabConfig> _buildTabs({
         page: AdminReservationsPage(
           key: ValueKey('admin-reservations-$adminReservationsRefreshVersion'),
         ),
-        item: const BottomNavigationBarItem(
-          icon: Icon(Icons.event_note_outlined),
-          activeIcon: Icon(Icons.event_note),
-          label: 'Citas',
+        item: BottomNavigationBarItem(
+          icon: const Icon(Icons.event_note_outlined),
+          activeIcon: const Icon(Icons.event_note),
+          label: tr('nav_appointments'),
         ),
         type: _TabType.reservations,
       ),
     _TabConfig(
       page: const ProfileTab(),
-      item: const BottomNavigationBarItem(
-        icon: Icon(Icons.person_outline),
-        activeIcon: Icon(Icons.person),
-        label: 'Perfil',
+      item: BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline),
+        activeIcon: const Icon(Icons.person),
+        label: tr('nav_profile'),
       ),
       type: _TabType.profile,
     ),

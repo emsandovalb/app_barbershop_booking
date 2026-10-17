@@ -19,9 +19,8 @@ class ProfileTab extends StatelessWidget {
     final localization = context.watch<LocalizationService>();
     final config = context.watch<AppConfig>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
-    final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
-    final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
-        .toString();
+    final name = (auth.user?['name'] ?? '').toString();
+    final email = (auth.user?['email'] ?? '').toString();
     final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])
         ?.toString();
     final avatar = auth.api.resolveAssetUrl(rawAvatar);
@@ -115,7 +114,7 @@ class ProfileTab extends StatelessWidget {
           ),
         if (isAdmin && whiteLabel.features.showAdminDashboard)
           _ProfileTile(
-            title: 'Centro administrativo',
+            title: localization.t('admin_center'),
             icon: Icons.dashboard_outlined,
             onTap: () =>
                 Navigator.of(context).pushNamed(AppRoutes.adminDashboard),

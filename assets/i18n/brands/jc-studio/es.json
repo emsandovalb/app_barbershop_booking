@@ -5,6 +5,7 @@
   "booking_barber_picker_hint": "Elegí el estilista que realizará tu servicio.",
   "booking_barber_picker_title": "Elegí tu estilista",
   "booking_barber_selection_invalid": "La selección de estilista no es válida. Elegí uno de nuevo.",
+  "home_search_hint": "Buscar servicios, estilistas...",
   "manage_staff": "Administrar estilistas",
   "staff_load_failed": "No se pudieron cargar los estilistas",
   "staff_title": "Estilista"

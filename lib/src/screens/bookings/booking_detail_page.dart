@@ -39,7 +39,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text('Detalle de la cita'),
+        title: Text(tr('booking_details_title')),
       ),
       body: DecoratedBox(
         decoration: const BoxDecoration(
@@ -162,16 +162,19 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             ),
             const SizedBox(height: 16),
             _InfoCard(
-              title: 'Resumen de la cita',
+              title: tr('booking_summary_title'),
               children: [
-                _kv('Servicio', appointmentServiceName(booking)),
-                _kv('Código de cita', appointmentCode(booking)),
-                _kv('Fecha', appointmentDateLabel(booking)),
-                _kv('Hora', appointmentTimeLabel(booking)),
-                _kv('Barbero', appointmentBarberName(booking)),
-                _kv('Precio', appointmentPriceLabel(booking)),
                 _kv(
-                  'Estado',
+                  tr('booking_detail_ground_label'),
+                  appointmentServiceName(booking),
+                ),
+                _kv(tr('booking_detail_code'), appointmentCode(booking)),
+                _kv(tr('booking_detail_date'), appointmentDateLabel(booking)),
+                _kv(tr('booking_detail_time'), appointmentTimeLabel(booking)),
+                _kv(tr('booking_barber_label'), appointmentBarberName(booking)),
+                _kv(tr('booking_detail_price'), appointmentPriceLabel(booking)),
+                _kv(
+                  tr('booking_status'),
                   appointmentStatusLabelForBooking(booking),
                   valueHighlight: true,
                 ),
@@ -179,28 +182,28 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             ),
             const SizedBox(height: 14),
             _InfoCard(
-              title: 'Detalles rápidos',
+              title: tr('booking_quick_details'),
               children: [
                 _kv(
-                  'Duración',
+                  tr('booking_detail_duration'),
                   _durationLabel(
                     booking['duration_hours'] ?? resource['duration_hours'],
                     booking['duration_minutes'] ?? resource['duration_minutes'],
                   ),
                 ),
                 _kv(
-                  'Pago',
+                  tr('booking_payment'),
                   appointmentPaymentLabel(booking),
                   valueHighlight: true,
                 ),
                 _kv(
-                  'Local',
+                  tr('booking_location'),
                   resource['address']?.toString().isNotEmpty == true
                       ? resource['address'].toString()
-                      : 'Sin dirección disponible',
+                      : tr('booking_no_address'),
                 ),
                 _kv(
-                  'Código interno',
+                  tr('booking_internal_code'),
                   '#${booking['id']?.toString() ?? '—'}',
                   valueHighlight: true,
                 ),
@@ -224,7 +227,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.close_outlined),
-                  label: Text(loading ? 'Cancelando...' : 'Cancelar cita'),
+                  label: Text(
+                    loading
+                        ? tr('booking_cancelling')
+                        : tr('booking_cancel_title'),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF231315),
                     foregroundColor: const Color(0xFFFF9D9D),
@@ -248,7 +255,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.autorenew_outlined),
-                  label: Text(loading ? 'Reprogramando...' : 'Reagendar'),
+                  label: Text(
+                    loading
+                        ? tr('booking_rescheduling')
+                        : tr('booking_reschedule'),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primary,
                     foregroundColor: const Color(0xFF090909),
@@ -282,22 +293,25 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF161110),
-        title: const Text(
-          'Cancelar cita',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        title: Text(
+          tr('booking_cancel_title'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        content: const Text(
-          '¿Seguro que querés cancelar esta cita?',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          tr('booking_cancel_confirm'),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('No'),
+            child: Text(tr('btn_no')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sí, cancelar'),
+            child: Text(tr('booking_cancel_yes')),
           ),
         ],
       ),
@@ -308,12 +322,12 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     try {
       await auth.api.cancelReservation(_bookingId());
       if (!mounted) return;
-      messenger.showSnackBar(const SnackBar(content: Text('Cita cancelada')));
+      messenger.showSnackBar(SnackBar(content: Text(tr('booking_cancelled'))));
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('No se pudo cancelar: $e')),
+        SnackBar(content: Text('${tr('booking_cancel_failed')}: $e')),
       );
     } finally {
       if (mounted) setState(() => loading = false);
@@ -472,7 +486,9 @@ String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
   if (minutes != null && minutes > 0) {
     if (minutes % 60 == 0) {
       final hours = minutes ~/ 60;
-      return hours == 1 ? '1 hora' : '$hours horas';
+      return hours == 1
+          ? tr('duration_one_hour')
+          : tr('duration_hours', args: {'hours': hours});
     }
     final hours = minutes ~/ 60;
     final remainder = minutes % 60;
@@ -482,5 +498,7 @@ String _durationLabel(dynamic durationHours, dynamic durationMinutes) {
   final hours = durationHours is num
       ? durationHours.toInt()
       : int.tryParse(durationHours?.toString() ?? '1') ?? 1;
-  return hours == 1 ? '1 hora' : '$hours horas';
+  return hours == 1
+      ? tr('duration_one_hour')
+      : tr('duration_hours', args: {'hours': hours});
 }

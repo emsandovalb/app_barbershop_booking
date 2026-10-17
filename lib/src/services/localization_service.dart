@@ -5,6 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Translates [key] with the active [LocalizationService], for code that has
+/// no BuildContext (formatters, helpers called from build methods). Widgets
+/// should keep using `context.watch<LocalizationService>().t` so they rebuild
+/// when the language changes.
+String tr(String key, {Map<String, Object?> args = const {}}) =>
+    LocalizationService._active?.t(key, args: args) ?? key;
+
 /// UI strings bundled with the app as JSON, one file per language:
 ///
 /// * `assets/i18n/<lang>.json` holds every key the app uses.
@@ -15,7 +22,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// works offline. The chosen language is remembered across launches.
 class LocalizationService extends ChangeNotifier {
   LocalizationService({this.brandSlug, AssetBundle? bundle})
-    : _bundle = bundle ?? rootBundle;
+    : _bundle = bundle ?? rootBundle {
+    _active = this;
+  }
 
   /// Starts with [strings] already loaded, for tests and previews.
   @visibleForTesting
@@ -26,11 +35,19 @@ class LocalizationService extends ChangeNotifier {
   }) : _bundle = rootBundle,
        _strings = Map.of(strings),
        _locale = locale,
-       _isLoading = false;
+       _isLoading = false {
+    _active = this;
+  }
 
   static const supportedLanguages = ['es', 'en'];
   static const defaultLanguage = 'es';
   static const _prefsLanguageKey = 'language_code';
+
+  static LocalizationService? _active;
+
+  /// Language code of the active service, for date/number formatting.
+  static String get activeLanguage =>
+      _active?._locale.languageCode ?? defaultLanguage;
 
   final String? brandSlug;
   final AssetBundle _bundle;

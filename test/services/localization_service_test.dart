@@ -93,6 +93,18 @@ void main() {
       }
     });
 
+    test('no Dart source contains double-encoded text', () {
+      for (final file in Directory('lib').listSync(recursive: true)) {
+        if (file is File && file.path.endsWith('.dart')) {
+          expect(
+            file.readAsStringSync(),
+            isNot(matches(RegExp('Ã[\u0080-\u00BF]|â€'))),
+            reason: file.path,
+          );
+        }
+      }
+    });
+
     test('brand overrides only replace keys that exist', () {
       final brands = Directory('assets/i18n/brands').listSync();
       expect(brands, isNotEmpty);

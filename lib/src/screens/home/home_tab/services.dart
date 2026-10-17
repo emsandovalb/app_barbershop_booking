@@ -51,7 +51,7 @@ class _ServiceListSection extends StatelessWidget {
       return _StateCard(
         title: title,
         body: emptyMessage,
-        actionLabel: 'Ver todos',
+        actionLabel: tr('btn_view_all'),
         onAction: onViewAll,
         leading: const Icon(Icons.inbox_outlined, color: Colors.white70),
       );
@@ -143,7 +143,9 @@ class _ServiceCard extends StatelessWidget {
       data?['duration_hours'],
       data?['duration_minutes'],
     );
-    final title = data?['name']?.toString() ?? 'Servicio ${index + 1}';
+    final title =
+        data?['name']?.toString() ??
+        tr('home_service_fallback_name', args: {'number': index + 1});
 
     return InkWell(
       onTap: () {
@@ -252,7 +254,7 @@ class _ServiceCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       price,
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
