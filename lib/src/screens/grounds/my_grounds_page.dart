@@ -126,7 +126,7 @@ class _MyGroundsPageState extends State<MyGroundsPage> {
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
                 final resource = items[i];
                 final status = (resource['status'] ?? 'active').toString();

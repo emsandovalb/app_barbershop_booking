@@ -263,10 +263,7 @@ class _BarberTile extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: .08),
             backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
             child: avatar.isEmpty
-                ?  Icon(
-                    Icons.content_cut_rounded,
-                    color: theme.primary,
-                  )
+                ? Icon(Icons.content_cut_rounded, color: theme.primary)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -328,7 +325,6 @@ class _MiniBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -356,7 +352,6 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -386,7 +381,6 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       padding: const EdgeInsets.all(20),

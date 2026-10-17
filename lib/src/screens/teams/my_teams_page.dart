@@ -169,7 +169,7 @@ class _MyTeamsPageState extends State<MyTeamsPage> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (_, index) {
                 final team = Map<String, dynamic>.from(items[index] as Map);
                 return _TeamCard(

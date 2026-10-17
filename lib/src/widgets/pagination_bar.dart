@@ -47,7 +47,7 @@ class PaginationBar extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? theme.primary.withOpacity(.2)
+                      ? theme.primary.withValues(alpha: .2)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),

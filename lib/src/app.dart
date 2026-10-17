@@ -63,10 +63,10 @@ class BarbershopBookingApp extends StatelessWidget {
             value: whiteLabelConfigService!,
           ),
           ProxyProvider<WhiteLabelConfigService, WhiteLabelConfig>(
-            update: (_, service, __) => service.config,
+            update: (_, service, _) => service.config,
           ),
           ProxyProvider<WhiteLabelConfigService, BrandTheme>(
-            update: (_, service, __) => service.brandTheme,
+            update: (_, service, _) => service.brandTheme,
           ),
         ] else ...[
           Provider<WhiteLabelConfig>.value(value: whiteLabelConfig),

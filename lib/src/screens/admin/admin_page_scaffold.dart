@@ -76,7 +76,7 @@ PreferredSizeWidget buildAdminAppBar(
         onPressed: () => navigateToAdminDashboard(context),
         icon: const Icon(Icons.dashboard_outlined),
       ),
-      if (actions != null) ...actions,
+      ...?actions,
     ],
   );
 }

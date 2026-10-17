@@ -103,7 +103,9 @@ class _HomeShellState extends State<HomeShell> {
         // disappears against a light background — pick the unselected
         // icon color from the background's own brightness instead.
         unselectedItemColor:
-            ThemeData.estimateBrightnessForColor(config.brand.backgroundColor) ==
+            ThemeData.estimateBrightnessForColor(
+                  config.brand.backgroundColor,
+                ) ==
                 Brightness.light
             ? Colors.black.withValues(alpha: .45)
             : Colors.white.withValues(alpha: .58),

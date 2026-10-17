@@ -4,7 +4,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
 import '../config/white_label_config.dart';
-import '../navigation/app_router.dart';
 import '../navigation/tenant_startup_route.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/barbershop_branding.dart';
@@ -83,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white.withOpacity(.88),
+                        color: Colors.white.withValues(alpha: .88),
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -107,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
                     style: TextStyle(
                       fontSize: 15,
                       height: 1.35,
-                      color: Colors.white.withOpacity(.78),
+                      color: Colors.white.withValues(alpha: .78),
                     ),
                   ),
                 ],

@@ -44,8 +44,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                       );
                       if (x != null) {
                         final encoded = await _compressAndEncodeImage(x);
-                        if (encoded != null)
+                        if (encoded != null) {
                           setState(() => images.add(encoded));
+                        }
                       }
                     },
                     child: Container(
@@ -78,8 +79,9 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                           final value = await _compressAndEncodeImage(image);
                           if (value != null) encoded.add(value);
                         }
-                        if (encoded.isNotEmpty)
+                        if (encoded.isNotEmpty) {
                           setState(() => images.addAll(encoded));
+                        }
                       }
                     },
                     child: Container(
@@ -108,7 +110,7 @@ class _AddPhotosPageState extends State<AddPhotosPage> {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: images.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
                   itemBuilder: (_, i) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(12),

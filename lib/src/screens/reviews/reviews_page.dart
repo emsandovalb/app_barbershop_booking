@@ -17,7 +17,6 @@ class _ReviewsPageState extends State<ReviewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final whiteLabel = Provider.of<WhiteLabelConfig>(context, listen: false);
     final visibleReviews = _demoReviews
         .where((review) => review.matches(_filter))
@@ -175,11 +174,7 @@ class _RatingSummaryCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                     Icon(
-                      Icons.star_rounded,
-                      color: theme.primary,
-                      size: 24,
-                    ),
+                    Icon(Icons.star_rounded, color: theme.primary, size: 24),
                     const SizedBox(height: 2),
                     Text(
                       rating.toStringAsFixed(1),
@@ -373,7 +368,7 @@ class _FilterRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: ReviewFilter.values.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final filter = ReviewFilter.values[index];
           final isSelected = filter == selected;
@@ -425,7 +420,6 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -458,7 +452,6 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 24,
       child: Column(
@@ -688,7 +681,7 @@ class _AvatarBadge extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _initialsAvatar(initials, theme),
+          errorBuilder: (_, _, _) => _initialsAvatar(initials, theme),
         ),
       );
     }
@@ -875,8 +868,6 @@ class ReviewEntry {
 }
 
 const double _summaryRating = 4.9;
-const int _totalReviews = 128;
-
 const Map<int, int> _ratingDistribution = {5: 98, 4: 18, 3: 7, 2: 3, 1: 2};
 
 final ReviewEntry _featuredReview = ReviewEntry.fromMap(const {

@@ -25,7 +25,7 @@ class ProfileTab extends StatelessWidget {
     final rawAvatar = (auth.user?['avatar_url'] ?? auth.user?['avatar'])
         ?.toString();
     final avatar = auth.api.resolveAssetUrl(rawAvatar);
-    final isAdmin = (auth.user?['role']?.toString() ?? '') == 'admin';
+    final isAdmin = auth.canManageBusiness;
     final currentLang = localization.locale.languageCode;
     final languageOptions = <Map<String, String>>[
       {
@@ -243,7 +243,7 @@ class ProfileTab extends StatelessWidget {
                 ],
               ),
             );
-            if (confirmed == true) {
+            if (confirmed == true && context.mounted) {
               await context.read<AuthProvider>().logout();
               if (context.mounted) {
                 Navigator.of(

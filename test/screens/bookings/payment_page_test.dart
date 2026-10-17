@@ -45,7 +45,7 @@ void main() {
       MultiProvider(
         providers: [
           Provider<AppConfig>.value(value: AppConfig.barbershop),
-            Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
+          Provider<BrandTheme>.value(value: BrandTheme.barbershop()),
           Provider<WhiteLabelConfig>.value(value: WhiteLabelConfig.tresAmigos),
           ChangeNotifierProvider<AuthProvider>.value(value: auth),
           ChangeNotifierProvider<LocalizationService>.value(
@@ -147,6 +147,8 @@ void main() {
           'iso': '2026-09-01T10:00:00.000',
           'slot': '10:00 AM to 11:00 AM',
           'duration': 1,
+          // The booking flow requires a barber before reaching this page.
+          'staff': {'id': 3, 'name': 'Carlos Ramírez'},
         },
       );
 

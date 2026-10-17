@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/white_label_config.dart';
 import '../theme/brand_theme.dart';
+import 'resilient_http_client.dart';
 
 class WhiteLabelConfigService extends ChangeNotifier {
   WhiteLabelConfigService({
@@ -15,7 +16,14 @@ class WhiteLabelConfigService extends ChangeNotifier {
     http.Client? client,
   }) : _baseUrl = _cleanBase(baseUrl),
        _businessSlug = _cleanBusinessSlug(businessSlug),
-       _client = client ?? http.Client(),
+       // Short deadline: the app waits for this on startup and falls back
+       // to the cached config, so a slow network must not block launch.
+       _client =
+           client ??
+           ResilientHttpClient(
+             timeout: const Duration(seconds: 8),
+             getRetries: 0,
+           ),
        _fallback = fallback ?? WhiteLabelConfig.generic,
        _config = fallback ?? WhiteLabelConfig.generic,
        _brandTheme = BrandTheme.generic();
@@ -35,7 +43,9 @@ class WhiteLabelConfigService extends ChangeNotifier {
 
   String get _cacheKey => _businessSlug == null
       ? defaultCacheKey
-      : 'white_label_config_cache_v${_cacheSchemaVersion}_${_businessSlug}';
+      : 'white_label_config_cache_v${_cacheSchemaVersion}_$_businessSlug';
+
+  String get _etagKey => '${_cacheKey}_etag';
 
   WhiteLabelConfig get config => _config;
   BrandTheme get brandTheme => _brandTheme;
@@ -88,10 +98,20 @@ class WhiteLabelConfigService extends ChangeNotifier {
       final uri = _businessSlug == null
           ? Uri.parse('$_baseUrl/app-config')
           : Uri.parse('$_baseUrl/public/businesses/$_businessSlug/config');
+      final prefs = await SharedPreferences.getInstance();
+      // Send back the ETag of the cached copy: when branding hasn't
+      // changed the server answers 304 with no body and the cache is used.
+      final cachedEtag = prefs.getString(_cacheKey) == null
+          ? null
+          : prefs.getString(_etagKey);
       final response = await _client.get(
         uri,
-        headers: const {'Accept': 'application/json'},
+        headers: {'Accept': 'application/json', 'If-None-Match': ?cachedEtag},
       );
+      if (response.statusCode == 304 && cachedEtag != null) {
+        await _loadCachedConfig();
+        return true;
+      }
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException('HTTP ${response.statusCode}');
       }
@@ -103,8 +123,13 @@ class WhiteLabelConfigService extends ChangeNotifier {
       final parsed = WhiteLabelConfig.fromJson(normalized);
       _config = parsed;
       _brandTheme = BrandTheme.fromJson(normalized, fallback: _brandTheme);
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_cacheKey, jsonEncode(normalized));
+      final etag = response.headers['etag'];
+      if (etag != null && etag.isNotEmpty) {
+        await prefs.setString(_etagKey, etag);
+      } else {
+        await prefs.remove(_etagKey);
+      }
       notifyListeners();
       return true;
     } catch (_) {

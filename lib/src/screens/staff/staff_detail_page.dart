@@ -306,7 +306,7 @@ class _StaffDetailPageState extends State<StaffDetailPage> {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: services.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final service = services[index];
                       return _ServiceSheetCard(
@@ -696,7 +696,6 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     if (avatarUrl.isEmpty) {
       return const DecoratedBox(
         decoration: BoxDecoration(
@@ -714,7 +713,7 @@ class _Avatar extends StatelessWidget {
       return Image.asset(
         avatarUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Center(
+        errorBuilder: (_, _, _) => const Center(
           child: Icon(Icons.person_rounded, color: Colors.white70),
         ),
       );
@@ -723,7 +722,7 @@ class _Avatar extends StatelessWidget {
     return Image.network(
       avatarUrl,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const Center(
+      errorBuilder: (_, _, _) => const Center(
         child: Icon(Icons.person_rounded, color: Colors.white70),
       ),
     );
@@ -743,7 +742,6 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -776,7 +774,6 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -808,7 +805,6 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -879,7 +875,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .12),
               ),
-              child:  Icon(Icons.star_rounded, color: theme.primary),
+              child: Icon(Icons.star_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -911,7 +907,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),

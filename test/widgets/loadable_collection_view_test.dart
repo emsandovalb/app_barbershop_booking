@@ -4,11 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:app_barbershop_booking/src/widgets/loadable_collection_view.dart';
 
 Widget _wrap(Widget child) {
-  return MaterialApp(
-    home: Scaffold(
-      body: child,
-    ),
-  );
+  return MaterialApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -22,10 +18,10 @@ void main() {
         LoadableCollectionView<List<String>>(
           controller: controller,
           isEmpty: (items) => items.isEmpty,
-          loadingBuilder: (_, __) => const Text('loading'),
-          errorBuilder: (_, __, ___) => const Text('error'),
-          emptyBuilder: (_, __) => const Text('empty'),
-          dataBuilder: (_, data, __, ___) => Text('items: ${data.length}'),
+          loadingBuilder: (_, _) => const Text('loading'),
+          errorBuilder: (_, _, _) => const Text('error'),
+          emptyBuilder: (_, _) => const Text('empty'),
+          dataBuilder: (_, data, _, _) => Text('items: ${data.length}'),
         ),
       ),
     );
@@ -39,21 +35,20 @@ void main() {
     expect(find.text('error'), findsNothing);
   });
 
-  testWidgets('shows the empty state when the request succeeds without items',
-      (tester) async {
-    final controller = LoadableController<List<String>>(
-      () async => <String>[],
-    );
+  testWidgets('shows the empty state when the request succeeds without items', (
+    tester,
+  ) async {
+    final controller = LoadableController<List<String>>(() async => <String>[]);
 
     await tester.pumpWidget(
       _wrap(
         LoadableCollectionView<List<String>>(
           controller: controller,
           isEmpty: (items) => items.isEmpty,
-          loadingBuilder: (_, __) => const Text('loading'),
-          errorBuilder: (_, __, ___) => const Text('error'),
-          emptyBuilder: (_, __) => const Text('empty'),
-          dataBuilder: (_, data, __, ___) => Text('items: ${data.length}'),
+          loadingBuilder: (_, _) => const Text('loading'),
+          errorBuilder: (_, _, _) => const Text('error'),
+          emptyBuilder: (_, _) => const Text('empty'),
+          dataBuilder: (_, data, _, _) => Text('items: ${data.length}'),
         ),
       ),
     );
@@ -66,21 +61,19 @@ void main() {
   });
 
   testWidgets('shows the error state when the request fails', (tester) async {
-    final controller = LoadableController<List<String>>(
-      () async {
-        throw Exception('network');
-      },
-    );
+    final controller = LoadableController<List<String>>(() async {
+      throw Exception('network');
+    });
 
     await tester.pumpWidget(
       _wrap(
         LoadableCollectionView<List<String>>(
           controller: controller,
           isEmpty: (items) => items.isEmpty,
-          loadingBuilder: (_, __) => const Text('loading'),
-          errorBuilder: (_, __, ___) => const Text('error'),
-          emptyBuilder: (_, __) => const Text('empty'),
-          dataBuilder: (_, data, __, ___) => Text('items: ${data.length}'),
+          loadingBuilder: (_, _) => const Text('loading'),
+          errorBuilder: (_, _, _) => const Text('error'),
+          emptyBuilder: (_, _) => const Text('empty'),
+          dataBuilder: (_, data, _, _) => Text('items: ${data.length}'),
         ),
       ),
     );
@@ -94,22 +87,20 @@ void main() {
 
   testWidgets('retries successfully after an initial error', (tester) async {
     var attempts = 0;
-    final controller = LoadableController<List<String>>(
-      () async {
-        attempts += 1;
-        if (attempts == 1) {
-          throw Exception('network');
-        }
-        return ['recovered'];
-      },
-    );
+    final controller = LoadableController<List<String>>(() async {
+      attempts += 1;
+      if (attempts == 1) {
+        throw Exception('network');
+      }
+      return ['recovered'];
+    });
 
     await tester.pumpWidget(
       _wrap(
         LoadableCollectionView<List<String>>(
           controller: controller,
           isEmpty: (items) => items.isEmpty,
-          loadingBuilder: (_, __) => const Text('loading'),
+          loadingBuilder: (_, _) => const Text('loading'),
           errorBuilder: (context, error, retry) {
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -122,8 +113,8 @@ void main() {
               ],
             );
           },
-          emptyBuilder: (_, __) => const Text('empty'),
-          dataBuilder: (_, data, __, ___) => Text('items: ${data.length}'),
+          emptyBuilder: (_, _) => const Text('empty'),
+          dataBuilder: (_, data, _, _) => Text('items: ${data.length}'),
         ),
       ),
     );
