@@ -7,20 +7,6 @@ class _BusinessProfileData {
   const _BusinessProfileData({required this.staff, required this.resources});
 }
 
-class _GalleryTileData {
-  final String asset;
-  final String label;
-
-  const _GalleryTileData(this.asset, this.label);
-}
-
-const List<_GalleryTileData> _galleryTiles = [
-  _GalleryTileData('', 'Ambiente premium'),
-  _GalleryTileData('', 'Identidad del negocio'),
-  _GalleryTileData('', 'Profesionales expertos'),
-  _GalleryTileData('', 'Detalles de precisión'),
-];
-
 String _stringValue(
   Map<String, dynamic> map,
   List<String> keys, {

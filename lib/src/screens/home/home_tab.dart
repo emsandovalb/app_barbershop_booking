@@ -10,7 +10,6 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/loadable_collection_view.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
-import '../gallery/gallery_page.dart';
 import '../ground/ground_detail_page.dart';
 import '../grounds/filtered_courts_page.dart';
 import '../../services/localization_service.dart';
@@ -272,24 +271,6 @@ class _HomeTabState extends State<HomeTab> {
                       ).pushNamed(AppRoutes.adminDashboard),
                     ),
                   ],
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const GalleryPage()),
-                      ),
-                      icon: const Icon(Icons.photo_library_outlined, size: 18),
-                      label: Text(tr('home_view_gallery')),
-                      style: TextButton.styleFrom(
-                        foregroundColor: theme.secondary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   SectionHeader(
                     title: tr('home_featured_services'),

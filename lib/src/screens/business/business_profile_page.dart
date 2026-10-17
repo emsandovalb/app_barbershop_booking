@@ -8,7 +8,6 @@ import '../../config/white_label_config.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
-import '../gallery/gallery_page.dart';
 import '../../services/localization_service.dart';
 
 part 'business_profile/hero.dart';
@@ -200,18 +199,6 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                               body: tr('business_services_empty'),
                             )
                           : _ServiceGrid(resources: resources),
-                      const SizedBox(height: 20),
-                      SectionHeader(
-                        title: whiteLabel.galleryLabel,
-                        actionLabel: tr('home_view_gallery'),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const GalleryPage(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const _GalleryGrid(),
                       const SizedBox(height: 20),
                       BarbershopPremiumCard(
                         padding: const EdgeInsets.all(18),

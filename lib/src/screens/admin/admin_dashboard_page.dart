@@ -13,7 +13,6 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import 'admin_page_scaffold.dart';
 import '../bookings/booking_detail_page.dart';
-import '../gallery/gallery_page.dart';
 import '../../services/business_clock.dart';
 import '../../services/localization_service.dart';
 
@@ -299,13 +298,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                   case 'business':
                                     _openNamedRoute(AppRoutes.businessProfile);
                                     return;
-                                  case 'gallery':
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const GalleryPage(),
-                                      ),
-                                    );
-                                    return;
                                 }
                               },
                             ),
@@ -379,13 +371,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         title: tr('admin_module_business'),
         subtitle: tr('admin_module_business_body'),
         badge: tr('active'),
-      ),
-      _AdminModuleData(
-        id: 'gallery',
-        icon: Icons.photo_library_rounded,
-        title: tr('admin_module_gallery'),
-        subtitle: tr('admin_module_gallery_body'),
-        badge: tr('admin_badge_new'),
       ),
     ];
   }
