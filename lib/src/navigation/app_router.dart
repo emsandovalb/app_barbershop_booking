@@ -13,8 +13,6 @@ import '../screens/bookings/booking_detail_page.dart';
 import '../screens/bookings/ground_booking_detail_page.dart';
 import '../screens/booking/payment_page.dart';
 import '../screens/booking/order_placed_page.dart';
-import '../screens/grounds/add_ground_page.dart';
-import '../screens/grounds/add_photos_page.dart';
 import '../screens/common/coming_soon_page.dart';
 import '../screens/admin/admin_dashboard_page.dart';
 import '../screens/admin/admin_services_page.dart';
@@ -40,16 +38,6 @@ class AppRoutes {
   static const payment = '/booking/payment';
   static const orderPlaced = '/booking/order-placed';
   static const bookingShow = '/bookings/show';
-  static const myGrounds = '/grounds/mine';
-  static const addGround = '/grounds/add';
-  static const categoryGround = '/grounds/category';
-  static const addPhotos = '/grounds/photos';
-  static const categories = '/categories';
-  static const tournaments = '/tournaments';
-  static const tournamentDetail = '/tournaments/detail';
-  static const tournamentForm = '/tournaments/form';
-  static const myTeams = '/teams';
-  static const teamForm = '/teams/form';
   static const comingSoon = '/coming-soon';
   static const adminDashboard = '/admin/dashboard';
   static const adminServices = '/admin/services';
@@ -111,51 +99,6 @@ class AppRouter {
         return _material(
           settings,
           BookingDetailPage(booking: args['booking'] as Map<String, dynamic>),
-        );
-      case AppRoutes.myGrounds:
-        return _material(settings, const AdminServicesPage());
-      case AppRoutes.addGround:
-        return _material(settings, const AddGroundPage());
-      case AppRoutes.categoryGround:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Service categories unavailable'),
-        );
-      case AppRoutes.addPhotos:
-        final args = settings.arguments as Map<String, dynamic>?;
-        return _material(
-          settings,
-          AddPhotosPage(initialData: args ?? const {}),
-        );
-      case AppRoutes.categories:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Service categories unavailable'),
-        );
-      case AppRoutes.tournaments:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
-        );
-      case AppRoutes.tournamentDetail:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
-        );
-      case AppRoutes.tournamentForm:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
-        );
-      case AppRoutes.myTeams:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Teams unavailable'),
-        );
-      case AppRoutes.teamForm:
-        return _material(
-          settings,
-          const ComingSoonPage(title: 'Teams unavailable'),
         );
       case AppRoutes.comingSoon:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};

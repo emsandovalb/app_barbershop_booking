@@ -9,7 +9,6 @@ import 'config/white_label_config.dart';
 import 'navigation/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'services/api.dart';
-import 'providers/ground_form_provider.dart';
 import 'services/localization_service.dart';
 import 'services/salon_fallbacks.dart';
 import 'services/white_label_config_service.dart';
@@ -83,7 +82,6 @@ class BarbershopBookingApp extends StatelessWidget {
             ),
           ),
         ),
-        ChangeNotifierProvider(create: (_) => GroundFormProvider()),
         ChangeNotifierProvider(
           create: (_) {
             final service = LocalizationService(

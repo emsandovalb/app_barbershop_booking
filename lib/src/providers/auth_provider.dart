@@ -82,24 +82,6 @@ class AuthProvider extends ChangeNotifier {
   bool get rememberSession => _rememberSession;
   String get rememberedEmail => _rememberedEmail;
   Future<void> get ready => _initialization;
-  List<Map<String, dynamic>> get manageableTeams {
-    final teams = (user?['teams'] as List?) ?? const [];
-    final currentUserId = user?['id'];
-    return teams
-        .where((entry) {
-          final team = Map<String, dynamic>.from(entry as Map);
-          if (currentUserId != null &&
-              team['user_id']?.toString() == currentUserId.toString()) {
-            return true;
-          }
-          final pivot = (team['pivot'] as Map?) ?? const {};
-          final role = pivot['role']?.toString() ?? '';
-          return role == 'owner' || role == 'captain' || role == 'manager';
-        })
-        .map((entry) => Map<String, dynamic>.from(entry as Map))
-        .toList(growable: false);
-  }
-
   AuthProvider(this.api) {
     _initialization = _restore();
   }

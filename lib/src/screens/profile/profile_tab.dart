@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/app_config.dart';
 import '../../config/white_label_config.dart';
 import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
@@ -17,7 +16,6 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final localization = context.watch<LocalizationService>();
-    final config = context.watch<AppConfig>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     final name = (auth.user?['name'] ?? 'Emmanuel Sandoval').toString();
     final email = (auth.user?['email'] ?? 'esandovalbarrantes@gmail.com')
@@ -151,12 +149,6 @@ class ProfileTab extends StatelessWidget {
           icon: Icons.history,
           onTap: () => _go(context, const BookingsTab(initialIndex: 1)),
         ),
-        if (config.features.showTeams)
-          _ProfileTile(
-            title: localization.t('profile_my_teams', fallback: 'My teams'),
-            icon: Icons.groups_outlined,
-            onTap: () => Navigator.of(context).pushNamed(AppRoutes.myTeams),
-          ),
         if (isAdmin)
           _ProfileTile(
             title: localization.t(
@@ -165,7 +157,7 @@ class ProfileTab extends StatelessWidget {
             ),
             icon: Icons.content_cut_outlined,
             onTap: () {
-              Navigator.of(context).pushNamed(AppRoutes.myGrounds);
+              Navigator.of(context).pushNamed(AppRoutes.adminServices);
             },
           ),
         const SizedBox(height: 12),

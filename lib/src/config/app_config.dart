@@ -24,11 +24,7 @@ class FeatureFlags {
   final bool showResources;
   final bool showReservations;
   final bool showAdminReservations;
-  final bool showResourceCategories;
   final bool showPayments;
-  final bool showPromotions;
-  final bool showTeams;
-  final bool showTournaments;
   final bool showStaff;
   final bool reservationStaffSelection;
   final bool adminStaffManagement;
@@ -37,11 +33,7 @@ class FeatureFlags {
     this.showResources = true,
     this.showReservations = true,
     this.showAdminReservations = true,
-    this.showResourceCategories = false,
     this.showPayments = true,
-    this.showPromotions = false,
-    this.showTeams = false,
-    this.showTournaments = false,
     this.showStaff = false,
     this.reservationStaffSelection = false,
     this.adminStaffManagement = false,
@@ -119,11 +111,7 @@ class AppConfig {
       showResources: true,
       showReservations: true,
       showAdminReservations: true,
-      showResourceCategories: false,
       showPayments: true,
-      showPromotions: false,
-      showTeams: false,
-      showTournaments: false,
       showStaff: false,
       reservationStaffSelection: false,
       adminStaffManagement: false,
@@ -160,11 +148,7 @@ class AppConfig {
       showResources: true,
       showReservations: true,
       showAdminReservations: true,
-      showResourceCategories: false,
       showPayments: true,
-      showPromotions: false,
-      showTeams: false,
-      showTournaments: false,
       showStaff: true,
       reservationStaffSelection: true,
       adminStaffManagement: true,
@@ -215,11 +199,7 @@ class AppConfig {
       showResources: true,
       showReservations: true,
       showAdminReservations: true,
-      showResourceCategories: false,
       showPayments: true,
-      showPromotions: false,
-      showTeams: false,
-      showTournaments: false,
       showStaff: true,
       reservationStaffSelection: true,
       adminStaffManagement: true,
