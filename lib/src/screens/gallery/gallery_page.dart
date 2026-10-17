@@ -10,7 +10,6 @@ part 'gallery/header.dart';
 part 'gallery/tiles.dart';
 part 'gallery/viewer.dart';
 
-
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
 

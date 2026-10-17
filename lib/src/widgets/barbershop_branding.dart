@@ -29,11 +29,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xFF050505),
-            Color(0xFF0E0A08),
-            Color(0xFF090909),
-          ],
+          colors: [Color(0xFF050505), Color(0xFF0E0A08), Color(0xFF090909)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -111,9 +107,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
             ),
           Positioned.fill(
             child: IgnorePointer(
-              child: CustomPaint(
-                painter: _PremiumTexturePainter(),
-              ),
+              child: CustomPaint(painter: _PremiumTexturePainter()),
             ),
           ),
           child,
@@ -154,7 +148,10 @@ class BarbershopCinematicPanel extends StatelessWidget {
               child: Opacity(
                 opacity: opacity,
                 child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: blurSigma,
+                    sigmaY: blurSigma,
+                  ),
                   child: Image.asset(backgroundAsset, fit: BoxFit.cover),
                 ),
               ),
@@ -188,10 +185,7 @@ class BarbershopCinematicPanel extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: padding,
-            child: child,
-          ),
+          Padding(padding: padding, child: child),
         ],
       ),
     );
@@ -278,11 +272,7 @@ class BarbershopLogoMark extends StatelessWidget {
                 ),
               ),
             ),
-          SizedBox(
-            width: size,
-            height: size,
-            child: logo,
-          ),
+          SizedBox(width: size, height: size, child: logo),
         ],
       ),
     );
@@ -314,8 +304,11 @@ class BarbershopPremiumCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? const Color(0xFF120E0B),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor ?? Colors.white.withValues(alpha: .06)),
-        boxShadow: boxShadow ??
+        border: Border.all(
+          color: borderColor ?? Colors.white.withValues(alpha: .06),
+        ),
+        boxShadow:
+            boxShadow ??
             [
               BoxShadow(
                 color: Colors.black.withValues(alpha: .28),
@@ -339,11 +332,7 @@ class PremiumBadge extends StatelessWidget {
   final String label;
   final bool compact;
 
-  const PremiumBadge({
-    super.key,
-    required this.label,
-    this.compact = false,
-  });
+  const PremiumBadge({super.key, required this.label, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -431,10 +420,7 @@ class _GlowBlob extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

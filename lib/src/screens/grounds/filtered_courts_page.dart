@@ -115,21 +115,21 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                       Center(
                         child: Column(
                           children: [
-                            const Text(
-                              'No fue posible cargar los servicios.',
-                              style: TextStyle(color: Colors.white70),
+                            Text(
+                              tr('home_services_load_failed'),
+                              style: const TextStyle(color: Colors.white70),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Revisa tu conexión e intenta nuevamente.',
-                              style: TextStyle(color: Colors.white54),
+                            Text(
+                              tr('common_check_connection'),
+                              style: const TextStyle(color: Colors.white54),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 12),
                             OutlinedButton(
                               onPressed: () => _reload(page: 1),
-                              child: const Text('Reintentar'),
+                              child: Text(tr('btn_retry')),
                             ),
                           ],
                         ),
@@ -234,7 +234,8 @@ class _ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = resource['name']?.toString() ?? 'Resource';
+    final name =
+        resource['name']?.toString() ?? tr('appointment_default_service');
     final address = resource['address']?.toString() ?? '';
     return InkWell(
       onTap: () => Navigator.of(context).push(

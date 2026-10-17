@@ -11,7 +11,6 @@ import '../ground/ground_detail_page.dart';
 part 'staff_detail/hero.dart';
 part 'staff_detail/sections.dart';
 
-
 class StaffDetailPage extends StatefulWidget {
   final Map<String, dynamic> staff;
 

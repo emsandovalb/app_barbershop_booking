@@ -128,7 +128,7 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
     final auth = context.watch<AuthProvider>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     if (!auth.canManageBusiness) {
-      return  Scaffold(
+      return Scaffold(
         backgroundColor: theme.background,
         body: Center(
           child: Text(
@@ -407,7 +407,7 @@ class _ServiceCard extends StatelessWidget {
                         )
                       : Container(
                           color: Colors.white.withValues(alpha: .04),
-                          child:  Icon(
+                          child: Icon(
                             Icons.content_cut_rounded,
                             color: theme.primary,
                             size: 30,
@@ -692,7 +692,7 @@ class _SectionTitle extends StatelessWidget {
           onPressed: onAction,
           child: Text(
             actionLabel,
-            style:  TextStyle(
+            style: TextStyle(
               color: theme.secondary,
               fontWeight: FontWeight.w700,
             ),
@@ -719,11 +719,7 @@ class _EmptyState extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-             Icon(
-              Icons.content_cut_rounded,
-              color: theme.primary,
-              size: 40,
-            ),
+            Icon(Icons.content_cut_rounded, color: theme.primary, size: 40),
             const SizedBox(height: 10),
             Text(
               'Todavía no hay servicios creados.',

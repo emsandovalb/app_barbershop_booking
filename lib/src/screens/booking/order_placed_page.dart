@@ -12,10 +12,10 @@ class OrderPlacedPage extends StatelessWidget {
 
   const OrderPlacedPage({
     super.key,
-    this.title = 'Solicitud enviada',
-    this.subtitle =
-        'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
-    this.buttonText = 'Volver al inicio',
+    // Empty means "use the translated default".
+    this.title = '',
+    this.subtitle = '',
+    this.buttonText = '',
     this.backRoute = AppRoutes.home,
   });
 

@@ -39,7 +39,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
     if (serviceId == null || staffId == null) {
       setState(() {
         _loading = false;
-        _error = 'No se pudo identificar el servicio o el profesional.';
+        _error = tr('select_missing_selection');
       });
       return;
     }
@@ -65,7 +65,7 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
       setState(() => _slots = slots);
     } catch (_) {
       if (!mounted) return;
-      setState(() => _error = 'No pudimos cargar los horarios disponibles.');
+      setState(() => _error = tr('select_load_failed'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -180,7 +180,7 @@ class _LoadState extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       Text(message, style: const TextStyle(color: Colors.white70)),
-      TextButton(onPressed: onRetry, child: const Text('Reintentar')),
+      TextButton(onPressed: onRetry, child: Text(tr('btn_retry'))),
     ],
   );
 }

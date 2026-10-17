@@ -90,7 +90,7 @@ class GroundDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            resource['name']?.toString() ?? 'Service',
+            resource['name']?.toString() ?? tr('appointment_default_service'),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -119,7 +119,10 @@ class GroundDetailPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Barbero seleccionado: $selectedStaffName',
+                      tr(
+                        'booking_selected_staff',
+                        args: {'name': selectedStaffName},
+                      ),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

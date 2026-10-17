@@ -9,7 +9,6 @@ part 'reviews/summary.dart';
 part 'reviews/review_list.dart';
 part 'reviews/data.dart';
 
-
 class ReviewsPage extends StatefulWidget {
   const ReviewsPage({super.key});
 

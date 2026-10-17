@@ -263,10 +263,7 @@ class _BarberTile extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: .08),
             backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
             child: avatar.isEmpty
-                ?  Icon(
-                    Icons.content_cut_rounded,
-                    color: theme.primary,
-                  )
+                ? Icon(Icons.content_cut_rounded, color: theme.primary)
                 : null,
           ),
           const SizedBox(width: 12),

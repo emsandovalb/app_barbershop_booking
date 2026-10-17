@@ -181,7 +181,7 @@ class _PerformanceRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _formatCrc(item.revenue),
-                  style:  TextStyle(
+                  style: TextStyle(
                     color: theme.secondary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
@@ -263,7 +263,7 @@ class _TopServiceCard extends StatelessWidget {
             children: [
               Text(
                 _formatCrc(item.revenue),
-                style:  TextStyle(
+                style: TextStyle(
                   color: theme.secondary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -285,7 +285,7 @@ class _TopServiceCard extends StatelessWidget {
               value: item.progress,
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: .06),
-              valueColor:  AlwaysStoppedAnimation(theme.primary),
+              valueColor: AlwaysStoppedAnimation(theme.primary),
             ),
           ),
         ],

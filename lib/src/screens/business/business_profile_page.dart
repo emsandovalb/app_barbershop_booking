@@ -16,7 +16,6 @@ part 'business_profile/info_and_staff.dart';
 part 'business_profile/services_and_reviews.dart';
 part 'business_profile/data.dart';
 
-
 class BusinessProfilePage extends StatefulWidget {
   const BusinessProfilePage({super.key});
 
@@ -152,9 +151,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                     if (isLoading) ...[
                       const SizedBox(height: 220),
                       Center(
-                        child: CircularProgressIndicator(
-                          color: theme.primary,
-                        ),
+                        child: CircularProgressIndicator(color: theme.primary),
                       ),
                       const SizedBox(height: 220),
                     ] else ...[

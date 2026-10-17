@@ -33,7 +33,7 @@ class GroundBookingDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            resource['name']?.toString() ?? 'Service',
+            resource['name']?.toString() ?? tr('appointment_default_service'),
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
@@ -86,7 +86,8 @@ class GroundBookingDetailPage extends StatelessWidget {
               children: [
                 _kv(
                   loc.t('booking_detail_ground_label'),
-                  resource['name']?.toString() ?? 'Service',
+                  resource['name']?.toString() ??
+                      tr('appointment_default_service'),
                 ),
                 const SizedBox(height: 10),
                 _kv(loc.t('booking_detail_code'), '—'),

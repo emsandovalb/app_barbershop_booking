@@ -13,7 +13,6 @@ part 'operations_board/detail_sheet.dart';
 part 'operations_board/lanes.dart';
 part 'operations_board/booking_helpers.dart';
 
-
 enum OperationsLane { newOrders, preparing, ready, dispatched }
 
 class OperationsBoard extends StatefulWidget {
@@ -152,9 +151,11 @@ class _OperationsBoardState extends State<OperationsBoard> {
       };
       final key = operationsBookingIdentity(booking);
       setState(() {
-        _localStatusOverrides[key] = response['status']?.toString() ?? targetStatus;
+        _localStatusOverrides[key] =
+            response['status']?.toString() ?? targetStatus;
         if (targetStatus == 'paid') {
-          _localPaymentOverrides[key] = response['payment_status']?.toString() ?? 'paid';
+          _localPaymentOverrides[key] =
+              response['payment_status']?.toString() ?? 'paid';
         }
       });
       if (mounted) {
@@ -217,7 +218,9 @@ class _OperationsBoardState extends State<OperationsBoard> {
             if (status != null) 'status': status,
             if (paymentStatus != null) 'payment_status': paymentStatus,
             if (status != null)
-              'kanban_lane': operationsLaneName(operationsLaneFromStatus(status)),
+              'kanban_lane': operationsLaneName(
+                operationsLaneFromStatus(status),
+              ),
           };
         })
         .toList(growable: false);

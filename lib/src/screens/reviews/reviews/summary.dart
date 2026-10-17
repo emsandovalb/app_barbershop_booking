@@ -84,11 +84,7 @@ class _RatingSummaryCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                     Icon(
-                      Icons.star_rounded,
-                      color: theme.primary,
-                      size: 24,
-                    ),
+                    Icon(Icons.star_rounded, color: theme.primary, size: 24),
                     const SizedBox(height: 2),
                     Text(
                       rating.toStringAsFixed(1),

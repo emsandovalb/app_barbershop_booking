@@ -153,7 +153,7 @@ class _BarberPickerBottomSheetState extends State<BarberPickerBottomSheet> {
                                         arguments: {'staff': barber},
                                       );
                                     },
-                                    child: const Text('Ver perfil'),
+                                    child: Text(tr('staff_view_profile')),
                                   ),
                                   onTap: () =>
                                       Navigator.of(context).pop(barber),

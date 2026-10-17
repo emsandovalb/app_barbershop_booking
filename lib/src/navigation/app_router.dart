@@ -25,6 +25,7 @@ import '../screens/admin/staff_resource_assignment_page.dart';
 import '../screens/admin/service_barber_assignment_page.dart';
 import '../screens/admin/service_form_page.dart';
 import '../screens/staff/staff_detail_page.dart';
+import '../services/localization_service.dart';
 
 class AppRoutes {
   static const splash = '/';
@@ -98,11 +99,10 @@ class AppRouter {
         return _material(
           settings,
           OrderPlacedPage(
-            title: args['title'] as String? ?? 'Solicitud enviada',
-            subtitle:
-                args['subtitle'] as String? ??
-                'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
-            buttonText: args['buttonText'] as String? ?? 'Volver al inicio',
+            // Empty strings make OrderPlacedPage use its translated defaults.
+            title: args['title'] as String? ?? '',
+            subtitle: args['subtitle'] as String? ?? '',
+            buttonText: args['buttonText'] as String? ?? '',
             backRoute: args['backRoute'] as String? ?? AppRoutes.home,
           ),
         );
@@ -119,7 +119,7 @@ class AppRouter {
       case AppRoutes.categoryGround:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Service categories unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.addPhotos:
         final args = settings.arguments as Map<String, dynamic>?;
@@ -130,32 +130,32 @@ class AppRouter {
       case AppRoutes.categories:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Service categories unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.tournaments:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.tournamentDetail:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.tournamentForm:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Promotions unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.myTeams:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Teams unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.teamForm:
         return _material(
           settings,
-          const ComingSoonPage(title: 'Teams unavailable'),
+          ComingSoonPage(title: tr('section_unavailable')),
         );
       case AppRoutes.comingSoon:
         final args = (settings.arguments as Map<String, dynamic>?) ?? const {};

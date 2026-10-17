@@ -79,7 +79,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .12),
               ),
-              child:  Icon(Icons.star_rounded, color: theme.primary),
+              child: Icon(Icons.star_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -111,7 +111,7 @@ class _ReviewsPreviewCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),

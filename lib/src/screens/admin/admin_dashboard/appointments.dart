@@ -91,7 +91,7 @@ class _AppointmentCard extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style:  TextStyle(
+                        style: TextStyle(
                           color: theme.primary,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
@@ -134,7 +134,7 @@ class _AppointmentCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       _bookingPriceLabel(booking, resource),
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.secondary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,

@@ -58,14 +58,14 @@ void main() {
     // find the specific TextSpan and invoke its recognizer directly —
     // the standard pattern for testing tappable RichText spans.
     final signupTextFinder = find.byWidgetPredicate(
-      (widget) => widget is RichText && widget.text.toPlainText().contains('Regístrate'),
+      (widget) => widget is RichText && widget.text.toPlainText().contains('Registrate'),
     );
     expect(signupTextFinder, findsOneWidget);
 
     final richText = tester.widget<RichText>(signupTextFinder);
     TapGestureRecognizer? recognizer;
     (richText.text as TextSpan).visitChildren((span) {
-      if (span is TextSpan && span.text == 'Regístrate') {
+      if (span is TextSpan && span.text == 'Registrate') {
         recognizer = span.recognizer as TapGestureRecognizer?;
       }
       return true;

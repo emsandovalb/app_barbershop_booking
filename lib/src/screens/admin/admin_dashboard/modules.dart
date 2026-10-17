@@ -108,7 +108,7 @@ class _ModuleBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style:  TextStyle(
+        style: TextStyle(
           color: theme.secondary,
           fontSize: 10.5,
           fontWeight: FontWeight.w800,
@@ -181,7 +181,7 @@ class _SectionHeaderRow extends StatelessWidget {
           onPressed: onTap,
           child: Text(
             actionLabel,
-            style:  TextStyle(
+            style: TextStyle(
               color: theme.secondary,
               fontWeight: FontWeight.w700,
             ),

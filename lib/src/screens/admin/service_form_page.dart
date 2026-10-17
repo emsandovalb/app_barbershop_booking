@@ -324,11 +324,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
     return DecoratedBox(
       decoration: const BoxDecoration(color: Color(0xFF120E0B)),
       child: Center(
-        child: Icon(
-          Icons.content_cut_rounded,
-          color: theme.primary,
-          size: 30,
-        ),
+        child: Icon(Icons.content_cut_rounded, color: theme.primary, size: 30),
       ),
     );
   }
@@ -503,21 +499,15 @@ class _PremiumField extends StatelessWidget {
         fillColor: const Color(0xFF120E0B).withValues(alpha: .96),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: theme.primary.withValues(alpha: .14),
-          ),
+          borderSide: BorderSide(color: theme.primary.withValues(alpha: .14)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: theme.primary.withValues(alpha: .14),
-          ),
+          borderSide: BorderSide(color: theme.primary.withValues(alpha: .14)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: theme.primary.withValues(alpha: .44),
-          ),
+          borderSide: BorderSide(color: theme.primary.withValues(alpha: .44)),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),

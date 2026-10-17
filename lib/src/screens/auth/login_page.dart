@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                           vertical: 8,
                         ),
                       ),
-                      child: const Text('Omitir'),
+                      child: Text(tr('btn_skip')),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -291,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Bienvenido de nuevo',
+                          tr('login_welcome_back'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: colors.primaryGoldLight,
@@ -305,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           decoration: _inputDecoration(
-                            hintText: 'Correo electrónico',
+                            hintText: tr('login_email'),
                             prefixIcon: Icons.alternate_email_rounded,
                           ),
                         ),
@@ -314,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: passCtrl,
                           obscureText: _obscure,
                           decoration: _inputDecoration(
-                            hintText: 'Contraseña',
+                            hintText: tr('login_password'),
                             prefixIcon: Icons.lock_outline_rounded,
                             suffixIcon: IconButton(
                               onPressed: () =>
@@ -338,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                               padding: EdgeInsets.zero,
                               foregroundColor: colors.primaryGoldLight,
                             ),
-                            child: const Text('¿Olvidaste tu contraseña?'),
+                            child: Text(tr('login_forgot_password')),
                           ),
                         ),
                         const SizedBox(height: 0),
@@ -364,9 +364,9 @@ class _LoginPageState extends State<LoginPage> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Correo o contraseña incorrectos',
+                                            tr('login_invalid_credentials'),
                                           ),
                                         ),
                                       );
@@ -387,13 +387,15 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             child: Text(
-                              isBusy ? 'INICIANDO...' : 'INICIAR SESIÓN',
+                              isBusy
+                                  ? tr('login_signing_in')
+                                  : tr('login_button_caps'),
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         _SocialDivider(
-                          label: 'O CONTINUAR CON',
+                          label: tr('login_or_continue_with'),
                           lineColor: colors.primaryGoldDark,
                           textColor: colors.primaryGoldLight,
                         ),
@@ -454,9 +456,9 @@ class _LoginPageState extends State<LoginPage> {
                                 fontSize: 14,
                               ),
                               children: [
-                                const TextSpan(text: '¿No tienes cuenta? '),
+                                TextSpan(text: '${tr('login_no_account')} '),
                                 TextSpan(
-                                  text: 'Regístrate',
+                                  text: tr('login_sign_up_link'),
                                   style: TextStyle(
                                     color: colors.primaryGoldLight,
                                     fontWeight: FontWeight.w700,

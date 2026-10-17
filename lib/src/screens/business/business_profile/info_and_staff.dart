@@ -251,11 +251,7 @@ class _StaffCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                 Icon(
-                  Icons.star_rounded,
-                  color: theme.primary,
-                  size: 16,
-                ),
+                Icon(Icons.star_rounded, color: theme.primary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   rating.toStringAsFixed(1),

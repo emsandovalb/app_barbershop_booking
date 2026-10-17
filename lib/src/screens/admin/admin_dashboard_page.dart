@@ -24,7 +24,6 @@ part 'admin_dashboard/appointments.dart';
 part 'admin_dashboard/data.dart';
 part 'admin_dashboard/helpers.dart';
 
-
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
 

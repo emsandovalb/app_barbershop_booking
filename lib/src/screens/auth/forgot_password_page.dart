@@ -73,7 +73,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 onPressed: () {
                   Navigator.pushNamed(context, AppRoutes.resetPassword);
                 },
-                child: const Text('I already have a reset token'),
+                child: Text(tr('forgot_have_code')),
               ),
             ],
           ),

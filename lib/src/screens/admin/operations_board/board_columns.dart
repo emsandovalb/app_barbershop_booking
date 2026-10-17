@@ -412,7 +412,7 @@ class _EmptyBoardState extends StatelessWidget {
               shape: BoxShape.circle,
               color: theme.primary.withValues(alpha: .12),
             ),
-            child:  Icon(
+            child: Icon(
               Icons.view_column_outlined,
               color: theme.primary,
               size: 32,

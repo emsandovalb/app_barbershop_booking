@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/brand_theme.dart';
 import '../../navigation/app_router.dart';
+import '../../services/localization_service.dart';
 
 class ComingSoonPage extends StatelessWidget {
   final String? title;
@@ -10,7 +11,7 @@ class ComingSoonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
-    final t = title ?? 'Coming soon';
+    final t = title ?? tr('coming_soon');
     return Scaffold(
       appBar: AppBar(title: Text(t)),
       body: Stack(
@@ -59,12 +60,16 @@ class ComingSoonPage extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.content_cut, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                  children: [
+                    const Icon(
+                      Icons.content_cut,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      'Coming soon',
-                      style: TextStyle(
+                      tr('coming_soon'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         fontSize: 20,

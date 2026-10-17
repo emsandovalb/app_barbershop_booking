@@ -122,7 +122,7 @@ class _ServiceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   price,
-                  style:  TextStyle(
+                  style: TextStyle(
                     color: theme.primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -314,10 +314,7 @@ class _ReviewsCta extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .12),
               ),
-              child:  Icon(
-                Icons.rate_review_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.rate_review_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -341,7 +338,7 @@ class _ReviewsCta extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),

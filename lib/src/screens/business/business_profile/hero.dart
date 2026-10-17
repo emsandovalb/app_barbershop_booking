@@ -345,9 +345,7 @@ class _ActionButton extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(
-                  color: theme.primary.withValues(alpha: .30),
-                ),
+                border: Border.all(color: theme.primary.withValues(alpha: .30)),
               ),
               child: Icon(icon, color: theme.primary, size: 22),
             ),

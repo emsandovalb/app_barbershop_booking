@@ -195,9 +195,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
                           ).hasMatch(email)) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'Ingresa un correo electrónico válido',
+                                  tr('reset_password_invalid_email'),
                                 ),
                               ),
                             );
@@ -274,11 +274,11 @@ String _signupErrorMessage(String? error, LocalizationService loc) {
   final text = error?.trim() ?? '';
   final normalized = text.toLowerCase();
   if (normalized.contains('valid email')) {
-    return 'Ingresa un correo electrónico válido';
+    return tr('reset_password_invalid_email');
   }
   if (normalized.contains('already been taken') ||
       normalized.contains('unique')) {
-    return 'Ya existe una cuenta con este correo electrónico';
+    return tr('signup_email_taken');
   }
   if (text.isNotEmpty) return text;
   return loc.t('signup_failed');
