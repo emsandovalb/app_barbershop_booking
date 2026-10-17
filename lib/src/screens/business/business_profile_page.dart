@@ -9,6 +9,7 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import '../../services/localization_service.dart';
+import '../../services/contact_links.dart';
 
 part 'business_profile/hero.dart';
 part 'business_profile/info_and_staff.dart';
@@ -69,10 +70,13 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
     return const [];
   }
 
-  void _showPlaceholderAction(String label) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$label aún no está configurado.')));
+  Future<void> _openContact(Uri link) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (!await ContactLinks.open(link)) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(tr('business_contact_open_failed'))),
+      );
+    }
   }
 
   void _openBookingFlow() {
@@ -163,13 +167,8 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                       ),
                       const SizedBox(height: 14),
                       _QuickActionsRow(
-                        onWhatsApp: () => _showPlaceholderAction('WhatsApp'),
-                        onCall: () =>
-                            _showPlaceholderAction(tr('business_action_call')),
-                        onLocation: () => _showPlaceholderAction(
-                          tr('business_action_location'),
-                        ),
-                        onInstagram: () => _showPlaceholderAction('Instagram'),
+                        whiteLabel: whiteLabel,
+                        onOpen: _openContact,
                       ),
                       const SizedBox(height: 14),
                       _BusinessInfoSection(whiteLabel: whiteLabel),

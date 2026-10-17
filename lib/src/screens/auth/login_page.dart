@@ -2,8 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/white_label_config.dart';
@@ -40,17 +38,6 @@ class _LoginPageState extends State<LoginPage> {
     passCtrl.dispose();
     _signupTapRecognizer.dispose();
     super.dispose();
-  }
-
-  void _notImplemented(BuildContext context, String what) {
-    final loc = context.read<LocalizationService>();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          loc.t('feature_not_implemented').replaceFirst('{feature}', what),
-        ),
-      ),
-    );
   }
 
   InputDecoration _inputDecoration({
@@ -394,59 +381,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        _SocialDivider(
-                          label: tr('login_or_continue_with'),
-                          lineColor: colors.primaryGoldDark,
-                          textColor: colors.primaryGoldLight,
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _SocialButton(
-                                label: 'Google',
-                                icon: const _GoogleBrandIcon(),
-                                borderColor: colors.primaryGold.withValues(
-                                  alpha: .52,
-                                ),
-                                onTap: () =>
-                                    _notImplemented(context, 'Google Sign-In'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _SocialButton(
-                                label: 'Facebook',
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.facebookF,
-                                  color: Color(0xFF1877F2),
-                                  size: 20,
-                                ),
-                                borderColor: colors.primaryGold.withValues(
-                                  alpha: .52,
-                                ),
-                                onTap: () =>
-                                    _notImplemented(context, 'Facebook Login'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _SocialButton(
-                                label: 'Apple',
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.apple,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                borderColor: colors.primaryGold.withValues(
-                                  alpha: .52,
-                                ),
-                                onTap: () =>
-                                    _notImplemented(context, 'Apple / Face ID'),
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 8),
                         Center(
                           child: RichText(
@@ -480,126 +414,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
-  final Color borderColor;
-
-  const _SocialButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    required this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 54,
-      child: OutlinedButton(
-        onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: const Color(0xFF15100D),
-          side: BorderSide(color: borderColor, width: 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 20, height: 20, child: Center(child: icon)),
-            const SizedBox(width: 8),
-            Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialDivider extends StatelessWidget {
-  final String label;
-  final Color lineColor;
-  final Color textColor;
-
-  const _SocialDivider({
-    required this.label,
-    required this.lineColor,
-    required this.textColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.transparent, lineColor.withValues(alpha: .55)],
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.w800,
-              letterSpacing: .7,
-              fontSize: 11,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [lineColor.withValues(alpha: .55), Colors.transparent],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GoogleBrandIcon extends StatelessWidget {
-  const _GoogleBrandIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/icons/social/google.svg',
-      width: 18,
-      height: 18,
-      fit: BoxFit.contain,
     );
   }
 }

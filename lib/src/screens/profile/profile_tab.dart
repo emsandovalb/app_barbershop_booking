@@ -7,7 +7,6 @@ import '../../navigation/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import '../bookings/bookings_tab.dart';
-import '../common/coming_soon_page.dart';
 import 'my_profile_page.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -85,26 +84,6 @@ class ProfileTab extends StatelessWidget {
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.changePassword),
         ),
-        _ProfileTile(
-          title: localization.t('profile_settings'),
-          icon: Icons.settings_outlined,
-          onTap: () => _coming(context, localization.t('profile_settings')),
-        ),
-        _ProfileTile(
-          title: localization.t('profile_privacy'),
-          icon: Icons.privacy_tip_outlined,
-          onTap: () => _coming(context, localization.t('profile_privacy')),
-        ),
-        _ProfileTile(
-          title: localization.t('profile_help'),
-          icon: Icons.help_outline,
-          onTap: () => _coming(context, localization.t('profile_help')),
-        ),
-        _ProfileTile(
-          title: localization.t('profile_about'),
-          icon: Icons.info_outline,
-          onTap: () => _coming(context, localization.t('profile_about')),
-        ),
         if (whiteLabel.features.showBusinessProfile)
           _ProfileTile(
             title: whiteLabel.businessProfileLabel,
@@ -119,11 +98,6 @@ class ProfileTab extends StatelessWidget {
             onTap: () =>
                 Navigator.of(context).pushNamed(AppRoutes.adminDashboard),
           ),
-        _ProfileTile(
-          title: localization.t('profile_rate_us'),
-          icon: Icons.star_outline,
-          onTap: () => _coming(context, localization.t('profile_rate_us')),
-        ),
         _ProfileTile(
           title: localization.t('nav_history'),
           icon: Icons.history,
@@ -227,12 +201,6 @@ class ProfileTab extends StatelessWidget {
 
   void _go(BuildContext context, Widget page) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-  }
-
-  void _coming(BuildContext context, String title) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => ComingSoonPage(title: title)));
   }
 }
 

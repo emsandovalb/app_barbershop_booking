@@ -242,53 +242,46 @@ class _CounterTile extends StatelessWidget {
 }
 
 class _QuickActionsRow extends StatelessWidget {
-  final VoidCallback onWhatsApp;
-  final VoidCallback onCall;
-  final VoidCallback onLocation;
-  final VoidCallback onInstagram;
+  final WhiteLabelConfig whiteLabel;
+  final void Function(Uri link) onOpen;
 
-  const _QuickActionsRow({
-    required this.onWhatsApp,
-    required this.onCall,
-    required this.onLocation,
-    required this.onInstagram,
-  });
+  const _QuickActionsRow({required this.whiteLabel, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
+    final whatsapp = ContactLinks.whatsapp(
+      whiteLabel.whatsapp.isNotEmpty ? whiteLabel.whatsapp : whiteLabel.phone,
+    );
+    final phone = ContactLinks.phone(whiteLabel.phone);
+    final maps = ContactLinks.maps(
+      whiteLabel.address.isNotEmpty
+          ? whiteLabel.address
+          : whiteLabel.locationFull,
+    );
+    final instagram = ContactLinks.instagram(whiteLabel.instagram);
+    // Only channels the business configured get a button.
+    final actions = [
+      if (whatsapp != null) (Icons.chat_rounded, 'WhatsApp', whatsapp),
+      if (phone != null)
+        (Icons.call_rounded, tr('business_action_call'), phone),
+      if (maps != null)
+        (Icons.place_rounded, tr('business_action_location'), maps),
+      if (instagram != null) (Icons.camera_alt_rounded, 'Instagram', instagram),
+    ];
+    if (actions.isEmpty) return const SizedBox.shrink();
+
     return Row(
       children: [
-        Expanded(
-          child: _ActionButton(
-            icon: Icons.chat_rounded,
-            label: 'WhatsApp',
-            onTap: onWhatsApp,
+        for (var i = 0; i < actions.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: _ActionButton(
+              icon: actions[i].$1,
+              label: actions[i].$2,
+              onTap: () => onOpen(actions[i].$3),
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
-            icon: Icons.call_rounded,
-            label: tr('business_action_call'),
-            onTap: onCall,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
-            icon: Icons.place_rounded,
-            label: tr('business_action_location'),
-            onTap: onLocation,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
-            icon: Icons.camera_alt_rounded,
-            label: 'Instagram',
-            onTap: onInstagram,
-          ),
-        ),
+        ],
       ],
     );
   }
