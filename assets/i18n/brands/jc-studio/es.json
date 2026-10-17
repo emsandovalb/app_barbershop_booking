@@ -8,5 +8,7 @@
   "home_search_hint": "Buscar servicios, estilistas...",
   "manage_staff": "Administrar estilistas",
   "staff_load_failed": "No se pudieron cargar los estilistas",
+  "staff_plural": "estilistas",
+  "staff_plural_title": "Estilistas",
   "staff_title": "Estilista"
 }

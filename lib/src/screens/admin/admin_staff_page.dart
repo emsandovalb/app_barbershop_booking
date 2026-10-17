@@ -142,7 +142,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                         const SizedBox(height: 12),
                         OutlinedButton(
                           onPressed: retry,
-                          child: const Text('Reintentar'),
+                          child: Text(tr('btn_retry')),
                         ),
                       ],
                     ),
@@ -323,7 +323,7 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
                                       );
                                     },
                                     icon: const Icon(Icons.person_outline),
-                                    label: const Text('Ver perfil'),
+                                    label: Text(tr('staff_view_profile')),
                                   ),
                                   OutlinedButton.icon(
                                     onPressed: () async {
@@ -386,20 +386,20 @@ class _AdminStaffPageState extends State<AdminStaffPage> {
   String _staffErrorMessage(Object error) {
     final text = error.toString();
     if (text.contains('401')) {
-      return 'Tu sesión expiró. Vuelve a iniciar sesión.';
+      return tr('admin_session_expired');
     }
     if (text.contains('403')) {
-      return 'No tienes permiso para ver este módulo.';
+      return tr('admin_no_permission');
     }
     if (text.contains('404')) {
-      return 'No se encontró el negocio actual.';
+      return tr('admin_business_not_found');
     }
     if (text.contains('422')) {
-      return 'La respuesta del servidor no es válida.';
+      return tr('admin_invalid_response');
     }
     if (text.contains('500')) {
-      return 'El servidor falló al cargar el equipo.';
+      return tr('admin_team_server_error');
     }
-    return 'No se pudo cargar el equipo.';
+    return tr('admin_team_load_failed');
   }
 }

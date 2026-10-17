@@ -12,6 +12,7 @@ import '../../widgets/court_image.dart';
 import '../../widgets/keyboard_aware_list_view.dart';
 import 'admin_page_scaffold.dart';
 import 'service_management_utils.dart';
+import '../../services/localization_service.dart';
 
 class ServiceFormPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -79,7 +80,9 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       backgroundColor: theme.background,
       appBar: buildAdminAppBar(
         context,
-        title: _isCreating ? 'Nuevo servicio' : 'Editar servicio',
+        title: _isCreating
+            ? tr('admin_qa_new_service')
+            : tr('admin_edit_service'),
       ),
       body: BarbershopCinematicPanel(
         backgroundAsset: '',
@@ -119,14 +122,14 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const PremiumBadge(
-                                  label: 'GESTIÓN DE SERVICIOS',
+                                PremiumBadge(
+                                  label: tr('admin_services_management_caps'),
                                   compact: true,
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
                                   _isCreating
-                                      ? 'Nuevo servicio'
+                                      ? tr('admin_qa_new_service')
                                       : serviceName(service),
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -136,7 +139,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Configura nombre, descripción, precio, duración, imagen y estado.',
+                                  tr('admin_service_form_intro'),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: .72),
                                     height: 1.3,
@@ -157,8 +160,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                             icon: const Icon(Icons.photo_library_rounded),
                             label: Text(
                               previewBytes == null
-                                  ? 'Elegir imagen'
-                                  : 'Cambiar imagen',
+                                  ? tr('admin_choose_image')
+                                  : tr('admin_change_image'),
                             ),
                           ),
                           if (previewBytes != null)
@@ -171,7 +174,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                                         _pickedImageName = null;
                                       });
                                     },
-                              child: const Text('Quitar imagen'),
+                              child: Text(tr('admin_remove_image')),
                             ),
                         ],
                       ),
@@ -180,16 +183,18 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                 ),
                 const SizedBox(height: 16),
                 _SectionTitle(
-                  title: _isCreating ? 'Crear servicio' : 'Editar servicio',
-                  subtitle: 'Completa la información comercial del servicio.',
+                  title: _isCreating
+                      ? tr('admin_create_service')
+                      : tr('admin_edit_service'),
+                  subtitle: tr('admin_service_form_hint'),
                 ),
                 const SizedBox(height: 12),
                 _PremiumField(
                   controller: _nameCtrl,
-                  label: 'Nombre del servicio',
+                  label: tr('admin_service_name'),
                   validator: (value) {
                     if ((value ?? '').trim().isEmpty) {
-                      return 'Ingresa el nombre del servicio';
+                      return tr('admin_service_name_required');
                     }
                     return null;
                   },
@@ -197,7 +202,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                 const SizedBox(height: 12),
                 _PremiumField(
                   controller: _descriptionCtrl,
-                  label: 'Descripción',
+                  label: tr('admin_description'),
                   maxLines: 4,
                 ),
                 const SizedBox(height: 12),
@@ -206,7 +211,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                     Expanded(
                       child: _PremiumField(
                         controller: _priceCtrl,
-                        label: 'Precio',
+                        label: tr('booking_detail_price'),
                         keyboardType: TextInputType.number,
                         prefixText: '₡',
                         validator: (value) {
@@ -214,7 +219,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                             value?.replaceAll(',', '.').trim() ?? '',
                           );
                           if (parsed == null || parsed <= 0) {
-                            return 'Ingresa un precio válido';
+                            return tr('admin_price_invalid');
                           }
                           return null;
                         },
@@ -224,12 +229,12 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                     Expanded(
                       child: _PremiumField(
                         controller: _durationCtrl,
-                        label: 'Duración en minutos',
+                        label: tr('admin_duration_minutes'),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           final parsed = int.tryParse(value?.trim() ?? '');
                           if (parsed == null || parsed <= 0) {
-                            return 'Ingresa una duración válida';
+                            return tr('admin_duration_invalid');
                           }
                           return null;
                         },
@@ -253,8 +258,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                     value: _isActive,
                     onChanged: (value) => setState(() => _isActive = value),
                     activeThumbColor: theme.primary,
-                    title: const Text(
-                      'Servicio activo',
+                    title: Text(
+                      tr('admin_service_active'),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -262,8 +267,8 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                     ),
                     subtitle: Text(
                       _isActive
-                          ? 'Visible para reservas'
-                          : 'Oculto para reservas',
+                          ? tr('admin_visible_for_booking')
+                          : tr('admin_hidden_for_booking'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: .68),
                       ),
@@ -283,14 +288,16 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
                   ),
                   child: Text(
                     _saving
-                        ? 'Guardando...'
-                        : (_isEditing ? 'Guardar cambios' : 'Crear servicio'),
+                        ? tr('btn_saving')
+                        : (_isEditing
+                              ? tr('admin_save_changes')
+                              : tr('admin_create_service')),
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Formatos admitidos: JPG, PNG y WEBP. Recomendado: foto cuadrada o vertical de hasta 1600 px y compresión automática.',
+                  tr('admin_image_formats'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: .58),
@@ -339,20 +346,18 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
 
       final bytes = await picked.readAsBytes();
       if (bytes.isEmpty) {
-        _showMessage('La imagen seleccionada no es válida.');
+        _showMessage(tr('admin_image_invalid'));
         return;
       }
 
       final decoded = img.decodeImage(bytes);
       if (decoded == null) {
-        _showMessage('Elige una imagen JPG, PNG o WEBP válida.');
+        _showMessage(tr('admin_image_choose_valid'));
         return;
       }
 
       if (bytes.length > 10 * 1024 * 1024) {
-        _showMessage(
-          'La foto es demasiado grande. Usa una imagen más pequeña.',
-        );
+        _showMessage(tr('admin_image_too_large'));
         return;
       }
 
@@ -362,7 +367,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
         _pickedImageName = picked.name.isNotEmpty ? picked.name : 'service.jpg';
       });
     } catch (_) {
-      _showMessage('No pudimos leer la imagen seleccionada.');
+      _showMessage(tr('admin_image_unreadable'));
     }
   }
 
@@ -389,7 +394,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       if (_isEditing) {
         final id = widget.service?['id'] as int?;
         if (id == null) {
-          throw Exception('Servicio inválido');
+          throw Exception(tr('admin_service_invalid'));
         }
         await api.updateResource(
           id,
@@ -408,9 +413,7 @@ class _ServiceFormPageState extends State<ServiceFormPage> {
       Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        _showMessage(
-          'No pudimos guardar el servicio. Revisa la imagen o intenta de nuevo.',
-        );
+        _showMessage(tr('admin_service_save_failed'));
       }
     } finally {
       if (mounted) {

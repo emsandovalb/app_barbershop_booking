@@ -10,6 +10,7 @@ import '../../widgets/court_image.dart';
 import '../../widgets/loadable_collection_view.dart';
 import 'admin_page_scaffold.dart';
 import 'service_management_utils.dart';
+import '../../services/localization_service.dart';
 
 class AdminServicesPage extends StatefulWidget {
   const AdminServicesPage({super.key});
@@ -66,8 +67,8 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
       await _refresh();
       _showSnack(
         service == null
-            ? 'Servicio creado correctamente.'
-            : 'Servicio actualizado correctamente.',
+            ? tr('admin_service_created')
+            : tr('admin_service_updated'),
         success: true,
       );
     }
@@ -93,16 +94,15 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
       await api.updateResource(id, {'status': nextStatus});
       if (!mounted) return;
       _showSnack(
-        nextStatus == 'active' ? 'Servicio activado.' : 'Servicio desactivado.',
+        nextStatus == 'active'
+            ? tr('admin_service_activated')
+            : tr('admin_service_deactivated'),
         success: true,
       );
       await _refresh();
     } catch (_) {
       if (mounted) {
-        _showSnack(
-          'No pudimos cambiar el estado del servicio.',
-          success: false,
-        );
+        _showSnack(tr('admin_service_toggle_failed'), success: false);
       }
     } finally {
       if (mounted) {
@@ -132,7 +132,7 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
         backgroundColor: theme.background,
         body: Center(
           child: Text(
-            'Solo los administradores pueden acceder a esta sección',
+            tr('admin_only'),
             style: TextStyle(color: Colors.white70),
           ),
         ),
@@ -143,8 +143,8 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
       backgroundColor: theme.background,
       appBar: buildAdminAppBar(
         context,
-        title: 'Administrar ${whiteLabel.servicesLabel}',
-        subtitle: 'Catálogo, precios y asignaciones',
+        title: tr('admin_manage_services'),
+        subtitle: tr('admin_catalog_subtitle'),
         actions: [
           IconButton(
             onPressed: _actionInProgress ? null : _refresh,
@@ -158,7 +158,7 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add_rounded),
         label: Text(
-          'Nuevo ${whiteLabel.serviceLabel}',
+          tr('admin_qa_new_service'),
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
       ),
@@ -181,20 +181,20 @@ class _AdminServicesPageState extends State<AdminServicesPage> {
                   Center(
                     child: Column(
                       children: [
-                        const Text(
-                          'No fue posible cargar los servicios.',
+                        Text(
+                          tr('home_services_load_failed'),
                           style: TextStyle(color: Colors.white70),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Revisa tu conexión e intenta nuevamente.',
+                        Text(
+                          tr('common_check_connection'),
                           style: TextStyle(color: Colors.white54),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton(
                           onPressed: _actionInProgress ? null : retry,
-                          child: const Text('Reintentar'),
+                          child: Text(tr('btn_retry')),
                         ),
                       ],
                     ),
@@ -281,8 +281,8 @@ class _ServicesBody extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const PremiumBadge(
-                    label: 'ADMINISTRAR SERVICIOS',
+                  PremiumBadge(
+                    label: tr('admin_manage_services_caps'),
                     compact: true,
                   ),
                   const Spacer(),
@@ -296,8 +296,8 @@ class _ServicesBody extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Catálogo del negocio',
+              Text(
+                tr('admin_business_catalog'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -306,7 +306,7 @@ class _ServicesBody extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Gestiona el catálogo, activa o desactiva ${whiteLabel.servicesLabel} y asigna ${whiteLabel.staffPluralLabel} cuando corresponda.',
+                tr('admin_services_intro', args: {'staff': tr('staff_plural')}),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: .72),
                   height: 1.35,
@@ -316,12 +316,15 @@ class _ServicesBody extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _StatChip(label: 'Activos', value: '$activeCount'),
+                    child: _StatChip(
+                      label: tr('admin_active_plural'),
+                      value: '$activeCount',
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: _StatChip(
-                      label: whiteLabel.staffPluralLabel,
+                      label: tr('staff_plural_title'),
                       value: '$totalBarbers',
                     ),
                   ),
@@ -332,10 +335,12 @@ class _ServicesBody extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _SectionTitle(
-          title: 'Servicios',
-          subtitle:
-              'Edita, activa, desactiva o asigna ${whiteLabel.staffPluralLabel} desde cada tarjeta.',
-          actionLabel: 'Nuevo servicio',
+          title: tr('admin_module_services'),
+          subtitle: tr(
+            'admin_services_cards_hint',
+            args: {'staff': tr('staff_plural')},
+          ),
+          actionLabel: tr('admin_qa_new_service'),
           onAction: () => onNewService(),
         ),
         const SizedBox(height: 12),
@@ -425,7 +430,7 @@ class _ServiceCard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _Badge(
-                          label: active ? 'Activo' : 'Inactivo',
+                          label: active ? tr('active') : tr('inactive'),
                           color: active ? theme.success : Colors.redAccent,
                         ),
                         _Badge(
@@ -448,7 +453,7 @@ class _ServiceCard extends StatelessWidget {
                       service['description']?.toString().trim().isNotEmpty ==
                               true
                           ? service['description'].toString()
-                          : 'Sin descripción',
+                          : tr('admin_no_description'),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -471,8 +476,13 @@ class _ServiceCard extends StatelessWidget {
                         ),
                         _MetaChip(
                           icon: Icons.people_alt_rounded,
-                          label:
-                              '${serviceStaffCount(service)} ${whiteLabel.staffPluralLabel}',
+                          label: tr(
+                            'admin_staff_count',
+                            args: {
+                              'count': serviceStaffCount(service),
+                              'staff': tr('staff_plural'),
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -487,17 +497,17 @@ class _ServiceCard extends StatelessWidget {
             runSpacing: 10,
             children: [
               _ActionPill(
-                label: 'Editar',
+                label: tr('edit'),
                 icon: Icons.edit_rounded,
                 onTap: onEdit,
               ),
               _ActionPill(
-                label: whiteLabel.staffPluralLabel,
+                label: tr('staff_plural_title'),
                 icon: Icons.group_rounded,
                 onTap: onAssignBarbers,
               ),
               _ActionPill(
-                label: active ? 'Desactivar' : 'Activar',
+                label: active ? tr('admin_deactivate') : tr('admin_activate'),
                 icon: active
                     ? Icons.toggle_off_rounded
                     : Icons.toggle_on_rounded,
@@ -722,7 +732,7 @@ class _EmptyState extends StatelessWidget {
             Icon(Icons.content_cut_rounded, color: theme.primary, size: 40),
             const SizedBox(height: 10),
             Text(
-              'Todavía no hay servicios creados.',
+              tr('admin_no_services_yet'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: .82),
@@ -731,7 +741,10 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Crea el primer servicio para empezar a asignar ${whiteLabel.staffPluralLabel}.',
+              tr(
+                'admin_first_service_hint',
+                args: {'staff': tr('staff_plural')},
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: .64),

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/white_label_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/barbershop_branding.dart';
 import '../../widgets/court_image.dart';
 import 'service_management_utils.dart';
 import 'admin_page_scaffold.dart';
+import '../../services/localization_service.dart';
 
 class ServiceBarberAssignmentPage extends StatefulWidget {
   final Map<String, dynamic> service;
@@ -73,12 +73,11 @@ class _ServiceBarberAssignmentPageState
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
-    final whiteLabel = context.watch<WhiteLabelConfig>();
     return Scaffold(
       backgroundColor: theme.background,
       appBar: buildAdminAppBar(
         context,
-        title: 'Asignar ${whiteLabel.staffPluralLabel}',
+        title: tr('admin_assign_staff', args: {'staff': tr('staff_plural')}),
       ),
       body: BarbershopCinematicPanel(
         backgroundAsset: '',
@@ -96,7 +95,10 @@ class _ServiceBarberAssignmentPageState
               if (snap.hasError || snap.data == null) {
                 return Center(
                   child: Text(
-                    'No se pudieron cargar los ${whiteLabel.staffPluralLabel}',
+                    tr(
+                      'admin_staff_load_failed',
+                      args: {'staff': tr('staff_plural')},
+                    ),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .78),
                     ),
@@ -140,8 +142,8 @@ class _ServiceBarberAssignmentPageState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const PremiumBadge(
-                                  label: 'ASIGNACIÓN DE EQUIPO',
+                                PremiumBadge(
+                                  label: tr('admin_team_assignment_caps'),
                                   compact: true,
                                 ),
                                 const SizedBox(height: 10),
@@ -155,7 +157,18 @@ class _ServiceBarberAssignmentPageState
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  '${serviceStaffCount(widget.service)} ${whiteLabel.staffPluralLabel} asignados · ${serviceDurationLabel(widget.service)}',
+                                  tr(
+                                    'admin_assigned_summary',
+                                    args: {
+                                      'count': serviceStaffCount(
+                                        widget.service,
+                                      ),
+                                      'staff': tr('staff_plural'),
+                                      'duration': serviceDurationLabel(
+                                        widget.service,
+                                      ),
+                                    },
+                                  ),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: .72),
                                     height: 1.25,
@@ -168,10 +181,9 @@ class _ServiceBarberAssignmentPageState
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const _SectionTitle(
-                      title: 'Asignaciones activas',
-                      subtitle:
-                          'Activa o desactiva la relación de cada estilista con este servicio.',
+                    _SectionTitle(
+                      title: tr('admin_active_assignments'),
+                      subtitle: tr('admin_assignment_hint'),
                     ),
                     const SizedBox(height: 12),
                     if (data.barbers.isEmpty)
@@ -214,7 +226,7 @@ class _ServiceBarberAssignmentPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('No se pudo actualizar la asignación: $e'),
+            content: Text('${tr('admin_assignment_failed')}: $e'),
             backgroundColor: const Color(0xFF1A1512),
           ),
         );
@@ -293,11 +305,13 @@ class _BarberTile extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     _MiniBadge(
-                      label: active ? 'Activo' : 'Inactivo',
+                      label: active ? tr('active') : tr('inactive'),
                       color: active ? theme.success : Colors.redAccent,
                     ),
                     _MiniBadge(
-                      label: assigned ? 'Asignado' : 'Sin asignar',
+                      label: assigned
+                          ? tr('admin_assigned')
+                          : tr('appointment_unassigned'),
                       color: assigned ? theme.primary : Colors.white70,
                     ),
                   ],
@@ -388,7 +402,7 @@ class _EmptyState extends StatelessWidget {
       borderColor: Colors.white.withValues(alpha: .08),
       child: Center(
         child: Text(
-          'No se encontraron estilistas para asignar.',
+          tr('admin_no_staff_to_assign', args: {'staff': tr('staff_plural')}),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withValues(alpha: .76),

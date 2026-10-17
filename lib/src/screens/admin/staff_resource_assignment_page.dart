@@ -122,7 +122,7 @@ class _StaffResourceAssignmentPageState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'No fue posible cargar los servicios.',
+                        tr('home_services_load_failed'),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: .78),
                         ),
@@ -131,7 +131,7 @@ class _StaffResourceAssignmentPageState
                       const SizedBox(height: 8),
                       OutlinedButton(
                         onPressed: _refresh,
-                        child: const Text('Reintentar'),
+                        child: Text(tr('btn_retry')),
                       ),
                     ],
                   ),

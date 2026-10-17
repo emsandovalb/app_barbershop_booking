@@ -1,13 +1,14 @@
 import 'package:intl/intl.dart';
+import '../../services/localization_service.dart';
 
 String serviceName(Map<String, dynamic> service) {
   final name = service['name']?.toString().trim() ?? '';
-  return name.isNotEmpty ? name : 'Servicio';
+  return name.isNotEmpty ? name : tr('appointment_default_service');
 }
 
 String serviceCategory(Map<String, dynamic> service) {
   final value = service['category']?.toString().trim() ?? '';
-  return value.isNotEmpty ? value : 'General';
+  return value.isNotEmpty ? value : tr('admin_category_general');
 }
 
 bool serviceIsActive(Map<String, dynamic> service) {
@@ -90,7 +91,7 @@ String staffDisplayName(Map<String, dynamic> staff) {
   final first = staff['first_name']?.toString().trim() ?? '';
   final last = staff['last_name']?.toString().trim() ?? '';
   final combined = '$first $last'.trim();
-  return combined.isNotEmpty ? combined : 'Barbero';
+  return combined.isNotEmpty ? combined : tr('staff_title');
 }
 
 String staffRoleLabel(Map<String, dynamic> staff) {
@@ -99,7 +100,7 @@ String staffRoleLabel(Map<String, dynamic> staff) {
   if (name.isNotEmpty) return name;
   final slug = role['slug']?.toString().trim() ?? '';
   if (slug.isNotEmpty) return slug;
-  return 'Barbero';
+  return tr('staff_title');
 }
 
 bool staffIsBarber(Map<String, dynamic> staff) {

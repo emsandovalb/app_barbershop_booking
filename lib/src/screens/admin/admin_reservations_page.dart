@@ -57,12 +57,12 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
       appBar: buildAdminAppBar(
         context,
         title: loc.t('admin_reservations_title'),
-        subtitle: DateFormat('EEEE, MMM d').format(_selectedDay),
+        subtitle: _formatDay('EEEE, MMM d', _selectedDay),
         actions: [
           IconButton(
             onPressed: _pickDay,
             icon: const Icon(Icons.calendar_month_rounded),
-            tooltip: 'Pick day',
+            tooltip: tr('admin_pick_day'),
           ),
         ],
       ),
@@ -72,9 +72,18 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
         backgroundColor: const Color(0xFF141110),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.event_rounded),
-        label: Text(DateFormat('MM/dd').format(_selectedDay)),
+        label: Text(_formatDay('MM/dd', _selectedDay)),
       ),
     );
+  }
+}
+
+/// Formats [day] in the selected language; numeric fallback without locale data.
+String _formatDay(String pattern, DateTime day) {
+  try {
+    return DateFormat(pattern, LocalizationService.activeLanguage).format(day);
+  } catch (_) {
+    return '${day.day}/${day.month}';
   }
 }
 

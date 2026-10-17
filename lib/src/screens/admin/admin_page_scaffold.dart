@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../navigation/app_router.dart';
+import '../../services/localization_service.dart';
 
 void navigateBackFromAdmin(BuildContext context) {
   final navigator = Navigator.of(context);
@@ -37,7 +38,7 @@ PreferredSizeWidget buildAdminAppBar(
     foregroundColor: Colors.white,
     titleSpacing: 0,
     leading: IconButton(
-      tooltip: 'Volver',
+      tooltip: tr('ops_back'),
       onPressed: () => navigateBackFromAdmin(context),
       icon: const Icon(Icons.arrow_back_rounded),
     ),
@@ -72,7 +73,7 @@ PreferredSizeWidget buildAdminAppBar(
           ),
     actions: [
       IconButton(
-        tooltip: 'Centro administrativo',
+        tooltip: tr('admin_center'),
         onPressed: () => navigateToAdminDashboard(context),
         icon: const Icon(Icons.dashboard_outlined),
       ),

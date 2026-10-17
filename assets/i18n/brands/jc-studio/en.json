@@ -8,5 +8,7 @@
   "home_search_hint": "Search services, stylists...",
   "manage_staff": "Manage stylists",
   "staff_load_failed": "Couldn't load stylists",
+  "staff_plural": "stylists",
+  "staff_plural_title": "Stylists",
   "staff_title": "Stylist"
 }
