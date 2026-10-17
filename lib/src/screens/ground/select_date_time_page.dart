@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
+import '../../services/business_clock.dart';
 
 class SelectDateTimePage extends StatefulWidget {
   final Map<String, dynamic> court;
@@ -20,7 +21,7 @@ class SelectDateTimePage extends StatefulWidget {
 }
 
 class _SelectDateTimePageState extends State<SelectDateTimePage> {
-  DateTime _date = DateTime.now().add(const Duration(days: 1));
+  DateTime _date = BusinessClock.today().add(const Duration(days: 1));
   bool _loading = true;
   String? _error;
   List<Map<String, dynamic>> _slots = const [];
@@ -95,8 +96,8 @@ class _SelectDateTimePageState extends State<SelectDateTimePage> {
           const SizedBox(height: 8),
           CalendarDatePicker(
             initialDate: _date,
-            firstDate: DateTime.now(),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
+            firstDate: BusinessClock.today(),
+            lastDate: BusinessClock.today().add(const Duration(days: 365)),
             onDateChanged: (value) {
               _date = value;
               _loadAvailability();

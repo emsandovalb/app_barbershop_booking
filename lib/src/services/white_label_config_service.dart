@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/white_label_config.dart';
 import '../theme/brand_theme.dart';
+import 'business_clock.dart';
 
 class WhiteLabelConfigService extends ChangeNotifier {
   WhiteLabelConfigService({
@@ -76,6 +77,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
         final normalized = _normalizeMap(decoded);
         _config = WhiteLabelConfig.fromJson(normalized);
         _brandTheme = BrandTheme.fromJson(normalized, fallback: _brandTheme);
+        BusinessClock.configureFrom(normalized);
         notifyListeners();
       }
     } catch (_) {
@@ -103,6 +105,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
       final parsed = WhiteLabelConfig.fromJson(normalized);
       _config = parsed;
       _brandTheme = BrandTheme.fromJson(normalized, fallback: _brandTheme);
+      BusinessClock.configureFrom(normalized);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_cacheKey, jsonEncode(normalized));
       notifyListeners();

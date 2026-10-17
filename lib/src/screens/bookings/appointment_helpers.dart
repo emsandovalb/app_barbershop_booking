@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../services/business_clock.dart';
 
 enum AppointmentStatusBucket { upcoming, completed, cancelled }
 
@@ -17,7 +18,7 @@ Map<String, dynamic> appointmentBarber(Map<String, dynamic> booking) {
 }
 
 DateTime? appointmentDate(Map<String, dynamic> booking) {
-  return DateTime.tryParse((booking['date'] ?? '').toString());
+  return BusinessClock.parseAppointment(booking['date']);
 }
 
 String appointmentServiceName(Map<String, dynamic> booking) {
@@ -108,7 +109,7 @@ AppointmentStatusBucket appointmentStatusBucket(Map<String, dynamic> booking) {
   if (date == null) {
     return AppointmentStatusBucket.upcoming;
   }
-  return date.isBefore(DateTime.now())
+  return date.isBefore(BusinessClock.now())
       ? AppointmentStatusBucket.completed
       : AppointmentStatusBucket.upcoming;
 }
@@ -184,7 +185,7 @@ bool canCancelAppointment(Map<String, dynamic> booking) {
   if (bucket != AppointmentStatusBucket.upcoming) return false;
   final date = appointmentDate(booking);
   if (date == null) return false;
-  return date.difference(DateTime.now()).inHours >= 4;
+  return date.difference(BusinessClock.now()).inHours >= 4;
 }
 
 bool canRebookAppointment(Map<String, dynamic> booking) {

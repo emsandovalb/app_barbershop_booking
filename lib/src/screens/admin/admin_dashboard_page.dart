@@ -15,6 +15,7 @@ import 'admin_page_scaffold.dart';
 import '../bookings/booking_detail_page.dart';
 import '../gallery/gallery_page.dart';
 import '../reviews/reviews_page.dart';
+import '../../services/business_clock.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -37,7 +38,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final auth = context.read<AuthProvider>();
     await auth.ready;
     final api = auth.api;
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final today = DateFormat('yyyy-MM-dd').format(BusinessClock.today());
 
     final responses = await Future.wait([
       _safeFetch(
@@ -676,7 +677,7 @@ class _TopHero extends StatelessWidget {
                           value: DateFormat(
                             'd MMM',
                             'es',
-                          ).format(DateTime.now()),
+                          ).format(BusinessClock.today()),
                         ),
                         _HeroMetaChip(
                           icon: Icons.shield_rounded,

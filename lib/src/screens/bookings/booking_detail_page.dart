@@ -8,6 +8,7 @@ import '../../theme/brand_theme.dart';
 import '../../widgets/court_image.dart';
 import '../ground/select_date_time_page.dart';
 import 'appointment_helpers.dart';
+import '../../services/business_clock.dart';
 
 class BookingDetailPage extends StatefulWidget {
   final Map<String, dynamic> booking;
@@ -28,7 +29,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     final barber = appointmentBarber(booking);
     final status = appointmentStatusBucket(booking);
     final date = appointmentDate(booking);
-    final isUpcoming = date != null ? date.isAfter(DateTime.now()) : false;
+    final isUpcoming = date != null ? date.isAfter(BusinessClock.now()) : false;
     final canRebook = canRebookAppointment(booking);
     final canOpenBarberProfile = barber['id'] != null;
 

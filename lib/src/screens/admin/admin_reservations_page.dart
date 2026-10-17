@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/localization_service.dart';
 import 'admin_page_scaffold.dart';
 import 'operations_board.dart';
+import '../../services/business_clock.dart';
 
 class AdminReservationsPage extends StatefulWidget {
   const AdminReservationsPage({super.key});
@@ -20,15 +21,15 @@ class _AdminReservationsPageState extends State<AdminReservationsPage> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _dateOnly(DateTime.now());
+    _selectedDay = BusinessClock.today();
   }
 
   Future<void> _pickDay() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDay,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: BusinessClock.today().subtract(const Duration(days: 365)),
+      lastDate: BusinessClock.today().add(const Duration(days: 365)),
     );
     if (picked == null) return;
     setState(() {
