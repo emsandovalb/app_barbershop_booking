@@ -41,7 +41,7 @@ class BarbershopPremiumBackdrop extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (backgroundAsset != null)
+          if (backgroundAsset?.trim().isNotEmpty ?? false)
             Positioned.fill(
               child: Opacity(
                 opacity: backgroundOpacity,
@@ -149,15 +149,16 @@ class BarbershopCinematicPanel extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: opacity,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-                child: Image.asset(backgroundAsset, fit: BoxFit.cover),
+          if (backgroundAsset.trim().isNotEmpty)
+            Positioned.fill(
+              child: Opacity(
+                opacity: opacity,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                  child: Image.asset(backgroundAsset, fit: BoxFit.cover),
+                ),
               ),
             ),
-          ),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -219,15 +220,31 @@ class BarbershopLogoMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
     final resolvedGlowColor = glowColor ?? theme.primary;
-    final logo = Image.asset(
-      assetPath,
-      fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => Icon(
-        Icons.content_cut,
-        color: Colors.white.withOpacity(.92),
-        size: size * .30,
-      ),
-    );
+    final label = fallbackLabel?.trim() ?? '';
+    final Widget fallback = label.isNotEmpty
+        ? FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(.92),
+                fontSize: size * .30,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          )
+        : Icon(
+            Icons.content_cut,
+            color: Colors.white.withOpacity(.92),
+            size: size * .30,
+          );
+    final Widget logo = assetPath.isEmpty
+        ? Center(child: fallback)
+        : Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Center(child: fallback),
+          );
 
     return SizedBox(
       width: size,
