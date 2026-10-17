@@ -172,13 +172,14 @@ class _PaymentPageState extends State<PaymentPage> {
       Navigator.of(context).pushReplacementNamed(
         AppRoutes.orderPlaced,
         arguments: {
+          // New bookings are pending until the business confirms them.
           'title': loc.t(
-            'booking_success_title',
-            fallback: 'Appointment confirmed',
+            'booking_request_sent_title',
+            fallback: 'Solicitud enviada',
           ),
           'subtitle': loc.t(
-            'booking_success_subtitle',
-            fallback: 'Your appointment was placed successfully.',
+            'booking_request_sent_subtitle',
+            fallback: 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
           ),
           'buttonText': loc.t('btn_back_home', fallback: 'Back to home'),
           'backRoute': AppRoutes.home,

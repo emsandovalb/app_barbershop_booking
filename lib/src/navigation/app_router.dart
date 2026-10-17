@@ -98,10 +98,10 @@ class AppRouter {
         return _material(
           settings,
           OrderPlacedPage(
-            title: args['title'] as String? ?? 'Cita confirmada',
+            title: args['title'] as String? ?? 'Solicitud enviada',
             subtitle:
                 args['subtitle'] as String? ??
-                'Tu cita fue confirmada correctamente.',
+                'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
             buttonText: args['buttonText'] as String? ?? 'Volver al inicio',
             backRoute: args['backRoute'] as String? ?? AppRoutes.home,
           ),

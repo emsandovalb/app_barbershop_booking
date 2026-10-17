@@ -1,5 +1,6 @@
 import 'package:app_barbershop_booking/src/config/app_config.dart';
 import 'package:app_barbershop_booking/src/config/white_label_config.dart';
+import 'package:app_barbershop_booking/src/navigation/app_router.dart';
 import 'package:app_barbershop_booking/src/providers/auth_provider.dart';
 import 'package:app_barbershop_booking/src/screens/booking/payment_page.dart';
 import 'package:app_barbershop_booking/src/services/api.dart';
@@ -52,7 +53,10 @@ void main() {
             value: LocalizationService(translationsBaseUrl: 'http://localhost'),
           ),
         ],
-        child: MaterialApp(home: PaymentPage(args: args)),
+        child: MaterialApp(
+          home: PaymentPage(args: args),
+          onGenerateRoute: AppRouter.onGenerateRoute,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -144,6 +148,8 @@ void main() {
         api: _MissingIdReservationApiClient(),
         args: {
           'resource': {'id': 1, 'name': 'Corte Clásico'},
+          // A barber is required to reach the API call this test guards.
+          'staff': {'id': 7, 'name': 'Carlos'},
           'iso': '2026-09-01T10:00:00.000',
           'slot': '10:00 AM to 11:00 AM',
           'duration': 1,
@@ -161,6 +167,39 @@ void main() {
       expect(find.text('Continuar'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'a new booking is presented as a pending request, not as confirmed',
+    (tester) async {
+      await pumpPaymentPage(
+        tester,
+        api: _PersistedReservationApiClient(),
+        args: {
+          'resource': {'id': 1, 'name': 'Corte Clásico'},
+          'staff': {'id': 7, 'name': 'Carlos'},
+          'iso': '2026-09-01T10:00:00.000',
+          'slot': '10:00 AM to 11:00 AM',
+          'duration': 1,
+        },
+      );
+
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Continuar'));
+      await tester.pumpAndSettle();
+
+      // The server creates bookings as pending until the business confirms.
+      expect(find.text('Solicitud enviada'), findsWidgets);
+      expect(find.textContaining('Cita confirmada'), findsNothing);
+    },
+  );
+}
+
+class _PersistedReservationApiClient extends ApiClient {
+  _PersistedReservationApiClient() : super(baseUrl: 'http://localhost/api/v1');
+
+  @override
+  Future<Map<String, dynamic>> createReservation(
+    Map<String, dynamic> data,
+  ) async => <String, dynamic>{'id': 42, 'status': 'pending'};
 }
 
 class _MissingIdReservationApiClient extends ApiClient {

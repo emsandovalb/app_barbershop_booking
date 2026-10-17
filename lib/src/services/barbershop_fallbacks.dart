@@ -153,6 +153,9 @@ const Map<String, String> barbershopFallbacks = {
 
   'booking_success_title': 'Cita confirmada',
   'booking_success_subtitle': 'Tu cita quedó registrada correctamente.',
+  'booking_request_sent_title': 'Solicitud enviada',
+  'booking_request_sent_subtitle':
+      'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
   'booking_rebook_success_title': 'Cita reprogramada',
   'booking_rebook_success_subtitle':
       'Tu cita fue reprogramada. Podés cancelar o reprogramar hasta 4 horas antes.',

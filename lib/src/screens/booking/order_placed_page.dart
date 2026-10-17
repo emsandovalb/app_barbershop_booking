@@ -12,8 +12,8 @@ class OrderPlacedPage extends StatelessWidget {
 
   const OrderPlacedPage({
     super.key,
-    this.title = 'Cita confirmada',
-    this.subtitle = 'Tu cita se registró correctamente.',
+    this.title = 'Solicitud enviada',
+    this.subtitle = 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
     this.buttonText = 'Volver al inicio',
     this.backRoute = AppRoutes.home,
   });
@@ -23,7 +23,9 @@ class OrderPlacedPage extends StatelessWidget {
     final loc = context.watch<LocalizationService>();
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.t('order_placed_title', fallback: 'Cita confirmada')),
+        title: Text(
+          loc.t('booking_request_sent_title', fallback: 'Solicitud enviada'),
+        ),
       ),
       body: Center(
         child: Column(
@@ -39,8 +41,8 @@ class OrderPlacedPage extends StatelessWidget {
               title.isNotEmpty
                   ? title
                   : loc.t(
-                      'booking_success_title',
-                      fallback: 'Appointment confirmed',
+                      'booking_request_sent_title',
+                      fallback: 'Solicitud enviada',
                     ),
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
@@ -51,8 +53,8 @@ class OrderPlacedPage extends StatelessWidget {
                 subtitle.isNotEmpty
                     ? subtitle
                     : loc.t(
-                        'booking_success_subtitle',
-                        fallback: 'Tu cita quedó registrada correctamente.',
+                        'booking_request_sent_subtitle',
+                        fallback: 'El negocio confirmará tu cita pronto. Podés ver el estado en Mis citas.',
                       ),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white70),
