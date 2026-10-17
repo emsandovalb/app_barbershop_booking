@@ -203,17 +203,17 @@ class _StatusBadge extends StatelessWidget {
     final theme = context.watch<BrandTheme>();
     final (text, fg, bg) = switch (status) {
       AppointmentStatusBucket.upcoming => (
-        label ?? 'Pendiente',
+        label ?? tr('status_pending'),
         theme.primary,
         const Color(0xFF2E2315),
       ),
       AppointmentStatusBucket.completed => (
-        label ?? 'Completada',
+        label ?? tr('status_completed'),
         const Color(0xFFE8D8B8),
         const Color(0xFF16261F),
       ),
       AppointmentStatusBucket.cancelled => (
-        label ?? 'Cancelada',
+        label ?? tr('status_cancelled'),
         const Color(0xFFFF9D9D),
         const Color(0xFF301B1C),
       ),

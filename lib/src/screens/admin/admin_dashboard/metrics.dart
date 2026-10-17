@@ -166,7 +166,7 @@ class _PerformanceRow extends StatelessWidget {
                       status: item.active
                           ? AppointmentStatusBucket.upcoming
                           : AppointmentStatusBucket.cancelled,
-                      label: item.active ? 'Activo' : 'Inactivo',
+                      label: item.active ? tr('active') : tr('inactive'),
                     ),
                   ],
                 ),

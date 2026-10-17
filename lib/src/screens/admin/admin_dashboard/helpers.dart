@@ -81,7 +81,7 @@ String _staffName(Map<String, dynamic> staff) {
   final first = staff['first_name']?.toString().trim() ?? '';
   final last = staff['last_name']?.toString().trim() ?? '';
   final combined = '$first $last'.trim();
-  return combined.isNotEmpty ? combined : 'Perfil';
+  return combined.isNotEmpty ? combined : tr('admin_profile_fallback');
 }
 
 String _staffAvatar(Map<String, dynamic> staff) {
@@ -100,7 +100,7 @@ String _staffAvatar(Map<String, dynamic> staff) {
 String _serviceName(Map<String, dynamic> resource) {
   final name = resource['name']?.toString().trim() ?? '';
   if (name.isNotEmpty) return name;
-  return 'Servicio';
+  return tr('appointment_default_service');
 }
 
 String _serviceKey(Map<String, dynamic> resource) {
@@ -127,7 +127,7 @@ String _statusText(Map<String, dynamic> booking) {
 
 String _timeLabel(Map<String, dynamic> booking) {
   final raw = (booking['time_slot'] ?? booking['time'] ?? '').toString().trim();
-  if (raw.isEmpty) return 'Hora pendiente';
+  if (raw.isEmpty) return tr('admin_time_pending');
   if (raw.contains(':')) return raw;
   final parsed = DateTime.tryParse(raw);
   if (parsed != null) {

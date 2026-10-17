@@ -16,6 +16,7 @@ import '../bookings/booking_detail_page.dart';
 import '../gallery/gallery_page.dart';
 import '../reviews/reviews_page.dart';
 import '../../services/business_clock.dart';
+import '../../services/localization_service.dart';
 
 part 'admin_dashboard/hero.dart';
 part 'admin_dashboard/modules.dart';
@@ -152,7 +153,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       }
     } catch (_) {
       if (mounted) {
-        _showPlaceholder('Esta sección todavía no está disponible.');
+        _showPlaceholder(tr('admin_section_unavailable'));
       }
     } finally {
       if (mounted) {
@@ -172,7 +173,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return _openNamedRoute(
       AppRoutes.staffForm,
       arguments: const {'createMode': true},
-      successMessage: 'Perfil creado correctamente.',
+      successMessage: tr('admin_profile_created'),
     );
   }
 
@@ -180,7 +181,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return _openNamedRoute(
       AppRoutes.adminServiceForm,
       arguments: const {'createMode': true},
-      successMessage: 'Servicio creado correctamente.',
+      successMessage: tr('admin_service_created'),
     );
   }
 
@@ -194,11 +195,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final auth = context.watch<AuthProvider>();
     final whiteLabel = context.watch<WhiteLabelConfig>();
     if (!auth.canManageBusiness) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Color(0xFF090909),
         body: Center(
           child: Text(
-            'Solo los administradores pueden acceder a esta sección',
+            tr('admin_only'),
             style: TextStyle(color: Colors.white70),
           ),
         ),
@@ -208,7 +209,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return Scaffold(
       appBar: buildAdminAppBar(
         context,
-        title: 'Centro administrativo',
+        title: tr('admin_center'),
         subtitle: whiteLabel.displayName,
       ),
       backgroundColor: theme.background,
@@ -253,17 +254,16 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               onRefresh: _refresh,
                             ),
                             const SizedBox(height: 14),
-                            const _SectionIntro(
-                              title: 'Resumen de hoy',
-                              subtitle:
-                                  'Indicadores, agenda, desempeño y servicios destacados.',
+                            _SectionIntro(
+                              title: tr('admin_today_summary'),
+                              subtitle: tr('admin_today_summary_body'),
                             ),
                             const SizedBox(height: 12),
                             _KpiGrid(metrics: metrics),
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
-                              title: 'Citas de hoy',
-                              actionLabel: 'Ver agenda',
+                              title: tr('admin_today_appointments'),
+                              actionLabel: tr('admin_view_schedule'),
                               onTap: () =>
                                   _openNamedRoute(AppRoutes.adminReservations),
                             ),
@@ -274,8 +274,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             ),
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
-                              title: 'Rendimiento del equipo',
-                              actionLabel: 'Centro administrativo',
+                              title: tr('admin_team_performance'),
+                              actionLabel: tr('admin_center'),
                               onTap: () =>
                                   _openNamedRoute(AppRoutes.adminDashboard),
                             ),
@@ -283,18 +283,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                             _PerformanceList(items: performance),
                             const SizedBox(height: 18),
                             _SectionHeaderRow(
-                              title: 'Servicios más reservados',
-                              actionLabel: 'Administrar servicios',
+                              title: tr('admin_top_services'),
+                              actionLabel: tr('admin_manage_services'),
                               onTap: () =>
                                   _openNamedRoute(AppRoutes.adminServices),
                             ),
                             const SizedBox(height: 12),
                             _TopServicesList(items: topServices),
                             const SizedBox(height: 24),
-                            const _SectionIntro(
-                              title: 'Gestión',
-                              subtitle:
-                                  'Accesos directos a los módulos del centro administrativo.',
+                            _SectionIntro(
+                              title: tr('admin_management'),
+                              subtitle: tr('admin_management_body'),
                             ),
                             const SizedBox(height: 12),
                             _AdminModuleGrid(
@@ -333,10 +332,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               },
                             ),
                             const SizedBox(height: 24),
-                            const _SectionIntro(
-                              title: 'Acciones rápidas',
-                              subtitle:
-                                  'Atajos para operar sin perder el contexto del centro administrativo.',
+                            _SectionIntro(
+                              title: tr('admin_quick_actions'),
+                              subtitle: tr('admin_quick_actions_body'),
                             ),
                             const SizedBox(height: 12),
                             _QuickActionsRail(
@@ -374,47 +372,49 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   List<_AdminModuleData> _buildModules(AppConfig config) {
     return [
-      const _AdminModuleData(
+      _AdminModuleData(
         id: 'reservations',
         icon: Icons.event_available_rounded,
-        title: 'Citas',
-        subtitle: 'Gestionar citas',
-        badge: 'Activo',
+        title: tr('admin_module_appointments'),
+        subtitle: tr('admin_module_appointments_body'),
+        badge: tr('active'),
       ),
       _AdminModuleData(
         id: 'staff',
         icon: Icons.groups_rounded,
-        title: 'Equipo',
-        subtitle: 'Equipo y perfiles',
-        badge: config.features.adminStaffManagement ? 'Activo' : 'Demo',
+        title: tr('admin_module_team'),
+        subtitle: tr('admin_module_team_body'),
+        badge: config.features.adminStaffManagement
+            ? tr('active')
+            : tr('admin_badge_demo'),
       ),
-      const _AdminModuleData(
+      _AdminModuleData(
         id: 'services',
         icon: Icons.content_cut_rounded,
-        title: 'Servicios',
-        subtitle: 'Precios, duración y asignaciones',
-        badge: 'Activo',
+        title: tr('admin_module_services'),
+        subtitle: tr('admin_module_services_body'),
+        badge: tr('active'),
       ),
-      const _AdminModuleData(
+      _AdminModuleData(
         id: 'business',
         icon: Icons.storefront_rounded,
-        title: 'Perfil del negocio',
-        subtitle: 'Horarios, contacto y descripción',
-        badge: 'Activo',
+        title: tr('admin_module_business'),
+        subtitle: tr('admin_module_business_body'),
+        badge: tr('active'),
       ),
-      const _AdminModuleData(
+      _AdminModuleData(
         id: 'gallery',
         icon: Icons.photo_library_rounded,
-        title: 'Galería',
-        subtitle: 'Trabajos recientes',
-        badge: 'Nuevo',
+        title: tr('admin_module_gallery'),
+        subtitle: tr('admin_module_gallery_body'),
+        badge: tr('admin_badge_new'),
       ),
-      const _AdminModuleData(
+      _AdminModuleData(
         id: 'reviews',
         icon: Icons.rate_review_rounded,
-        title: 'Opiniones',
-        subtitle: 'Reputación y testimonios',
-        badge: 'Activo',
+        title: tr('reviews_title'),
+        subtitle: tr('admin_module_reviews_body'),
+        badge: tr('active'),
       ),
     ];
   }
@@ -439,35 +439,35 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return [
       _MetricData(
         icon: Icons.event_available_rounded,
-        label: 'Citas de hoy',
+        label: tr('admin_today_appointments'),
         value: '${reservations.length}',
         footnote: pendingCount > 0
-            ? '$pendingCount pendientes'
-            : 'Flujo estable',
+            ? tr('admin_metric_pending', args: {'count': pendingCount})
+            : tr('admin_metric_steady'),
       ),
       _MetricData(
         icon: Icons.payments_rounded,
-        label: 'Ingresos estimados',
+        label: tr('admin_metric_revenue'),
         value: _formatCrc(totalRevenue),
         footnote: serviceRevenue.isNotEmpty
-            ? 'Top: ${serviceRevenue.keys.first}'
-            : 'Estimación con datos locales',
+            ? tr('admin_metric_top', args: {'name': serviceRevenue.keys.first})
+            : tr('admin_metric_revenue_note'),
       ),
       _MetricData(
         icon: Icons.groups_rounded,
-        label: 'Equipo activo',
+        label: tr('admin_metric_active_team'),
         value: '${activeBarbers.length}',
         footnote: activeBarbers.isNotEmpty
-            ? 'Equipo disponible'
-            : 'Sin actividad',
+            ? tr('admin_metric_team_available')
+            : tr('admin_metric_no_activity'),
       ),
       _MetricData(
         icon: Icons.content_cut_rounded,
-        label: 'Servicios más reservados',
+        label: tr('admin_top_services'),
         value: '${serviceCounts.values.fold<int>(0, (a, b) => a + b)}',
         footnote: serviceRevenue.isNotEmpty
-            ? 'Top: ${serviceRevenue.keys.first}'
-            : 'Basado en citas de hoy',
+            ? tr('admin_metric_top', args: {'name': serviceRevenue.keys.first})
+            : tr('admin_metric_based_on_today'),
       ),
     ];
   }

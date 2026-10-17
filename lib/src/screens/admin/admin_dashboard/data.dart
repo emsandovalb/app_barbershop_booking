@@ -92,30 +92,30 @@ class _AdminDashboardData {
   );
 }
 
-const List<_QuickActionData> _quickActions = [
+List<_QuickActionData> get _quickActions => [
   _QuickActionData(
     id: 'new_appointment',
     icon: Icons.event_available_rounded,
-    label: 'Nueva cita',
-    description: 'Atajo premium para comenzar una reserva.',
+    label: tr('admin_qa_new_appointment'),
+    description: tr('admin_qa_new_appointment_body'),
   ),
   _QuickActionData(
     id: 'new_barber',
     icon: Icons.person_add_alt_1_rounded,
-    label: 'Nuevo perfil',
-    description: 'Sumá un perfil al equipo.',
+    label: tr('admin_qa_new_profile'),
+    description: tr('admin_qa_new_profile_body'),
   ),
   _QuickActionData(
     id: 'new_service',
     icon: Icons.content_cut_rounded,
-    label: 'Nuevo servicio',
-    description: 'Creá un servicio con tarifa y duración.',
+    label: tr('admin_qa_new_service'),
+    description: tr('admin_qa_new_service_body'),
   ),
   _QuickActionData(
     id: 'schedule',
     icon: Icons.calendar_month_rounded,
-    label: 'Ver agenda',
-    description: 'Abrí las citas del día en una vista rápida.',
+    label: tr('admin_view_schedule'),
+    description: tr('admin_qa_schedule_body'),
   ),
 ];
 

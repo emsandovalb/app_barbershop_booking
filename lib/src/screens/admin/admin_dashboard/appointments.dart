@@ -103,7 +103,7 @@ class _AppointmentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    client.isNotEmpty ? client : 'Cliente sin nombre',
+                    client.isNotEmpty ? client : tr('admin_client_unnamed'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,

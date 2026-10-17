@@ -36,10 +36,10 @@ class _TopHero extends StatelessWidget {
         height: 288,
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               top: 0,
               right: 0,
-              child: PremiumBadge(label: 'CENTRO ADMINISTRATIVO'),
+              child: PremiumBadge(label: tr('admin_center_caps')),
             ),
             Positioned.fill(
               child: Padding(
@@ -71,7 +71,7 @@ class _TopHero extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Centro administrativo',
+                          tr('admin_center'),
                           style: TextStyle(
                             color: theme.secondary,
                             fontSize: 15,
@@ -80,7 +80,7 @@ class _TopHero extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Gestioná citas, servicios y la presencia digital de tu negocio.',
+                          tr('admin_hero_body'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: .72),
@@ -98,16 +98,18 @@ class _TopHero extends StatelessWidget {
                       children: [
                         _HeroMetaChip(
                           icon: Icons.event_available_rounded,
-                          label: 'Hoy',
+                          label: tr('admin_today'),
                           value: DateFormat(
                             'd MMM',
-                            'es',
+                            LocalizationService.activeLanguage,
                           ).format(BusinessClock.today()),
                         ),
                         _HeroMetaChip(
                           icon: Icons.shield_rounded,
-                          label: 'Estado',
-                          value: isLoading ? 'Sincronizando' : 'Listo',
+                          label: tr('booking_status'),
+                          value: isLoading
+                              ? tr('admin_syncing')
+                              : tr('admin_ready'),
                         ),
                         TextButton.icon(
                           onPressed: onRefresh,
@@ -125,8 +127,8 @@ class _TopHero extends StatelessWidget {
                             ),
                           ),
                           icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label: const Text(
-                            'Actualizar',
+                          label: Text(
+                            tr('btn_refresh'),
                             style: TextStyle(fontWeight: FontWeight.w800),
                           ),
                         ),
