@@ -7,10 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'support/i18n.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
+    testLocalization();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -147,8 +150,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
-    expect(find.text('confirmar cita'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'confirmar'));
+    expect(find.text('Confirmar cita'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar'));
     await tester.pumpAndSettle();
 
     expect(_lastApi!.bookings.first['status'], 'confirmed');

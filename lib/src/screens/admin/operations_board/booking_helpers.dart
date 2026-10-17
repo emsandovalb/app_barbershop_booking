@@ -19,7 +19,7 @@ String operationsCustomerName(Map<String, dynamic> booking) {
   if (combined.isNotEmpty) return combined;
   return booking['customer_name']?.toString().trim().isNotEmpty == true
       ? booking['customer_name'].toString()
-      : 'Cliente';
+      : tr('ops_client');
 }
 
 String operationsChannelKey(Map<String, dynamic> booking) {
@@ -45,9 +45,9 @@ String operationsChannelName(Map<String, dynamic> booking) {
     case 'web':
       return 'Web';
     case 'phone':
-      return 'Phone';
+      return tr('ops_channel_phone');
     default:
-      return 'Direct';
+      return tr('ops_channel_direct');
   }
 }
 
@@ -193,7 +193,7 @@ String operationsElapsedLabel(Map<String, dynamic> booking) {
 
 String operationsTimeLabel(Map<String, dynamic> booking) {
   final raw = (booking['time_slot'] ?? booking['time'] ?? '').toString().trim();
-  if (raw.isEmpty) return 'Hora pendiente';
+  if (raw.isEmpty) return tr('admin_time_pending');
   return raw;
 }
 
@@ -211,22 +211,24 @@ String operationsUpdatedLabel(Map<String, dynamic> booking) {
 
 String operationsOrganizationLabel(Map<String, dynamic> booking) {
   final raw = booking['business_id'] ?? booking['organization_id'];
-  if (raw == null) return 'Barbería actual';
+  if (raw == null) return tr('ops_current_business');
   return raw.toString();
 }
 
 String operationsStatusLabel(Map<String, dynamic> booking) {
   final raw = (booking['status'] ?? '').toString().trim().toLowerCase();
-  if (raw.isEmpty) return 'Pendiente';
-  if (raw.contains('cancel')) return 'Cancelada';
+  if (raw.isEmpty) return tr('status_pending');
+  if (raw.contains('cancel')) return tr('status_cancelled');
   if (raw.contains('complete') ||
       raw.contains('done') ||
       raw.contains('finish')) {
-    return 'Completada';
+    return tr('status_completed');
   }
-  if (raw.contains('prepare')) return 'En atención';
-  if (raw.contains('ready')) return 'Por cerrar';
-  if (raw.contains('pending') || raw.contains('confirm')) return 'Pendiente';
+  if (raw.contains('prepare')) return tr('ops_status_in_service');
+  if (raw.contains('ready')) return tr('ops_status_to_close');
+  if (raw.contains('pending') || raw.contains('confirm')) {
+    return tr('status_pending');
+  }
   return raw;
 }
 

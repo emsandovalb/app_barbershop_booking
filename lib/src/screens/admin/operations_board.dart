@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/brand_theme.dart';
 import '../../widgets/live_queue.dart';
 import '../bookings/appointment_helpers.dart';
+import '../../services/localization_service.dart';
 
 part 'operations_board/board_header.dart';
 part 'operations_board/board_columns.dart';
@@ -76,7 +77,7 @@ class _OperationsBoardState extends State<OperationsBoard> {
     showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Operations detail',
+      barrierLabel: tr('booking_details_title'),
       barrierColor: Colors.black.withValues(alpha: .55),
       transitionDuration: const Duration(milliseconds: 220),
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
@@ -117,20 +118,21 @@ class _OperationsBoardState extends State<OperationsBoard> {
     Map<String, dynamic> booking,
     String targetStatus,
   ) async {
-    final action = _adminActionLabel(targetStatus);
+    // One complete sentence per action and language (keys ops_<kind>_<status>).
+    String text(String kind) => tr('ops_${kind}_$targetStatus');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('$action cita'),
-        content: Text('¿Confirmás que querés $action esta cita?'),
+        title: Text(text('title')),
+        content: Text(text('question')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Volver'),
+            child: Text(tr('ops_back')),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(action),
+            child: Text(text('button')),
           ),
         ],
       ),
@@ -161,7 +163,7 @@ class _OperationsBoardState extends State<OperationsBoard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Cita $action.'),
+            content: Text(text('done')),
             backgroundColor: const Color(0xFF132018),
           ),
         );
@@ -171,29 +173,12 @@ class _OperationsBoardState extends State<OperationsBoard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('No se pudo $action la cita.'),
+            content: Text(text('failed')),
             backgroundColor: const Color(0xFF5B2020),
           ),
         );
       }
       return false;
-    }
-  }
-
-  String _adminActionLabel(String targetStatus) {
-    switch (targetStatus) {
-      case 'confirmed':
-        return 'confirmar';
-      case 'rejected':
-        return 'rechazar';
-      case 'cancelled':
-        return 'cancelar';
-      case 'completed':
-        return 'completar';
-      case 'paid':
-        return 'marcar como pagada';
-      default:
-        return 'actualizar';
     }
   }
 
@@ -365,9 +350,8 @@ class _OperationsBoardState extends State<OperationsBoard> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                           child: _BoardAlert(
-                            title: 'No fue posible actualizar el tablero',
-                            subtitle:
-                                'La última versión disponible sigue visible mientras se actualizan las citas.',
+                            title: tr('ops_board_refresh_failed'),
+                            subtitle: tr('ops_board_refresh_failed_body'),
                             icon: Icons.wifi_off_rounded,
                           ),
                         ),
@@ -377,9 +361,8 @@ class _OperationsBoardState extends State<OperationsBoard> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 28, 16, 20),
                           child: _EmptyBoardState(
-                            title: 'No hay citas para este día.',
-                            subtitle:
-                                'Las citas de esta fecha aparecerán aquí.',
+                            title: tr('ops_board_empty'),
+                            subtitle: tr('ops_board_empty_body'),
                           ),
                         ),
                       )

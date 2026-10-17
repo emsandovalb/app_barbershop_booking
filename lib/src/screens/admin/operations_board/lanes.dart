@@ -18,37 +18,37 @@ class _LaneSpec {
   });
 }
 
-const _laneSpecs = <OperationsLane, _LaneSpec>{
+Map<OperationsLane, _LaneSpec> get _laneSpecs => {
   OperationsLane.newOrders: _LaneSpec(
     lane: OperationsLane.newOrders,
-    label: 'Pendientes',
+    label: tr('ops_lane_pending'),
     color: Color(0xFF4DA3FF),
     icon: Icons.inbox_rounded,
-    emptyMessage: 'No hay citas pendientes.',
+    emptyMessage: tr('ops_lane_pending_empty'),
     statuses: ['pending_review', 'confirmed'],
   ),
   OperationsLane.preparing: _LaneSpec(
     lane: OperationsLane.preparing,
-    label: 'En atención',
+    label: tr('ops_status_in_service'),
     color: Color(0xFFFFB84D),
     icon: Icons.kitchen_rounded,
-    emptyMessage: 'No hay citas en atención.',
+    emptyMessage: tr('ops_lane_in_service_empty'),
     statuses: ['preparing'],
   ),
   OperationsLane.ready: _LaneSpec(
     lane: OperationsLane.ready,
-    label: 'Por cerrar',
+    label: tr('ops_status_to_close'),
     color: Color(0xFF5BD46D),
     icon: Icons.check_circle_rounded,
-    emptyMessage: 'No hay citas por cerrar.',
+    emptyMessage: tr('ops_lane_to_close_empty'),
     statuses: ['ready_for_dispatch'],
   ),
   OperationsLane.dispatched: _LaneSpec(
     lane: OperationsLane.dispatched,
-    label: 'Completadas',
+    label: tr('bookings_tab_completed'),
     color: Color(0xFF8B8B8B),
     icon: Icons.inventory_2_rounded,
-    emptyMessage: 'No hay citas completadas.',
+    emptyMessage: tr('ops_lane_completed_empty'),
     statuses: ['dispatched'],
   ),
 };

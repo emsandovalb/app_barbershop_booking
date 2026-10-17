@@ -59,8 +59,8 @@ class _BoardHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Agenda del día',
+                    Text(
+                      tr('ops_day_agenda'),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -69,7 +69,7 @@ class _BoardHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Citas programadas. $totalCount citas visibles.',
+                      tr('ops_visible_count', args: {'count': totalCount}),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: .68),
                         fontSize: 12.5,
@@ -83,14 +83,23 @@ class _BoardHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _StatusPill(
-                    label: isLoading ? 'Sincronizando' : 'Agenda actualizada',
+                    label: isLoading
+                        ? tr('admin_syncing')
+                        : tr('ops_schedule_updated'),
                     accent: isLoading ? Colors.white54 : theme.secondary,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     lastUpdated == null
-                        ? 'Esperando la primera actualización'
-                        : 'Actualizado a las ${DateFormat.Hm().format(lastUpdated!.toLocal())}',
+                        ? tr('ops_waiting_first_update')
+                        : tr(
+                            'ops_updated_at',
+                            args: {
+                              'time': DateFormat.Hm().format(
+                                lastUpdated!.toLocal(),
+                              ),
+                            },
+                          ),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: .54),
                       fontSize: 11,
@@ -103,7 +112,7 @@ class _BoardHeader extends StatelessWidget {
           if (errorText != null) ...[
             const SizedBox(height: 12),
             _BoardAlert(
-              title: 'Aviso de datos',
+              title: tr('ops_data_notice'),
               subtitle: errorText!,
               icon: Icons.error_outline_rounded,
             ),
@@ -113,7 +122,7 @@ class _BoardHeader extends StatelessWidget {
             controller: searchController,
             onChanged: onSearchChanged,
             decoration: InputDecoration(
-              hintText: 'Buscar cliente, código o profesional',
+              hintText: tr('ops_search_hint'),
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: searchQuery.isEmpty
                   ? null
@@ -233,7 +242,7 @@ class _LiveQueueFooter extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            'Se muestran $total citas en este momento.',
+            tr('ops_showing_now', args: {'count': total}),
             style: TextStyle(
               color: Colors.white.withValues(alpha: .66),
               fontSize: 12,

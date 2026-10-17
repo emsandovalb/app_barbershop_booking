@@ -82,42 +82,42 @@ class OperationsDetailSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(18),
                 children: [
                   _DetailSection(
-                    title: 'Cliente',
+                    title: tr('ops_client'),
                     icon: Icons.person_rounded,
                     children: [
-                      _DetailRow(label: 'Nombre', value: customer),
+                      _DetailRow(label: tr('form_name'), value: customer),
                       _DetailRow(
-                        label: 'Teléfono',
+                        label: tr('form_phone'),
                         value: _bookingPhone(booking),
                       ),
                       _DetailRow(
-                        label: 'Código',
+                        label: tr('ops_code'),
                         value: operationsBookingIdentity(booking),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    title: 'Servicio',
+                    title: tr('appointment_default_service'),
                     icon: Icons.content_cut_rounded,
                     children: [
                       _DetailRow(
-                        label: 'Servicio',
+                        label: tr('appointment_default_service'),
                         value: appointmentServiceName(booking),
                       ),
                       _DetailRow(
-                        label: 'Barbero',
+                        label: tr('booking_barber_label'),
                         value: appointmentBarberName(booking),
                       ),
                       _DetailRow(
-                        label: 'Transcurrido',
+                        label: tr('ops_elapsed'),
                         value: operationsElapsedLabel(booking),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    title: 'Acciones',
+                    title: tr('ops_actions'),
                     icon: Icons.playlist_add_check_rounded,
                     children: [
                       for (final action in actions) ...[
@@ -135,7 +135,7 @@ class OperationsDetailSheet extends StatelessWidget {
                       ],
                       if (actions.isEmpty)
                         Text(
-                          'Esta cita ya está en su estado final.',
+                          tr('ops_final_state'),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: .68),
                           ),
@@ -144,50 +144,53 @@ class OperationsDetailSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    title: 'Horario',
+                    title: tr('ops_schedule'),
                     icon: Icons.history_rounded,
                     children: [
                       _DetailRow(
-                        label: 'Fecha',
+                        label: tr('booking_detail_date'),
                         value: appointmentDateLabel(booking),
                       ),
                       _DetailRow(
-                        label: 'Hora',
+                        label: tr('booking_detail_time'),
                         value: appointmentTimeLabel(booking),
                       ),
                       _DetailRow(
-                        label: 'Duración',
+                        label: tr('booking_detail_duration'),
                         value: _bookingDurationLabel(booking),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    title: 'Estado',
+                    title: tr('booking_status'),
                     icon: Icons.warning_amber_rounded,
                     children: [
                       _DetailRow(
-                        label: 'Estado',
+                        label: tr('booking_status'),
                         value: operationsStatusLabel(booking),
                       ),
                       _DetailRow(
-                        label: 'Precio',
+                        label: tr('booking_detail_price'),
                         value: appointmentPriceLabel(booking),
                       ),
-                      _DetailRow(label: 'Notas', value: _bookingNotes(booking)),
+                      _DetailRow(
+                        label: tr('ops_notes'),
+                        value: _bookingNotes(booking),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    title: 'Código',
+                    title: tr('ops_code'),
                     icon: Icons.info_outline_rounded,
                     children: [
                       _DetailRow(
-                        label: 'Código',
+                        label: tr('ops_code'),
                         value: operationsBookingIdentity(booking),
                       ),
                       _DetailRow(
-                        label: 'Última actualización',
+                        label: tr('ops_last_update'),
                         value: operationsUpdatedLabel(booking),
                       ),
                     ],
@@ -344,19 +347,19 @@ List<_LaneAction> _actionsForBooking(
   final actions = switch (booking['status']?.toString().toLowerCase()) {
     'pending' || 'pending_review' => [
       _LaneAction(
-        label: 'Confirmar',
+        label: tr('ops_button_confirmed'),
         icon: Icons.check_rounded,
         accent: primaryColor,
         targetStatus: 'confirmed',
       ),
-      const _LaneAction(
-        label: 'Rechazar',
+      _LaneAction(
+        label: tr('ops_button_rejected'),
         icon: Icons.block_rounded,
         accent: Color(0xFFFF8A80),
         targetStatus: 'rejected',
       ),
-      const _LaneAction(
-        label: 'Cancelar',
+      _LaneAction(
+        label: tr('btn_cancel'),
         icon: Icons.cancel_outlined,
         accent: Color(0xFFFF8A80),
         targetStatus: 'cancelled',
@@ -364,13 +367,13 @@ List<_LaneAction> _actionsForBooking(
     ],
     'confirmed' => [
       _LaneAction(
-        label: 'Completar cita',
+        label: tr('ops_complete_appointment'),
         icon: Icons.task_alt_rounded,
         accent: primaryColor,
         targetStatus: 'completed',
       ),
-      const _LaneAction(
-        label: 'Cancelar',
+      _LaneAction(
+        label: tr('btn_cancel'),
         icon: Icons.cancel_outlined,
         accent: Color(0xFFFF8A80),
         targetStatus: 'cancelled',
@@ -385,8 +388,8 @@ List<_LaneAction> _actionsForBooking(
       )) {
     return [
       ...actions,
-      const _LaneAction(
-        label: 'Marcar pagada',
+      _LaneAction(
+        label: tr('ops_mark_paid'),
         icon: Icons.payments_rounded,
         accent: Color(0xFF65D6A5),
         targetStatus: 'paid',
@@ -407,7 +410,7 @@ String _bookingPhone(Map<String, dynamic> booking) {
     final value = booking[key]?.toString().trim() ?? '';
     if (value.isNotEmpty) return value;
   }
-  return 'No registrado';
+  return tr('ops_not_registered');
 }
 
 String _bookingDurationLabel(Map<String, dynamic> booking) {
@@ -432,6 +435,6 @@ String _bookingNotes(Map<String, dynamic> booking) {
           ?.toString()
           .trim() ??
       '';
-  if (raw.isEmpty) return 'Sin notas';
+  if (raw.isEmpty) return tr('ops_no_notes');
   return raw;
 }

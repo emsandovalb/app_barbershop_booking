@@ -217,7 +217,7 @@ class OperationsColumnHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Citas ${spec.label.toLowerCase()}',
+                  tr('ops_lane_column_title', args: {'lane': spec.label}),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -253,7 +253,7 @@ class OperationsColumnHeader extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Promedio: $averageWaitLabel',
+                tr('ops_average', args: {'value': averageWaitLabel}),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: .70),
                   fontSize: 11.5,
