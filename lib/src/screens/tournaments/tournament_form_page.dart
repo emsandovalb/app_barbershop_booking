@@ -237,7 +237,7 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _format,
+              initialValue: _format,
               decoration: InputDecoration(
                 labelText: loc.t('tournaments_format', fallback: 'Format'),
               ),
@@ -378,7 +378,7 @@ class _TournamentFormPageState extends State<TournamentFormPage> {
       lastDate: DateTime.now().add(const Duration(days: 3650)),
       initialDate: initial,
     );
-    if (date == null) return;
+    if (date == null || !mounted) return;
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initial),
@@ -497,7 +497,7 @@ class _CourtDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.watch<LocalizationService>();
     return DropdownButtonFormField<int?>(
-      value: selectedCourtId,
+      initialValue: selectedCourtId,
       decoration: InputDecoration(
         labelText: loc.t('tournaments_court', fallback: 'Court'),
       ),

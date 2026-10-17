@@ -176,7 +176,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             password: password,
                             passwordConfirmation: confirm,
                           );
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -193,7 +193,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             (route) => false,
                           );
                         } on ApiException catch (e) {
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -202,7 +202,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             ),
                           );
                         } catch (e) {
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -211,7 +211,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             ),
                           );
                         } finally {
-                          if (mounted) {
+                          if (context.mounted) {
                             setState(() => loading = false);
                           }
                         }

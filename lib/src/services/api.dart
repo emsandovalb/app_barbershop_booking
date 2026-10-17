@@ -40,7 +40,7 @@ class ApiClient {
 
   Map<String, String> get _headers => {
     'Accept': 'application/json',
-    if (businessSlug != null) 'X-Business-Slug': businessSlug!,
+    'X-Business-Slug': ?businessSlug,
     if (_token != null) 'Authorization': 'Bearer $_token',
   };
 
@@ -238,7 +238,11 @@ class ApiClient {
     bool reservation = false,
   }) async {
     final headers = {..._headers, 'Content-Type': 'application/json'};
-    final res = await _http.post(uri, headers: headers, body: json.encode(body));
+    final res = await _http.post(
+      uri,
+      headers: headers,
+      body: json.encode(body),
+    );
     _ensureOk(res, expectCreated: expectCreated);
     return _normalizeResponse(
       json.decode(res.body) as Map<String, dynamic>,
@@ -387,7 +391,7 @@ class ApiClient {
         if (q != null && q.isNotEmpty) 'q': q,
         if (minPrice != null) 'min_price': '$minPrice',
         if (maxPrice != null) 'max_price': '$maxPrice',
-        if (sort != null) 'sort': sort,
+        'sort': ?sort,
         if (category != null && category.isNotEmpty) 'category': category,
         if (durationHours != null) 'duration': '$durationHours',
         if (page > 1) 'page': '$page',
@@ -456,7 +460,7 @@ class ApiClient {
   }) async {
     return _postJson(_apiUri('staff/$staffId/services'), {
       'resource_id': resourceId,
-      if (isPrimary != null) 'is_primary': isPrimary,
+      'is_primary': ?isPrimary,
     });
   }
 
@@ -646,7 +650,10 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> getEvents() async {
-    final res = await _http.get(Uri.parse('$baseUrl/events'), headers: _headers);
+    final res = await _http.get(
+      Uri.parse('$baseUrl/events'),
+      headers: _headers,
+    );
     _ensureOk(res);
     return json.decode(res.body) as Map<String, dynamic>;
   }

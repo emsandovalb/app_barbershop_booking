@@ -18,8 +18,11 @@ jobs:
 
       - run: flutter pub get
 
-      # Existing lint warnings and deprecations are not fatal yet; analyzer
-      # errors are.
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: dart format --output=none --set-exit-if-changed lib test
+
+      # Warnings and errors fail the build. Infos stay non-fatal so the
+      # RadioGroup deprecation (needs Flutter 3.35+) doesn't force an SDK
+      # bump on everyone building the app.
+      - run: flutter analyze --no-fatal-infos
 
       - run: flutter test

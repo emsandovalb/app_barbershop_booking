@@ -126,7 +126,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             currentPassword: currentCtrl.text,
                             newPassword: newCtrl.text,
                           );
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -139,7 +139,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           );
                           Navigator.pop(context);
                         } catch (e) {
-                          if (mounted) {
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

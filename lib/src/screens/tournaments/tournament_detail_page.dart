@@ -40,8 +40,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
 
     final results = await Future.wait([tournamentFuture, enrolledTeamsFuture]);
     final tournament = Map<String, dynamic>.from(results[0] as Map);
-    final enrolledTeamsData =
-        (results[1] as Map<String, dynamic>)['data'] as List? ?? const [];
+    final enrolledTeamsData = (results[1])['data'] as List? ?? const [];
     final enrolledTeams = enrolledTeamsData
         .whereType<Map>()
         .map((entry) => Map<String, dynamic>.from(entry))
@@ -346,7 +345,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                                 fallback: 'No description provided.',
                               ),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(.78),
+                          color: Colors.white.withValues(alpha: .78),
                           height: 1.4,
                         ),
                       ),
@@ -499,7 +498,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
 
     try {
       final response = await context.read<AuthProvider>().api.closeTournament(
@@ -566,7 +565,7 @@ class _InfoGrid extends StatelessWidget {
               Text(
                 item.label,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(.62),
+                  color: Colors.white.withValues(alpha: .62),
                   fontSize: 12,
                 ),
               ),
@@ -609,7 +608,7 @@ class _RowValue extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(color: Colors.white.withOpacity(.72)),
+            style: TextStyle(color: Colors.white.withValues(alpha: .72)),
           ),
         ),
         const SizedBox(width: 12),
@@ -682,7 +681,7 @@ class _EnrollmentSection extends StatelessWidget {
                 'tournaments_registration_status',
                 fallback: 'Enrollment status',
               ),
-              style: TextStyle(color: Colors.white.withOpacity(.74)),
+              style: TextStyle(color: Colors.white.withValues(alpha: .74)),
             ),
             const SizedBox(height: 10),
             Column(
@@ -795,7 +794,7 @@ class _TeamEnrollmentTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(.68),
+                    color: Colors.white.withValues(alpha: .68),
                     height: 1.35,
                   ),
                 ),
@@ -871,7 +870,7 @@ class _EnrollmentStateBanner extends StatelessWidget {
                 Text(
                   info.message,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(.72),
+                    color: Colors.white.withValues(alpha: .72),
                     height: 1.4,
                   ),
                 ),
@@ -889,7 +888,7 @@ class _EnrollmentStateBanner extends StatelessWidget {
                                 'You need to own or manage a team before enrolling in a tournament.',
                           ),
                     style: TextStyle(
-                      color: Colors.white.withOpacity(.62),
+                      color: Colors.white.withValues(alpha: .62),
                       height: 1.4,
                     ),
                   ),
@@ -1041,7 +1040,7 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
             Text(
               widget.hint,
               style: TextStyle(
-                color: Colors.white.withOpacity(.68),
+                color: Colors.white.withValues(alpha: .68),
                 height: 1.4,
               ),
             ),
@@ -1053,7 +1052,7 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: widget.teams.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (_, index) {
                   final team = widget.teams[index];
                   final teamId = team['id'] as int?;
@@ -1097,7 +1096,7 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                                 Text(
                                   role == null ? '' : role.toUpperCase(),
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(.65),
+                                    color: Colors.white.withValues(alpha: .65),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -1147,7 +1146,7 @@ class _TeamSelectSheetState extends State<_TeamSelectSheet> {
                   'tournaments_registration_no_selection',
                   fallback: 'Please select a team to continue.',
                 ),
-                style: TextStyle(color: Colors.white.withOpacity(.6)),
+                style: TextStyle(color: Colors.white.withValues(alpha: .6)),
               ),
             ],
           ],
@@ -1439,8 +1438,9 @@ String _money(dynamic value, LocalizationService loc) {
   final num? parsed = value is num
       ? value
       : num.tryParse(value?.toString() ?? '');
-  if (parsed == null || parsed <= 0)
+  if (parsed == null || parsed <= 0) {
     return loc.t('tournaments_free', fallback: 'Free');
+  }
   return '\$${parsed.toStringAsFixed(2)}';
 }
 

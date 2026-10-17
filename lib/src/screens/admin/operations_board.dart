@@ -145,9 +145,11 @@ class _OperationsBoardState extends State<OperationsBoard> {
       };
       final key = operationsBookingIdentity(booking);
       setState(() {
-        _localStatusOverrides[key] = response['status']?.toString() ?? targetStatus;
+        _localStatusOverrides[key] =
+            response['status']?.toString() ?? targetStatus;
         if (targetStatus == 'paid') {
-          _localPaymentOverrides[key] = response['payment_status']?.toString() ?? 'paid';
+          _localPaymentOverrides[key] =
+              response['payment_status']?.toString() ?? 'paid';
         }
       });
       if (mounted) {
@@ -207,10 +209,12 @@ class _OperationsBoardState extends State<OperationsBoard> {
           if (status == null && paymentStatus == null) return booking;
           return {
             ...booking,
-            if (status != null) 'status': status,
-            if (paymentStatus != null) 'payment_status': paymentStatus,
+            'status': ?status,
+            'payment_status': ?paymentStatus,
             if (status != null)
-              'kanban_lane': operationsLaneName(operationsLaneFromStatus(status)),
+              'kanban_lane': operationsLaneName(
+                operationsLaneFromStatus(status),
+              ),
           };
         })
         .toList(growable: false);
@@ -426,7 +430,6 @@ class _ResponsiveBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final lanes = OperationsLane.values;
     final columns = lanes
         .map(
@@ -512,8 +515,7 @@ class OperationsColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    final spec = operationsLaneSpec(lane);
+    final spec = _operationsLaneSpec(lane);
     final avg = operationsAverageWaitMinutes(bookings);
     final avgLabel = bookings.isEmpty
         ? '0 min'
@@ -585,8 +587,7 @@ class OperationsColumnHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    final spec = operationsLaneSpec(lane);
+    final spec = _operationsLaneSpec(lane);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -696,8 +697,7 @@ class OperationsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    final spec = operationsLaneSpec(lane);
+    final spec = _operationsLaneSpec(lane);
     final customer = operationsCustomerName(booking);
 
     return Material(
@@ -820,7 +820,7 @@ class OperationsDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<BrandTheme>();
     final customer = operationsCustomerName(booking);
-    final spec = operationsLaneSpec(lane);
+    final spec = _operationsLaneSpec(lane);
     final actions = _actionsForBooking(booking, theme.primary);
 
     return SafeArea(
@@ -1057,7 +1057,6 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -1106,7 +1105,6 @@ class _DetailActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -1152,7 +1150,7 @@ class _EmptyBoardState extends StatelessWidget {
               shape: BoxShape.circle,
               color: theme.primary.withValues(alpha: .12),
             ),
-            child:  Icon(
+            child: Icon(
               Icons.view_column_outlined,
               color: theme.primary,
               size: 32,
@@ -1188,7 +1186,6 @@ class _EmptyColumnState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -1356,7 +1353,6 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -1432,40 +1428,6 @@ class _BoardAlert extends StatelessWidget {
   }
 }
 
-class _ToggleChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ToggleChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      backgroundColor: const Color(0xFF1A1614),
-      selectedColor: theme.primary.withValues(alpha: .18),
-      checkmarkColor: theme.primary,
-      labelStyle: TextStyle(
-        color: selected ? theme.primary : Colors.white70,
-        fontWeight: FontWeight.w700,
-      ),
-      side: BorderSide(
-        color: selected
-            ? theme.primary.withValues(alpha: .32)
-            : Colors.white.withValues(alpha: .06),
-      ),
-    );
-  }
-}
-
 class _MobileFallbackList extends StatelessWidget {
   final List<Map<String, dynamic>> bookings;
   final ValueChanged<Map<String, dynamic>> onCardTap;
@@ -1474,7 +1436,6 @@ class _MobileFallbackList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       children: [
         for (final booking in bookings) ...[
@@ -1490,34 +1451,6 @@ class _MobileFallbackList extends StatelessWidget {
   }
 }
 
-class _MiniBadge extends StatelessWidget {
-  final String label;
-  final Color accent;
-
-  const _MiniBadge({required this.label, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: accent.withValues(alpha: .18)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: accent,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
 class _MiniMeta extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1526,7 +1459,6 @@ class _MiniMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
@@ -1561,7 +1493,6 @@ class _LiveQueueFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Icon(
@@ -1718,10 +1649,10 @@ const _laneSpecs = <OperationsLane, _LaneSpec>{
   ),
 };
 
-_LaneSpec operationsLaneSpec(OperationsLane lane) => _laneSpecs[lane]!;
+_LaneSpec _operationsLaneSpec(OperationsLane lane) => _laneSpecs[lane]!;
 
 String operationsLaneLabel(OperationsLane lane) =>
-    operationsLaneSpec(lane).label;
+    _operationsLaneSpec(lane).label;
 
 String operationsLaneName(OperationsLane lane) {
   switch (lane) {

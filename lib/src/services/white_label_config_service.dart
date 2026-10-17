@@ -43,7 +43,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
 
   String get _cacheKey => _businessSlug == null
       ? defaultCacheKey
-      : 'white_label_config_cache_v${_cacheSchemaVersion}_${_businessSlug}';
+      : 'white_label_config_cache_v${_cacheSchemaVersion}_$_businessSlug';
 
   String get _etagKey => '${_cacheKey}_etag';
 
@@ -106,10 +106,7 @@ class WhiteLabelConfigService extends ChangeNotifier {
           : prefs.getString(_etagKey);
       final response = await _client.get(
         uri,
-        headers: {
-          'Accept': 'application/json',
-          if (cachedEtag != null) 'If-None-Match': cachedEtag,
-        },
+        headers: {'Accept': 'application/json', 'If-None-Match': ?cachedEtag},
       );
       if (response.statusCode == 304 && cachedEtag != null) {
         await _loadCachedConfig();

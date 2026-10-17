@@ -243,7 +243,7 @@ class ProfileTab extends StatelessWidget {
                 ],
               ),
             );
-            if (confirmed == true) {
+            if (confirmed == true && context.mounted) {
               await context.read<AuthProvider>().logout();
               if (context.mounted) {
                 Navigator.of(

@@ -146,9 +146,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                     if (isLoading) ...[
                       const SizedBox(height: 220),
                       Center(
-                        child: CircularProgressIndicator(
-                          color: theme.primary,
-                        ),
+                        child: CircularProgressIndicator(color: theme.primary),
                       ),
                       const SizedBox(height: 220),
                     ] else ...[
@@ -292,7 +290,6 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         IconButton(
@@ -546,7 +543,6 @@ class _QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Expanded(
@@ -632,9 +628,7 @@ class _ActionButton extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                border: Border.all(
-                  color: theme.primary.withValues(alpha: .30),
-                ),
+                border: Border.all(color: theme.primary.withValues(alpha: .30)),
               ),
               child: Icon(icon, color: theme.primary, size: 22),
             ),
@@ -664,7 +658,6 @@ class _BusinessInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       children: [
         _BusinessInfoCard(
@@ -757,7 +750,6 @@ class _EmptySectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       padding: const EdgeInsets.all(18),
       child: Column(
@@ -792,13 +784,12 @@ class _StaffScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return SizedBox(
       height: 214,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: staff.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           return _StaffCard(staff: staff[index]);
         },
@@ -862,7 +853,7 @@ class _StaffCard extends StatelessWidget {
                     ? Image.network(
                         avatar,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
+                        errorBuilder: (_, _, _) => const Center(
                           child: Icon(
                             Icons.person_rounded,
                             color: Colors.white70,
@@ -911,11 +902,7 @@ class _StaffCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                 Icon(
-                  Icons.star_rounded,
-                  color: theme.primary,
-                  size: 16,
-                ),
+                Icon(Icons.star_rounded, color: theme.primary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   rating.toStringAsFixed(1),
@@ -957,7 +944,6 @@ class _MiniChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
@@ -984,7 +970,6 @@ class _ServiceGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final items = resources.take(4).toList(growable: false);
     return GridView.builder(
       shrinkWrap: true,
@@ -1100,7 +1085,7 @@ class _ServiceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   price,
-                  style:  TextStyle(
+                  style: TextStyle(
                     color: theme.primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -1128,7 +1113,6 @@ class _GalleryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final tiles = _galleryTiles;
     return GridView.builder(
       shrinkWrap: true,
@@ -1293,10 +1277,7 @@ class _ReviewsCta extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .12),
               ),
-              child:  Icon(
-                Icons.rate_review_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.rate_review_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1320,7 +1301,7 @@ class _ReviewsCta extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -1372,61 +1353,6 @@ class _ReviewData {
 
   const _ReviewData(this.name, this.text);
 }
-
-const List<Map<String, dynamic>> _fallbackStaff = [
-  {
-    'name': 'Profesional Senior',
-    'title': 'Cortes premium',
-    'rating': 4.9,
-    'specialties': 'Fade, barba, detalle fino',
-    'avatar': '',
-  },
-  {
-    'name': 'Especialista en barba',
-    'title': 'Afeitado clásico',
-    'rating': 4.8,
-    'specialties': 'Barba, perfilado, navaja',
-    'avatar': '',
-  },
-  {
-    'name': 'Estilista creativo',
-    'title': 'Look contemporáneo',
-    'rating': 5.0,
-    'specialties': 'Corte moderno, diseño, acabado',
-    'avatar': '',
-  },
-];
-
-const List<Map<String, dynamic>> _fallbackResources = [
-  {
-    'name': 'Corte premium',
-    'price_per_hour': 6000,
-    'duration_hours': 1,
-    'category': 'premium',
-    'images': [''],
-  },
-  {
-    'name': 'Barba y perfilado',
-    'price_per_hour': 4500,
-    'duration_hours': 1,
-    'category': 'clásico',
-    'images': [''],
-  },
-  {
-    'name': 'Fade signature',
-    'price_per_hour': 7000,
-    'duration_hours': 1,
-    'category': 'premium',
-    'images': [''],
-  },
-  {
-    'name': 'Experiencia completa',
-    'price_per_hour': 9500,
-    'duration_hours': 2,
-    'category': 'premium',
-    'images': [''],
-  },
-];
 
 const List<_GalleryTileData> _galleryTiles = [
   _GalleryTileData('', 'Ambiente premium'),

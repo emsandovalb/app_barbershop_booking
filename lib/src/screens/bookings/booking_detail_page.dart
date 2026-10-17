@@ -54,9 +54,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: theme.primary.withValues(alpha: .18),
-                ),
+                border: Border.all(color: theme.primary.withValues(alpha: .18)),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x59000000),
@@ -128,7 +126,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                                 : null,
                             child: Row(
                               children: [
-                                 Icon(
+                                Icon(
                                   Icons.content_cut_outlined,
                                   color: theme.secondary,
                                   size: 18,
@@ -464,7 +462,6 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(

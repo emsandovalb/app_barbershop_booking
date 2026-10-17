@@ -151,7 +151,7 @@ class _TournamentsPageState extends State<TournamentsPage> with RouteAware {
                           ),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(.72),
+                            color: Colors.white.withValues(alpha: .72),
                           ),
                         ),
                       ],
@@ -180,7 +180,7 @@ class _TournamentsPageState extends State<TournamentsPage> with RouteAware {
                   ),
                 );
               },
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemCount: items.length,
             ),
           );
@@ -325,8 +325,7 @@ class _TournamentCard extends StatelessWidget {
                         _MetaChip(
                           icon: Icons.people_alt_outlined,
                           label:
-                              loc.t('tournaments_max_prefix', fallback: 'Max') +
-                              ' $maxTeams',
+                              '${loc.t('tournaments_max_prefix', fallback: 'Max')} $maxTeams',
                         ),
                       _MetaChip(icon: Icons.payments_outlined, label: fee),
                     ],

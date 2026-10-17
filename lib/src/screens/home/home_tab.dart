@@ -108,7 +108,7 @@ class _HomeTabState extends State<HomeTab> {
               children: [
                 Text(
                   'Hola, $name',
-                  style:  TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     color: theme.primary,
                     fontWeight: FontWeight.w700,
@@ -475,7 +475,6 @@ class _ServiceListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final state = controller.state;
 
     if (state.isLoading && !state.hasData) {
@@ -533,7 +532,6 @@ class _StateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return BarbershopPremiumCard(
       radius: 26,
       padding: const EdgeInsets.all(18),
@@ -680,7 +678,7 @@ class _HeroCard extends StatelessWidget {
                     Text(
                       whiteLabel.displayName.split(' ').first.toUpperCase(),
                       textAlign: TextAlign.center,
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.primary,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -719,7 +717,6 @@ class _BusinessInfoCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -786,10 +783,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.storefront_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.storefront_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -813,7 +807,7 @@ class _BusinessProfileTeaser extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -862,10 +856,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.dashboard_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.dashboard_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -889,7 +880,7 @@ class _AdminDashboardTeaser extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -939,10 +930,7 @@ class _ReviewsPromoCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.primary.withValues(alpha: .14),
               ),
-              child:  Icon(
-                Icons.favorite_rounded,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.favorite_rounded, color: theme.primary),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -965,7 +953,7 @@ class _ReviewsPromoCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     'Ver ${whiteLabel.reviewsLabel}',
-                    style:  TextStyle(
+                    style: TextStyle(
                       color: theme.secondary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -974,7 +962,7 @@ class _ReviewsPromoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-             Icon(Icons.chevron_right_rounded, color: theme.primary),
+            Icon(Icons.chevron_right_rounded, color: theme.primary),
           ],
         ),
       ),
@@ -1171,7 +1159,7 @@ class _ServiceCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       price,
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -1271,7 +1259,6 @@ class _ServiceCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     if (isLoading && items.isEmpty) {
       return const SizedBox(
         height: 224,
@@ -1308,7 +1295,7 @@ class _ServiceCarousel extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (_, index) => itemBuilder(index, items[index]),
       ),
     );

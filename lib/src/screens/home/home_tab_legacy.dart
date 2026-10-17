@@ -48,7 +48,7 @@ class _HomeTabState extends State<HomeTab> {
       });
     } catch (e) {
       // ignore: avoid_print
-      print('Failed to load courts: ' + e.toString());
+      print('Failed to load courts: $e');
       if (!mounted) return;
       setState(() {
         popular = [];
@@ -74,7 +74,7 @@ class _HomeTabState extends State<HomeTab> {
       });
     } catch (e) {
       // ignore: avoid_print
-      print('Failed to apply filters: ' + e.toString());
+      print('Failed to apply filters: $e');
     }
   }
 
@@ -155,8 +155,9 @@ class _HomeTabState extends State<HomeTab> {
                           maxPrice = result['maxPrice'] as double?;
                           sort = result['sort'] as String?;
                           final filterQ = result['q'] as String?;
-                          if (filterQ != null && filterQ.isNotEmpty)
+                          if (filterQ != null && filterQ.isNotEmpty) {
                             q = filterQ;
+                          }
                           categoryFilter = result['category'] as String?;
                           durationFilter = result['duration'] as int?;
                           await _applyFilters();
@@ -188,7 +189,9 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     Text(
                       loc.t('home_view_all', fallback: 'View all'),
-                      style: TextStyle(color: Colors.white.withOpacity(.8)),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: .8),
+                      ),
                     ),
                   ],
                 ),
@@ -211,7 +214,7 @@ class _HomeTabState extends State<HomeTab> {
                         ],
                       );
                     },
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: AppCategories.list.length,
                   ),
                 ),
@@ -232,7 +235,9 @@ class _HomeTabState extends State<HomeTab> {
                           Navigator.of(context).pushNamed(AppRoutes.categories),
                       child: Text(
                         loc.t('home_view_all', fallback: 'View all'),
-                        style: TextStyle(color: Colors.white.withOpacity(.8)),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: .8),
+                        ),
                       ),
                     ),
                   ],
@@ -246,7 +251,7 @@ class _HomeTabState extends State<HomeTab> {
                       index: i,
                       data: i < popular.length ? popular[i] : null,
                     ),
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: popular.length,
                   ),
                 ),
@@ -264,7 +269,9 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     Text(
                       loc.t('home_view_all', fallback: 'View all'),
-                      style: TextStyle(color: Colors.white.withOpacity(.8)),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: .8),
+                      ),
                     ),
                   ],
                 ),
@@ -277,7 +284,7 @@ class _HomeTabState extends State<HomeTab> {
                       index: i,
                       data: i < nearby.length ? nearby[i] : null,
                     ),
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemCount: nearby.length,
                   ),
                 ),
@@ -337,7 +344,7 @@ class _GroundCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(.4),
+                        color: Colors.black.withValues(alpha: .4),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -384,7 +391,7 @@ class _GroundCard extends StatelessWidget {
                         child: Text(
                           data?['address']?.toString() ?? 'Address',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(.75),
+                            color: Colors.white.withValues(alpha: .75),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

@@ -52,13 +52,13 @@ class CourtImage extends StatelessWidget {
       return Image.network(
         src,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const _Placeholder(),
+        errorBuilder: (_, _, _) => const _Placeholder(),
       );
     }
     return Image.network(
       src,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const _Placeholder(),
+      errorBuilder: (_, _, _) => const _Placeholder(),
     );
   }
 

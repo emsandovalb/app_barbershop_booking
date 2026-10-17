@@ -165,7 +165,7 @@ class _StaffResourceAssignmentPageState
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: resources.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (_, index) {
                     final resource = resources[index];
                     final resourceId = resource['id'] as int;
@@ -176,7 +176,7 @@ class _StaffResourceAssignmentPageState
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
                           color: assigned
-                              ? Colors.greenAccent.withOpacity(.5)
+                              ? Colors.greenAccent.withValues(alpha: .5)
                               : Colors.white10,
                         ),
                       ),
@@ -196,11 +196,11 @@ class _StaffResourceAssignmentPageState
                         subtitle: Text(
                           resource['address']?.toString() ?? '',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(.72),
+                            color: Colors.white.withValues(alpha: .72),
                           ),
                         ),
                         leading: CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(.12),
+                          backgroundColor: Colors.white.withValues(alpha: .12),
                           child: Icon(
                             assigned ? Icons.link : Icons.link_off,
                             color: assigned

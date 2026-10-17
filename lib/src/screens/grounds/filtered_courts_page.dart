@@ -168,7 +168,7 @@ class _FilteredCourtsPageState extends State<FilteredCourtsPage> {
                         child: ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: resources.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (_, i) {
                             final resource = resources[i];

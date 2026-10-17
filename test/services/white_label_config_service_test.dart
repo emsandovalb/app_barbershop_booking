@@ -119,33 +119,36 @@ void main() {
     expect(stored['terminology']['staff_display_name'], 'estilista');
   });
 
-  test('a 304 answer reuses the cached branding and sends the stored ETag', () async {
-    final cacheKey = 'white_label_config_cache_v3_jc-studio';
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      cacheKey,
-      jsonEncode({
-        'slug': 'jc-studio',
-        'identity': {'app_name': 'JC Studio', 'short_name': 'JC'},
-      }),
-    );
-    await prefs.setString('${cacheKey}_etag', '"abc123"');
+  test(
+    'a 304 answer reuses the cached branding and sends the stored ETag',
+    () async {
+      final cacheKey = 'white_label_config_cache_v3_jc-studio';
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        cacheKey,
+        jsonEncode({
+          'slug': 'jc-studio',
+          'identity': {'app_name': 'JC Studio', 'short_name': 'JC'},
+        }),
+      );
+      await prefs.setString('${cacheKey}_etag', '"abc123"');
 
-    String? sentEtag;
-    final service = WhiteLabelConfigService(
-      baseUrl: 'http://localhost/api/v1',
-      businessSlug: 'jc-studio',
-      client: MockClient((request) async {
-        sentEtag = request.headers['If-None-Match'];
-        return http.Response('', 304);
-      }),
-    );
+      String? sentEtag;
+      final service = WhiteLabelConfigService(
+        baseUrl: 'http://localhost/api/v1',
+        businessSlug: 'jc-studio',
+        client: MockClient((request) async {
+          sentEtag = request.headers['If-None-Match'];
+          return http.Response('', 304);
+        }),
+      );
 
-    await service.initialize();
+      await service.initialize();
 
-    expect(sentEtag, '"abc123"');
-    expect(service.config.identity.appName, 'JC Studio');
-  });
+      expect(sentEtag, '"abc123"');
+      expect(service.config.identity.appName, 'JC Studio');
+    },
+  );
 
   test('a fresh response stores its ETag for the next start', () async {
     final service = WhiteLabelConfigService(

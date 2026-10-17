@@ -13,7 +13,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('CourtImage resolves storage paths through ApiClient', (tester) async {
+  testWidgets('CourtImage resolves storage paths through ApiClient', (
+    tester,
+  ) async {
     final api = ApiClient(baseUrl: 'http://localhost/api/v1');
     final auth = AuthProvider(api);
     await auth.ready;

@@ -780,7 +780,6 @@ class _QuickActionsRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return AbsorbPointer(
       absorbing: isBusy,
       child: Opacity(
@@ -873,7 +872,6 @@ class _AdminModuleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -974,7 +972,7 @@ class _ModuleBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style:  TextStyle(
+        style: TextStyle(
           color: theme.secondary,
           fontSize: 10.5,
           fontWeight: FontWeight.w800,
@@ -992,7 +990,6 @@ class _SectionIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1024,7 +1021,6 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1122,7 +1118,6 @@ class _TodayAppointmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackReservations;
     return Column(
       children: list
@@ -1206,7 +1201,7 @@ class _AppointmentCard extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style:  TextStyle(
+                        style: TextStyle(
                           color: theme.primary,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
@@ -1249,7 +1244,7 @@ class _AppointmentCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       _bookingPriceLabel(booking, resource),
-                      style:  TextStyle(
+                      style: TextStyle(
                         color: theme.secondary,
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
@@ -1275,7 +1270,6 @@ class _PerformanceList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackPerformance;
     return Column(
       children: list
@@ -1354,7 +1348,7 @@ class _PerformanceRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _formatCrc(item.revenue),
-                  style:  TextStyle(
+                  style: TextStyle(
                     color: theme.secondary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
@@ -1376,7 +1370,6 @@ class _TopServicesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     final list = items.isNotEmpty ? items : _fallbackTopServices;
     return Column(
       children: list
@@ -1437,7 +1430,7 @@ class _TopServiceCard extends StatelessWidget {
             children: [
               Text(
                 _formatCrc(item.revenue),
-                style:  TextStyle(
+                style: TextStyle(
                   color: theme.secondary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1459,7 +1452,7 @@ class _TopServiceCard extends StatelessWidget {
               value: item.progress,
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: .06),
-              valueColor:  AlwaysStoppedAnimation(theme.primary),
+              valueColor: AlwaysStoppedAnimation(theme.primary),
             ),
           ),
         ],
@@ -1499,7 +1492,7 @@ class _SectionHeaderRow extends StatelessWidget {
           onPressed: onTap,
           child: Text(
             actionLabel,
-            style:  TextStyle(
+            style: TextStyle(
               color: theme.secondary,
               fontWeight: FontWeight.w700,
             ),

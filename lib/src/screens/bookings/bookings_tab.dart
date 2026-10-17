@@ -190,11 +190,7 @@ class _AppointmentList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Icon(
-                Icons.lock_outline,
-                color: theme.primary,
-                size: 44,
-              ),
+              Icon(Icons.lock_outline, color: theme.primary, size: 44),
               const SizedBox(height: 14),
               const Text(
                 'Iniciá sesión para ver tus citas',
@@ -235,7 +231,7 @@ class _AppointmentList extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 14),
+        separatorBuilder: (_, _) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           final booking = items[index];
           return _AppointmentCard(booking: booking, onRefresh: onRefresh);
@@ -332,7 +328,7 @@ class _AppointmentCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                           Icon(
+                          Icon(
                             Icons.content_cut_outlined,
                             size: 16,
                             color: theme.secondary,
@@ -528,7 +524,6 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -557,7 +552,6 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<BrandTheme>();
     return Row(
       children: [
         Icon(icon, size: 16, color: Colors.white54),
@@ -595,10 +589,7 @@ class _PriceChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style:  TextStyle(
-          color: theme.primary,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: theme.primary, fontWeight: FontWeight.w800),
       ),
     );
   }

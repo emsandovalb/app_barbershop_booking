@@ -60,18 +60,18 @@ void main() {
     expect(calls, 1);
   });
 
-  test('ApiClient uses the injected client and surfaces network errors', () async {
-    final api = ApiClient(
-      baseUrl: 'https://api.example.com/api/v1',
-      httpClient: ResilientHttpClient(
-        inner: MockClient((_) async => throw http.ClientException('offline')),
-        retryDelay: Duration.zero,
-      ),
-    );
+  test(
+    'ApiClient uses the injected client and surfaces network errors',
+    () async {
+      final api = ApiClient(
+        baseUrl: 'https://api.example.com/api/v1',
+        httpClient: ResilientHttpClient(
+          inner: MockClient((_) async => throw http.ClientException('offline')),
+          retryDelay: Duration.zero,
+        ),
+      );
 
-    await expectLater(
-      api.getAppConfig(),
-      throwsA(isA<ApiException>()),
-    );
-  });
+      await expectLater(api.getAppConfig(), throwsA(isA<ApiException>()));
+    },
+  );
 }
